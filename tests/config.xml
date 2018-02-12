@@ -1,0 +1,7 @@
+<phpunit bootstrap="bootstrap.php" colors="true">
+    <testsuites>
+        <testsuite name="authuser">
+            <directory>Auth</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
