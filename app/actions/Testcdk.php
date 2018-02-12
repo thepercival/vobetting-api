@@ -40,10 +40,12 @@ final class Testcdk
         try{
             Betfair::init($appKey, $userName, $password);
 
-            $test = array( "cdk" => $userName );
+            $events = Betfair::betting('listEvents', ['filter' => ['textQuery' => 'Serie A']]);
+
+            // $test = array( "cdk" => $userName );
             return $response
                 ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize($test, 'json'));
+                ->write($this->serializer->serialize($events, 'json'));
         }
         catch( \Exception $e ){
             $sErrorMessage = $e->getMessage();
