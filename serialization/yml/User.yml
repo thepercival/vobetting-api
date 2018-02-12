@@ -1,0 +1,12 @@
+VOBetting\User:
+  exclusion_policy: ALL
+  exclude: false
+  access_type: public_method
+
+  properties:
+    id:
+      type: integer
+    emailaddress:
+      type: string
+    name:
+      type: string

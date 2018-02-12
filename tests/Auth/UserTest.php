@@ -8,7 +8,7 @@
 
 namespace VOBetting\Tests\Auth;
 
-use \VOBetting\Auth\User as User;
+use \VOBetting\User;
 
 class UserTest extends \PHPUnit_Framework_TestCase
 {

@@ -2,7 +2,7 @@
 // DIC configuration
 
 use \JMS\Serializer\SerializerBuilder;
-use \Slim\Middleware\JwtAuthentication;
+// use \Slim\Middleware\JwtAuthentication;
 
 $container = $app->getContainer();
 
@@ -24,75 +24,100 @@ $container['logger'] = function ($c) {
 // Doctrine
 $container['em'] = function ($c) {
     $settings = $c->get('settings')['doctrine'];
-	class CustomYamlDriver extends Doctrine\ORM\Mapping\Driver\YamlDriver
-	{
-		protected function loadMappingFile($file)
-		{
-			return Symfony\Component\Yaml\Yaml::parse(file_get_contents($file), Symfony\Component\Yaml\Yaml::PARSE_CONSTANT);
-		}
-	}
+    class CustomYamlDriver extends Doctrine\ORM\Mapping\Driver\YamlDriver
+    {
+        protected function loadMappingFile($file)
+        {
+            return Symfony\Component\Yaml\Yaml::parse(file_get_contents($file), Symfony\Component\Yaml\Yaml::PARSE_CONSTANT);
+        }
+    }
 
-	$config = Doctrine\ORM\Tools\Setup::createConfiguration(
-		$settings['meta']['auto_generate_proxies'],
-		$settings['meta']['proxy_dir'],
-		$settings['meta']['cache']
-	);
-	$config->setMetadataDriverImpl( new CustomYamlDriver( $settings['meta']['entity_path'] ));
+    $config = Doctrine\ORM\Tools\Setup::createConfiguration(
+        $settings['meta']['auto_generate_proxies'],
+        $settings['meta']['proxy_dir'],
+        $settings['meta']['cache']
+    );
+    $config->setMetadataDriverImpl( new CustomYamlDriver( $settings['meta']['entity_path'] ));
 
-	return Doctrine\ORM\EntityManager::create($settings['connection'], $config);
+    return Doctrine\ORM\EntityManager::create($settings['connection'], $config);
 };
 
 // symfony serializer
 $container['serializer'] = function( $c ) {
     $settings = $c->get('settings');
 
-    $serializer = SerializerBuilder::create()
+    $serializerBuilder = SerializerBuilder::create()
         ->setDebug($settings['displayErrorDetails'])
         /*->setCacheDir($settings['serializer']['cache_dir'])*/;
 
+    $serializerBuilder
+//        ->configureListeners(function(JMS\Serializer\EventDispatcher\EventDispatcher $dispatcher) {
+//            $dispatcher->addListener('serializer.pre_serialize',
+//                function(JMS\Serializer\EventDispatcher\PostSerializeEvent $event) {
+//                    // do something
+//
+//                }
+//            );
+//            // $dispatcher->addSubscriber(new MyEventSubscriber());
+//        })
+    ;
+
     foreach( $settings['serializer']['yml_dir'] as $ymlnamespace => $ymldir ){
-        $serializer->addMetadataDir($ymldir,$ymlnamespace);
+        $serializerBuilder->addMetadataDir($ymldir,$ymlnamespace);
     }
 
 
-    return $serializer->build();
+    return $serializerBuilder->build();
 };
 
-// symfony serializer
+// voetbalService
 $container['voetbal'] = function( $c ) {
     $voetbalService = new Voetbal\Service($c->get('em'));
 
     return $voetbalService;
 };
 
-// JWTAuthentication
-$container['jwtauth'] = function( $c ) {
-    $settings = $c->get('settings');
-    return new JwtAuthentication([
-        "secure" => true,
-        "relaxed" => ["localhost"],
-        "secret" => $settings['auth']['jwtsecret'],
-        // "algorithm" => $settings['auth']['jwtalgorithm'], default
-        "rules" => [
-            new JwtAuthentication\RequestPathRule([
-	            "path" => "/",
-	            "passthrough" => ["/auth/register", "/auth/login"]
-            ])	        ,
-            new JwtAuthentication\RequestMethodRule([
-                "passthrough" => ["OPTIONS"]
-            ])
-        ]
-    ]);
+// JWT
+$container["jwt"] = function ( $c ) {
+    return new \StdClass;
 };
 
 // actions
 $container['App\Action\Auth'] = function ($c) {
-	$em = $c->get('em');
-    $repos = new VOBettingRepository\Auth\User($em,$em->getClassMetaData(VOBetting\Auth\User::class));
-	return new App\Action\Auth($repos,$c->get('serializer'),$c->get('settings'));
+    $em = $c->get('em');
+    $repos = new VOBetting\User\Repository($em,$em->getClassMetaData(VOBetting\User::class));
+    return new App\Action\Auth($repos,$c->get('serializer'),$c->get('settings'));
 };
-$container['App\Action\Auth\User'] = function ($c) {
-	$em = $c->get('em');
-    $repos = new VOBettingRepository\Auth\User($em,$em->getClassMetaData(VOBetting\Auth\User::class));
-	return new App\Action\Auth\User($repos,$c->get('serializer'),$c->get('settings'));
+$container['App\Action\User'] = function ($c) {
+    $em = $c->get('em');
+    $repos = new VOBetting\User\Repository($em,$em->getClassMetaData(VOBetting\User::class));
+    return new App\Action\User($repos,$c->get('serializer'),$c->get('settings'));
 };
+$container['App\Action\Testcdk'] = function ($c) {
+    return new App\Action\Testcdk(
+        /*$tournamentService,
+        $tournamentRepos,
+        $userRepository,
+        $voetbalService->getService(Voetbal\Structure::class),*/
+        $c->get('serializer'),$c->get('settings'));
+};
+
+//$container['App\Action\Tournament'] = function ($c) {
+//    $em = $c->get('em');
+//    $voetbalService = $c->get('voetbal');
+//    $tournamentRepos = new VOBetting\Tournament\Repository($em,$em->getClassMetaData(VOBetting\Tournament::class));
+//    $tournamentRoleRepos = new VOBetting\Tournament\Role\Repository($em,$em->getClassMetaData(VOBetting\Tournament\Role::class));
+//    $tournamentService = new VOBetting\Tournament\Service(
+//        $voetbalService,
+//        $tournamentRepos,
+//        $tournamentRoleRepos,
+//        $em
+//    );
+//    $userRepository = new VOBetting\User\Repository($em,$em->getClassMetaData(VOBetting\User::class));
+//    return new App\Action\Tournament(
+//        $tournamentService,
+//        $tournamentRepos,
+//        $userRepository,
+//        $voetbalService->getService(Voetbal\Structure::class),
+//        $c->get('serializer'),$c->get('jwt'));
+//};

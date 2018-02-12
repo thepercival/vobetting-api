@@ -8,7 +8,7 @@ return [
         'environment' => getenv('ENVIRONMENT'),
         'displayErrorDetails' => ( getenv('ENVIRONMENT') === "development" ),
         'addContentLengthHeader' => false, // Allow the web server to send the content-length header
-	    'determineRouteBeforeAppMiddleware' => true,
+        'determineRouteBeforeAppMiddleware' => true,
 
         // Renderer settings
         'renderer' => [
@@ -33,8 +33,8 @@ return [
         'doctrine' => [
             'meta' => [
                 'entity_path' => [
-	                __DIR__ . '/../vendor/thepercival/voetbal/db/yml-mapping',
-	                __DIR__ . '/../db/yml-mapping'
+                    __DIR__ . '/../vendor/thepercival/voetbal/db/yml-mapping',
+                    __DIR__ . '/../db/yml-mapping'
                 ],
                 'auto_generate_proxies' => true,
                 'proxy_dir' =>  __DIR__.'/../cache/proxies',
@@ -48,7 +48,7 @@ return [
                 'password' => getenv('DB_PASSWORD'),
             ],
             'serializer' => array(
-	            'enabled' => true,
+                'enabled' => true,
             ),
         ],
         'auth' => [
@@ -60,8 +60,15 @@ return [
             'url' => getenv('WWW_URL')
         ],
         'email' => [
-            'from' => "info@vobetting.nl",
+            'from' => "coendunnink@gmail.com",
             'fromname' => "VOBetting"
+        ],
+        'exchanges' => [
+            'betfair' => [
+                "apikey" => getenv('BETFAIR_APIKEY'),
+                "username" => getenv('BETFAIR_USERNAME'),
+                "password" => getenv('BETFAIR_PASSWORD')
+            ]
         ]
     ],
 ];
