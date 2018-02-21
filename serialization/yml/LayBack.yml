@@ -1,0 +1,17 @@
+VOBetting\LayBack:
+  exclusion_policy: ALL
+  exclude: false
+  access_type: public_method
+
+  properties:
+    id:
+      type: integer
+    back:
+      type: boolean
+    price:
+      type: float
+    size:
+      type: float
+    dateTime:
+      type: DateTimeImmutable<'Y-m-d\TH:i:s.u\Z'>
+      serialized_name: dateTime

@@ -5,4 +5,8 @@ VOBetting\BetLine:
 
   properties:
     id:
-      read_only: true
+      type: integer
+    betType:
+      type: integer
+    poulePlace:
+      type: Voetbal\PoulePlace

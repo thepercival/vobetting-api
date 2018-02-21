@@ -1,0 +1,41 @@
+VOBetting\LayBack:
+  type: entity
+  repositoryClass: VOBetting\LayBack\Repository
+  table: laybacks
+  id:
+    id:
+      type: integer
+      generator:
+        strategy: AUTO
+  fields:
+    back:
+      type: boolean
+      nullable: false
+    price:
+      type: float
+      unique: false
+      nullable: false
+    size:
+      type: float
+      unique: false
+      nullable: false
+    dateTime:
+      type: datetime_immutable
+      nullable: false
+      column: datetime
+  manyToOne:
+    betLine:
+      targetEntity: VOBetting\BetLine
+      inversedBy: laybacks
+      joinColumn:
+        name: betlineid
+        referencedColumnName: id
+        nullable: false
+        onDelete: CASCADE
+    externalSystem:
+      targetEntity: Voetbal\External\System
+      joinColumn:
+        name: externalsystemid
+        referencedColumnName: id
+        nullable: false
+        onDelete: CASCADE

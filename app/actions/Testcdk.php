@@ -42,6 +42,7 @@ final class Testcdk
 
             $events = Betfair::betting('listEvents', ['filter' => ['textQuery' => 'Serie A']]);
 
+
             // $test = array( "cdk" => $userName );
             return $response
                 ->withHeader('Content-Type', 'application/json;charset=utf-8')

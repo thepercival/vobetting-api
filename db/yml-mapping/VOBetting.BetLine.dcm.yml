@@ -1,0 +1,29 @@
+VOBetting\BetLine:
+  type: entity
+  repositoryClass: VOBetting\BetLine\Repository
+  table: betlines
+  id:
+    id:
+      type: integer
+      generator:
+        strategy: AUTO
+  fields:
+    betType:
+      type: integer
+      nullable: false
+      unique: false
+  manyToOne:
+    game:
+      targetEntity: Voetbal\Game
+      joinColumn:
+        name: gameid
+        referencedColumnName: id
+        nullable: false
+        onDelete: CASCADE
+    poulePlace:
+      targetEntity: Voetbal\PoulePlace
+      joinColumn:
+        name: pouleplaceid
+        referencedColumnName: id
+        nullable: false
+        onDelete: CASCADE
