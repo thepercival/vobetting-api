@@ -8,5 +8,7 @@ VOBetting\BetLine:
       type: integer
     betType:
       type: integer
+      serialized_name: betType
     poulePlace:
       type: Voetbal\PoulePlace
+      serialized_name: poulePlace
