@@ -22,6 +22,7 @@ use VOBetting\BetLine\Repository as BetLineRepos;
 use VOBetting\LayBack\Repository as LayBackRepos;
 use VOBetting\BetLine;
 use VOBetting\LayBack;
+use Monolog\Logger;
 
 class Betfair implements ExternalSystemInterface
 {
@@ -55,12 +56,18 @@ class Betfair implements ExternalSystemInterface
      */
     private $layBackRepos;
 
+    /**
+     * @var Logger
+     */
+    private $logger;
+
     public function __construct(
         ExternalSystemBase $externalSystem,
         CompetitionseasonRepos $competitionseasonRepos,
         ExternalTeamRepos $externalTeamRepos,
         GameRepos $gameRepos,
-        BetLineRepos $betLineRepos, LayBackRepos $layBackRepos
+        BetLineRepos $betLineRepos, LayBackRepos $layBackRepos,
+        Logger $logger
     )
     {
         $this->setExternalSystem( $externalSystem );
@@ -69,6 +76,7 @@ class Betfair implements ExternalSystemInterface
         $this->gameRepos = $gameRepos;
         $this->betLineRepos = $betLineRepos;
         $this->layBackRepos = $layBackRepos;
+        $this->logger = $logger;
     }
 
     public function init() {
@@ -93,52 +101,65 @@ class Betfair implements ExternalSystemInterface
      */
     public function setExternalSystem( ExternalSystemBase $externalSystem )
     {
-
         $this->externalSystem = $externalSystem;
     }
 
-    public function getGame( Competition $competition, \DateTimeImmutable $startDateTime, $runners )
+    public function getEvents( ExternalObject $externalObject )
     {
-        $competitionseason = $this->competitionseasonRepos->findOneByCompetitionAndDate( $competition,  $startDateTime );
-
-        if( $competitionseason === null ) {
-            return null;
-        }
-
-        $homeRunnerId = null; $awayRunnerId = null; $drawRunnerId = null;
-        foreach( $runners as $runner ) {
-            $homeAway = $this->convertHomeAway( $runner->sortPriority );
-            if( $homeAway === Game::HOME ) {
-                $homeRunnerId = $runner->metadata->runnerId;
-            }
-            else if( $homeAway === Game::AWAY ) {
-                $awayRunnerId = $runner->metadata->runnerId;
-            }
-            else {
-                $drawRunnerId = $runner->metadata->runnerId;
-            }
-            // use $runner->selectionId as marketbook
-            // var_dump($runner->runnerName . " : " . $runner->metadata->runnerId);
-        }
-
-        $homeTeam = $this->getTeamFromExternalId( $homeRunnerId );
-        $awayTeam = $this->getTeamFromExternalId( $awayRunnerId );
-        if( $homeTeam === null or $awayTeam === null  ) {
-            return null;
-        }
-
-        $game = $this->gameRepos->findByExt(
-            $homeTeam,
-            $awayTeam,
-            $competitionseason,
-            Game::STATE_CREATED + Game::STATE_INPLAY
-        );
-        return $game;
+        return PeterColesBetfair::betting('listEvents',
+            ['filter' => [
+                'competitionIds' => [$externalObject->getExternalId()]
+            ]]);
     }
 
-    public function getTeamFromExternalId( $externalId )
-    {
-        return $this->externalTeamRepos->findImportableBy( $this->externalSystem, $externalId );
+    public function processEvent( Competition $competition, $event, $betType ) {
+        $markets = $this->getMarkets( $event->event->id, $betType );
+
+        $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $event->event->openDate);
+        $dateTime = new \DateTimeImmutable();
+
+        foreach ($markets as $market) {
+            $game = $this->getGame($competition, $startDateTime, $market->runners);
+            if ( $game === null ) {
+                continue;
+            }
+            $game = $this->syncStartDateTime( $game, $startDateTime);
+
+            foreach ($market->runners as $runner) {
+                // use $runner->selectionId as marketbook
+                //  var_dump($runner->runnerName . " : " . $runner->metadata->runnerId);
+                //  var_dump($runner->sortPriority);
+
+                $betLines = $this->getBetLines($market->marketId, $runner->metadata->runnerId);
+                foreach ($betLines as $betLine) {
+                    $team = $this->getTeamFromExternalId($runner->metadata->runnerId);
+                    $poulePlace = $game->getPoulePlaceForTeam($team);
+
+                    // var_dump($betLine->status); // IF CLOSED => UPDATE GAME!!
+                    $runnerOne = $betLine->runners[0];
+                    // var_dump($runnerOne->status); // "ACTIVE"
+
+                    $betLine = $this->betLineRepos->findOneBy(array(
+                        "game" => $game,
+                        "betType" => $betType,
+                        "poulePlace" => $poulePlace
+                    ));
+                    if( $betLine === null ) {
+                        $betLine = new BetLine($game, $betType);
+                        $betLine->setPoulePlace($poulePlace);
+                    }
+                    // maybe save close state here
+                    $this->betLineRepos->save($betLine);
+
+                    $backs = $runnerOne->ex->availableToBack;
+                    $lays = $runnerOne->ex->availableToLay;
+                    $this->saveLayBacks( $dateTime, $betLine, $backs, true );
+                    $this->saveLayBacks( $dateTime, $betLine, $lays, false );
+                    break;
+                }
+                break;
+            }
+        }
     }
 
     public function convertHomeAway( $homeAway )
@@ -155,15 +176,39 @@ class Betfair implements ExternalSystemInterface
         throw new \Exception("betfair homeaway-value unknown", E_ERROR );
     }
 
-    public function getEvents( ExternalObject $externalObject )
+    public function convertBetType( $betType )
     {
-        return PeterColesBetfair::betting('listEvents',
-            ['filter' => [
-                'competitionIds' => [$externalObject->getExternalId()]
-            ]]);
+        if( $betType === BetLine::_MATCH_ODDS ) {
+            return 'MATCH_ODDS';
+        }
+        throw new \Exception("unknown bettype", E_ERROR);
     }
 
-    public function getMarkets( $eventId, $betType )
+    protected function saveLayBacks(
+        \DateTimeImmutable $dateTime,
+        BetLine $betLine,
+        $layBacks, $layBack
+    ) {
+        foreach( $layBacks as $layBackIt ){
+            $layBackNew = new LayBack( $dateTime, $betLine, $this->externalSystem );
+            $layBackNew->setBack( $layBack );
+            $layBackNew->setPrice( $layBackIt->price );
+            $layBackNew->setSize( $layBackIt->size );
+            $this->layBackRepos->save($layBackNew);
+            break; // only first layBack, because is most interesting price/size
+        }
+    }
+
+    protected function syncStartDateTime( Game $game, \DateTimeImmutable $startDateTime)
+    {
+        if( $game->getStartDateTime() != $startDateTime ) {
+            $game->setStartDateTime( $startDateTime );
+            return $this->gameRepos->save( $game );
+        }
+        return $game;
+    }
+
+    protected function getMarkets( $eventId, $betType )
     {
         return PeterColesBetfair::betting('listMarketCatalogue', [
             'filter' => [
@@ -175,7 +220,7 @@ class Betfair implements ExternalSystemInterface
         ]);
     }
 
-    public function getBetLines( $marketId, $runnerId ) {
+    protected function getBetLines( $marketId, $runnerId ) {
         return PeterColesBetfair::betting('listRunnerBook', [
             'marketId' => $marketId,
             'selectionId' => $runnerId,
@@ -185,78 +230,53 @@ class Betfair implements ExternalSystemInterface
         ]);
     }
 
-    public function convertBetType( $betType )
+    protected function getTeamFromExternalId( $externalId )
     {
-        if( $betType === BetLine::_MATCH_ODDS ) {
-            return 'MATCH_ODDS';
+        $team = $this->externalTeamRepos->findImportableBy( $this->externalSystem, $externalId );
+        if( $team === null ) {
+            $this->logger->addNotice("team not found for externalid " . $externalId . " and externalSystem " . $this->externalSystem->getName() );
         }
-        throw new \Exception("unknown bettype", E_ERROR);
+        return $team;
     }
 
-    public function processEvent( $competition, $event, $betType ) {
-        $markets = $this->getMarkets( $event->event->id, $betType );
+    protected function getGame( Competition $competition, \DateTimeImmutable $startDateTime, $runners )
+    {
+        $competitionseason = $this->competitionseasonRepos->findOneByCompetitionAndDate( $competition,  $startDateTime );
 
-        $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $event->event->openDate);
-        $dateTime = new \DateTimeImmutable();
-
-        foreach ($markets as $market) {
-            $game = $this->getGame($competition, $startDateTime, $market->runners);
-            if ( $game === null ) {
-                var_dump("gameis null");
-                continue;
-            }
-
-            foreach ($market->runners as $runner) {
-                // use $runner->selectionId as marketbook
-                //  var_dump($runner->runnerName . " : " . $runner->metadata->runnerId);
-                //  var_dump($runner->sortPriority);
-
-                $betLines = $this->getBetLines($market->marketId, $runner->metadata->runnerId);
-                foreach ($betLines as $betLine) {
-                    $team = $this->getTeamFromExternalId($runner->metadata->runnerId);
-                    $poulePlace = $game->getPoulePlaceForTeam($team);
-
-                    var_dump($betLine->status); // IF CLOSED => UPDATE GAME!!
-                    $runnerOne = $betLine->runners[0];
-                    var_dump($runnerOne->status); // "ACTIVE"
-
-                    $betLine = $this->betLineRepos->findOneBy(array(
-                        "game" => $game,
-                        "betType" => $betType,
-                        "poulePlace" => $poulePlace
-                    ));
-                    if( $betLine === null ) {
-                        $betLine = new BetLine($game, $betType);
-                        $betLine->setPoulePlace($poulePlace);
-                    }
-                    // maybe save close state here
-                    $this->betLineRepos->save($betLine);
-
-                    // save these!!!
-                    $backs = $runnerOne->ex->availableToBack;
-                    $lays = $runnerOne->ex->availableToLay;
-                    $this->saveLayBacks( $dateTime, $betLine, $backs, true );
-                    $this->saveLayBacks( $dateTime, $betLine, $lays, false );
-                    break;
-                }
-                break;
-            }
+        if( $competitionseason === null ) {
+            $this->logger->addNotice("competitionseason not found for competition " . $competition->getName() . " and date " . $startDateTime->format(\DATE_ISO8601));
+            return null;
         }
-    }
 
-    protected function saveLayBacks(
-        \DateTimeImmutable $dateTime,
-        BetLine $betLine,
-        $layBacks, $layBack
-    ) {
-        foreach( $layBacks as $layBackIt ){
-            var_dump( ( $layBack ? "back " : "lay " ) . $layBackIt->price . " -> " . $layBackIt->size);
-            $layBackNew = new LayBack( $dateTime, $betLine, $this->externalSystem );
-            $layBackNew->setBack( $layBack );
-            $layBackNew->setPrice( $layBackIt->price );
-            $layBackNew->setSize( $layBackIt->size );
-            $this->layBackRepos->save($layBackNew);
-
+        $homeRunnerId = null; $awayRunnerId = null; $drawRunnerId = null;
+        foreach( $runners as $runner ) {
+            $homeAway = $this->convertHomeAway( $runner->sortPriority );
+            if( $homeAway === Game::HOME ) {
+                $homeRunnerId = $runner->metadata->runnerId;
+            }
+            else if( $homeAway === Game::AWAY ) {
+                $awayRunnerId = $runner->metadata->runnerId;
+            }
+            else {
+                $drawRunnerId = $runner->metadata->runnerId;
+            }
+            // use $runner->selectionId as marketbook
         }
+
+        $homeTeam = $this->getTeamFromExternalId( $homeRunnerId );
+        if( $homeTeam === null ) {
+            return null;
+        }
+        $awayTeam = $this->getTeamFromExternalId( $awayRunnerId );
+        if( $awayTeam === null  ) {
+            return null;
+        }
+
+        $states = Game::STATE_CREATED + Game::STATE_INPLAY;
+        $game = $this->gameRepos->findByExt( $homeTeam, $awayTeam, $competitionseason, $states );
+        if( $game === null ) {
+            $this->logger->addNotice("game not found for hometeam " . $homeTeam->getName() . ",awayteam " . $awayTeam->getName() . ", competitionseason " . $competitionseason->getName() . " and states " . $states );
+        }
+        return $game;
     }
 }

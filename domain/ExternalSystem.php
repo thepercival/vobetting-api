@@ -16,9 +16,7 @@ interface ExternalSystem {
     public function init();
     public function getExternalSystem();
     public function setExternalSystem( ExternalSystemBase $externalSystem );
-    public function getGame( Competition $competition, \DateTimeImmutable $startDateTime, $runners );
-    public function convertHomeAway( $homeAway );
     public function getEvents( ExternalObject $externalObject );
-    public function getMarkets( $eventId, $betType );
-    public function getBetLines( $marketId, $runnerId );
+    public function processEvent( Competition $competition, $event, $betType );
+    public function convertHomeAway( $homeAway );
 }

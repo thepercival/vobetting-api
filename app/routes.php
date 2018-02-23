@@ -17,9 +17,12 @@ $app->group('/users', function () use ($app) {
     $app->get('/{id}', 'App\Action\User:fetchOne');
 });
 
-$app->group('/testcdk', function () use ($app) {
-    $app->get('/testcdk', 'App\Action\Testcdk:testcdk');
-});
+$app->get('/betlines', 'App\Action\BetLine:fetch');
+$app->get('/laybacks', 'App\Action\LayBack:fetch');
+
+//$app->group('/testcdk', function () use ($app) {
+//    $app->get('/testcdk', 'App\Action\Testcdk:testcdk');
+//});
 
 //$app->group('/tournaments', function () use ($app) {
 //    $app->post('', 'App\Action\Tournament:add');

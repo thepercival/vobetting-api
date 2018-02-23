@@ -101,23 +101,15 @@ $container['App\Action\Testcdk'] = function ($c) {
         $voetbalService->getService(Voetbal\Structure::class),*/
         $c->get('serializer'),$c->get('settings'));
 };
-
-//$container['App\Action\Tournament'] = function ($c) {
-//    $em = $c->get('em');
-//    $voetbalService = $c->get('voetbal');
-//    $tournamentRepos = new VOBetting\Tournament\Repository($em,$em->getClassMetaData(VOBetting\Tournament::class));
-//    $tournamentRoleRepos = new VOBetting\Tournament\Role\Repository($em,$em->getClassMetaData(VOBetting\Tournament\Role::class));
-//    $tournamentService = new VOBetting\Tournament\Service(
-//        $voetbalService,
-//        $tournamentRepos,
-//        $tournamentRoleRepos,
-//        $em
-//    );
-//    $userRepository = new VOBetting\User\Repository($em,$em->getClassMetaData(VOBetting\User::class));
-//    return new App\Action\Tournament(
-//        $tournamentService,
-//        $tournamentRepos,
-//        $userRepository,
-//        $voetbalService->getService(Voetbal\Structure::class),
-//        $c->get('serializer'),$c->get('jwt'));
-//};
+$container['App\Action\BetLine'] = function ($c) {
+    $em = $c->get('em');
+    $repos = new VOBetting\BetLine\Repository($em,$em->getClassMetaData(VOBetting\BetLine::class));
+    $gameRepository = new Voetbal\Game\Repository($em,$em->getClassMetaData(Voetbal\Game::class));
+    return new App\Action\BetLine($repos,$gameRepository,$c->get('serializer'));
+};
+$container['App\Action\LayBack'] = function ($c) {
+    $em = $c->get('em');
+    $repos = new VOBetting\LayBack\Repository($em,$em->getClassMetaData(VOBetting\LayBack::class));
+    $betLineRepository = new VOBetting\BetLine\Repository($em,$em->getClassMetaData(VOBetting\BetLine::class));
+    return new App\Action\LayBack($repos,$betLineRepository,$c->get('serializer'));
+};
