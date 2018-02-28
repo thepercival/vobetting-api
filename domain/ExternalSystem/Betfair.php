@@ -129,35 +129,40 @@ class Betfair implements ExternalSystemInterface
                 // use $runner->selectionId as marketbook
                 //  var_dump($runner->runnerName . " : " . $runner->metadata->runnerId);
                 //  var_dump($runner->sortPriority);
-
-                $betLines = $this->getBetLines($market->marketId, $runner->metadata->runnerId);
-                foreach ($betLines as $betLine) {
+                // var_dump($runner->metadata->runnerId); die();
+                $poulePlace = null;
+                if( $runner->metadata->runnerId !== "58805" ) { // the draw
                     $team = $this->getTeamFromExternalId($runner->metadata->runnerId);
+                    if( $team === null ) {
+                        continue;
+                    }
                     $poulePlace = $game->getPoulePlaceForTeam($team);
+                }
+                $betLine = $this->betLineRepos->findOneBy(array(
+                    "game" => $game,
+                    "betType" => $betType,
+                    "poulePlace" => $poulePlace
+                ));
+                if( $betLine === null ) {
+                    $betLine = new BetLine($game, $betType);
+                    $betLine->setPoulePlace($poulePlace);
+                }
+                // maybe save close state here
+                $this->betLineRepos->save($betLine);
+
+                $marketBooks = $this->getMarketBooks($market->marketId, $runner->metadata->runnerId);
+                foreach ($marketBooks as $marketBook) {
 
                     // var_dump($betLine->status); // IF CLOSED => UPDATE GAME!!
-                    $runnerOne = $betLine->runners[0];
+                    $runnerOne = $marketBook->runners[0];
                     // var_dump($runnerOne->status); // "ACTIVE"
-
-                    $betLine = $this->betLineRepos->findOneBy(array(
-                        "game" => $game,
-                        "betType" => $betType,
-                        "poulePlace" => $poulePlace
-                    ));
-                    if( $betLine === null ) {
-                        $betLine = new BetLine($game, $betType);
-                        $betLine->setPoulePlace($poulePlace);
-                    }
-                    // maybe save close state here
-                    $this->betLineRepos->save($betLine);
-
                     $backs = $runnerOne->ex->availableToBack;
                     $lays = $runnerOne->ex->availableToLay;
                     $this->saveLayBacks( $dateTime, $betLine, $backs, true );
                     $this->saveLayBacks( $dateTime, $betLine, $lays, false );
-                    break;
+                    break; // should not be necessary
                 }
-                break;
+                // break;
             }
         }
     }
@@ -220,7 +225,7 @@ class Betfair implements ExternalSystemInterface
         ]);
     }
 
-    protected function getBetLines( $marketId, $runnerId ) {
+    protected function getMarketBooks( $marketId, $runnerId ) {
         return PeterColesBetfair::betting('listRunnerBook', [
             'marketId' => $marketId,
             'selectionId' => $runnerId,

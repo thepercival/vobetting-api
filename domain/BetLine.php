@@ -109,7 +109,7 @@ class BetLine
     /**
      * @param $poulePlace
      */
-    public function setPoulePlace( PoulePlace $poulePlace )
+    public function setPoulePlace( PoulePlace $poulePlace = null )
     {
         $this->poulePlace = $poulePlace;
     }

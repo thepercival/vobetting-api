@@ -25,5 +25,5 @@ VOBetting\BetLine:
       joinColumn:
         name: pouleplaceid
         referencedColumnName: id
-        nullable: false
+        nullable: true
         onDelete: CASCADE
