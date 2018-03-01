@@ -19,4 +19,5 @@ interface ExternalSystem {
     public function getEvents( ExternalObject $externalObject );
     public function processEvent( Competition $competition, $event, $betType );
     public function convertHomeAway( $homeAway );
+    public function setMaxDaysBeforeImport( $maxDaysBeforeImport );
 }

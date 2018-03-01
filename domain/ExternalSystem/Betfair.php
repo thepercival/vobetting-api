@@ -61,6 +61,13 @@ class Betfair implements ExternalSystemInterface
      */
     private $logger;
 
+    /**
+     * @var int
+     */
+    private $maxDaysBeforeImport ;
+
+
+
     public function __construct(
         ExternalSystemBase $externalSystem,
         CompetitionseasonRepos $competitionseasonRepos,
@@ -86,6 +93,14 @@ class Betfair implements ExternalSystemInterface
             $this->externalSystem->getUsername(),
             $this->externalSystem->getPassword()
         );
+    }
+
+    public function setMaxDaysBeforeImport( $maxDaysBeforeImport ) {
+        $this->maxDaysBeforeImport = $maxDaysBeforeImport;
+    }
+
+    public function getImportStartDeadLine( \DateTimeImmutable $matchStartDateTime ) {
+        return $matchStartDateTime->modify("-".$this->maxDaysBeforeImport." days");
     }
 
     /**
@@ -124,6 +139,9 @@ class Betfair implements ExternalSystemInterface
                 continue;
             }
             $game = $this->syncStartDateTime( $game, $startDateTime);
+            if( $dateTime < $this->getImportStartDeadLine($startDateTime) ) {
+                continue;
+            }
 
             foreach ($market->runners as $runner) {
                 // use $runner->selectionId as marketbook

@@ -30,6 +30,7 @@ use VOBetting\BetLine;
 use Monolog\Logger;
 
 try {
+    $maxDaysBeforeImport = 14;
     $externalSystemRepos = $em->getRepository( \Voetbal\External\System::class );
     $competitionRepos = $em->getRepository( \Voetbal\Competition::class );
     $competitionseasonRepos = $em->getRepository( \Voetbal\Competitionseason::class );
@@ -53,6 +54,7 @@ try {
                 $betLineRepos, $layBackRepos,
                 $logger
             );
+            $externalSystem->setMaxDaysBeforeImport( $maxDaysBeforeImport );
             $externalSystem->init();
             foreach ($competitions as $competition) {
                 $externalObject = $externalCompetitionRepos->findOneBy(array(
@@ -69,17 +71,23 @@ try {
                 }
             }
         } catch (\Exception $e) {
-            throw new \Exception($e->getMessage(), E_ERROR);
+            if( $settings->get('environment') === 'production') {
+                mailAdmin( $e->getMessage() );
+                $logger->addError("GENERAL ERROR: " . $e->getMessage() );
+            } else {
+                echo $e->getMessage() . PHP_EOL;
+            }
         }
     }
 }
 catch( \Exception $e ) {
-    mailAdmin( $e->getMessage() );
-    throw new \Exception( $e->getMessage(), E_ERROR );
+    if( $settings->get('environment') === 'production') {
+        mailAdmin( $e->getMessage() );
+        $logger->addError("GENERAL ERROR: " . $e->getMessage() );
+    } else {
+        echo $e->getMessage() . PHP_EOL;
+    }
 }
-
-
-
 
 function getExternalSystem(
     ExternalSystemBase $externalSystemBase,
