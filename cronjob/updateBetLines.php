@@ -20,7 +20,7 @@ $settings = $app->getContainer()->get('settings');
 $logger = $app->getContainer()->get('logger');
 $em = $app->getContainer()->get('em');
 
-use Voetbal\Competitionseason\Repository as CompetitionseasonRepos;
+use Voetbal\Competition\Repository as CompetitionRepos;
 use Voetbal\External\System as ExternalSystemBase;
 use Voetbal\External\Team\Repository as ExternalTeamRepos;
 use Voetbal\Game\Repository as GameRepos;
@@ -32,23 +32,23 @@ use Monolog\Logger;
 try {
     $maxDaysBeforeImport = 14;
     $externalSystemRepos = $em->getRepository( \Voetbal\External\System::class );
+    $leagueRepos = $em->getRepository( \Voetbal\League::class );
     $competitionRepos = $em->getRepository( \Voetbal\Competition::class );
-    $competitionseasonRepos = $em->getRepository( \Voetbal\Competitionseason::class );
-    $externalCompetitionRepos = $em->getRepository( \Voetbal\External\Competition::class );
+    $externalLeagueRepos = $em->getRepository( \Voetbal\External\League::class );
     $externalTeamRepos = $em->getRepository( \Voetbal\External\Team::class );
     $gameRepos = $em->getRepository( \Voetbal\Game::class );
     $betLineRepos = $em->getRepository( \VOBetting\BetLine::class );
     $layBackRepos = $em->getRepository( \VOBetting\LayBack::class );
 
     $externalSystems = $externalSystemRepos->findAll();
-    $competitions = $competitionRepos->findAll();
+    $leagues = $leagueRepos->findAll();
     $betType = BetLine::_MATCH_ODDS;
     foreach( $externalSystems as $externalSystemBase ) {
         echo $externalSystemBase->getName() . PHP_EOL;
         try {
             $externalSystem = getExternalSystem(
                 $externalSystemBase,
-                $competitionseasonRepos,
+                $competitionRepos,
                 $externalTeamRepos,
                 $gameRepos,
                 $betLineRepos, $layBackRepos,
@@ -56,18 +56,18 @@ try {
             );
             $externalSystem->setMaxDaysBeforeImport( $maxDaysBeforeImport );
             $externalSystem->init();
-            foreach ($competitions as $competition) {
-                $externalObject = $externalCompetitionRepos->findOneBy(array(
+            foreach ($leagues as $league) {
+                $externalObject = $externalLeagueRepos->findOneBy(array(
                     'externalSystem' => $externalSystemBase,
-                    'importableObject' => $competition
+                    'importableObject' => $league
                 ));
                 if ($externalObject === null) {
-                    $logger->addNotice("external competition not found for externalSystem " . $externalSystemBase->getName() . " and competition " . $competition->getName() );
+                    $logger->addNotice("external league not found for externalSystem " . $externalSystemBase->getName() . " and league " . $league->getName() );
                     continue;
                 }
                 $events = $externalSystem->getEvents($externalObject);
                 foreach ($events as $event) {
-                    $externalSystem->processEvent($competition, $event, $betType);
+                    $externalSystem->processEvent($league, $event, $betType);
                 }
             }
         } catch (\Exception $e) {
@@ -91,7 +91,7 @@ catch( \Exception $e ) {
 
 function getExternalSystem(
     ExternalSystemBase $externalSystemBase,
-    CompetitionseasonRepos $competitionseasonRepos,
+    CompetitionRepos $competitionRepos,
     ExternalTeamRepos $externalTeamRepos,
     GameRepos $gameRepos,
     BetLineRepos $betLineRepos, LayBackRepos $layBackRepos,
@@ -101,7 +101,7 @@ function getExternalSystem(
     if( $externalSystemBase->getName() === "betfair" ) {
 
         $externalSystem = new \VOBetting\ExternalSystem\Betfair(
-            $externalSystemBase, $competitionseasonRepos, $externalTeamRepos, $gameRepos,
+            $externalSystemBase, $competitionRepos, $externalTeamRepos, $gameRepos,
             $betLineRepos, $layBackRepos, $logger
         );
     }

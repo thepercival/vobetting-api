@@ -12,8 +12,8 @@ use VOBetting\ExternalSystem;
 use Voetbal\External\System as ExternalSystemBase;
 use VOBetting\ExternalSystem as ExternalSystemInterface;
 use Voetbal\External\Object as ExternalObject;
-use Voetbal\Competitionseason\Repository as CompetitionseasonRepos;
-use Voetbal\Competition;
+use Voetbal\Competition\Repository as CompetitionRepos;
+use Voetbal\League;
 use PeterColes\Betfair\Betfair as PeterColesBetfair;
 use Voetbal\Game;
 use Voetbal\External\Team\Repository as ExternalTeamRepos;
@@ -32,9 +32,9 @@ class Betfair implements ExternalSystemInterface
     private $externalSystem;
 
     /**
-     * @var CompetitionseasonRepos
+     * @var CompetitionRepos
      */
-    private $competitionseasonRepos;
+    private $competitionRepos;
 
     /**
      * @var ExternalTeamRepos
@@ -70,7 +70,7 @@ class Betfair implements ExternalSystemInterface
 
     public function __construct(
         ExternalSystemBase $externalSystem,
-        CompetitionseasonRepos $competitionseasonRepos,
+        CompetitionRepos $competitionRepos,
         ExternalTeamRepos $externalTeamRepos,
         GameRepos $gameRepos,
         BetLineRepos $betLineRepos, LayBackRepos $layBackRepos,
@@ -78,7 +78,7 @@ class Betfair implements ExternalSystemInterface
     )
     {
         $this->setExternalSystem( $externalSystem );
-        $this->competitionseasonRepos = $competitionseasonRepos;
+        $this->competitionRepos = $competitionRepos;
         $this->externalTeamRepos = $externalTeamRepos;
         $this->gameRepos = $gameRepos;
         $this->betLineRepos = $betLineRepos;
@@ -123,18 +123,18 @@ class Betfair implements ExternalSystemInterface
     {
         return PeterColesBetfair::betting('listEvents',
             ['filter' => [
-                'competitionIds' => [$externalObject->getExternalId()]
+                'leagueIds' => [$externalObject->getExternalId()]
             ]]);
     }
 
-    public function processEvent( Competition $competition, $event, $betType ) {
+    public function processEvent( League $league, $event, $betType ) {
         $markets = $this->getMarkets( $event->event->id, $betType );
 
         $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $event->event->openDate);
         $dateTime = new \DateTimeImmutable();
 
         foreach ($markets as $market) {
-            $game = $this->getGame($competition, $startDateTime, $market->runners);
+            $game = $this->getGame($league, $startDateTime, $market->runners);
             if ( $game === null ) {
                 continue;
             }
@@ -262,12 +262,12 @@ class Betfair implements ExternalSystemInterface
         return $team;
     }
 
-    protected function getGame( Competition $competition, \DateTimeImmutable $startDateTime, $runners )
+    protected function getGame( League $league, \DateTimeImmutable $startDateTime, $runners )
     {
-        $competitionseason = $this->competitionseasonRepos->findOneByCompetitionAndDate( $competition,  $startDateTime );
+        $competition = $this->competitionRepos->findOneByLeagueAndDate( $league,  $startDateTime );
 
-        if( $competitionseason === null ) {
-            $this->logger->addNotice("competitionseason not found for competition " . $competition->getName() . " and date " . $startDateTime->format(\DATE_ISO8601));
+        if( $competition === null ) {
+            $this->logger->addNotice("competition not found for league " . $league->getName() . " and date " . $startDateTime->format(\DATE_ISO8601));
             return null;
         }
 
@@ -296,9 +296,9 @@ class Betfair implements ExternalSystemInterface
         }
 
         $states = Game::STATE_CREATED + Game::STATE_INPLAY;
-        $game = $this->gameRepos->findByExt( $homeTeam, $awayTeam, $competitionseason, $states );
+        $game = $this->gameRepos->findByExt( $homeTeam, $awayTeam, $competition, $states );
         if( $game === null ) {
-            $this->logger->addNotice("game not found for hometeam " . $homeTeam->getName() . ",awayteam " . $awayTeam->getName() . ", competitionseason " . $competitionseason->getName() . " and states " . $states );
+            $this->logger->addNotice("game not found for hometeam " . $homeTeam->getName() . ",awayteam " . $awayTeam->getName() . ", competition " . $competition->getName() . " and states " . $states );
         }
         return $game;
     }
