@@ -54,6 +54,9 @@ try {
                 $betLineRepos, $layBackRepos,
                 $logger
             );
+            if( $externalSystem === null ) {
+                continue;
+            }
             $externalSystem->setMaxDaysBeforeImport( $maxDaysBeforeImport );
             $externalSystem->init();
             foreach ($leagues as $league) {
@@ -105,6 +108,16 @@ function getExternalSystem(
             $betLineRepos, $layBackRepos, $logger
         );
     }
+//    else if( $externalSystemBase->getName() === "Football Data" ) {
+//
+//        $externalSystem = new \VOBetting\ExternalSystem\FootballData(
+//            $externalSystemBase, $competitionRepos, $externalTeamRepos, $gameRepos,
+//            $betLineRepos, $layBackRepos, $logger
+//        );
+//    }
+//    else {
+//        throw new \Exception("onbekend extern systeem:" . $externalSystemBase->getName(), E_ERROR );
+//    }
     return $externalSystem;
 }
 

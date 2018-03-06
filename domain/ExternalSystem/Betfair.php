@@ -10,7 +10,8 @@ namespace VOBetting\ExternalSystem;
 
 use VOBetting\ExternalSystem;
 use Voetbal\External\System as ExternalSystemBase;
-use VOBetting\ExternalSystem as ExternalSystemInterface;
+use Voetbal\External\System\Def as ExternalSystemInterface;
+use VOBetting\ExternalSystem as VOBettingExternalSystemInterface;
 use Voetbal\External\Object as ExternalObject;
 use Voetbal\Competition\Repository as CompetitionRepos;
 use Voetbal\League;
@@ -23,8 +24,10 @@ use VOBetting\LayBack\Repository as LayBackRepos;
 use VOBetting\BetLine;
 use VOBetting\LayBack;
 use Monolog\Logger;
+use League\Period\Period;
 
-class Betfair implements ExternalSystemInterface
+
+class Betfair implements ExternalSystemInterface, VOBettingExternalSystemInterface
 {
     /**
      * @var ExternalSystem
@@ -64,9 +67,15 @@ class Betfair implements ExternalSystemInterface
     /**
      * @var int
      */
-    private $maxDaysBeforeImport ;
+    private $maxDaysBeforeImport;
 
+    /**
+     * @var Period
+     */
+    private $period;
 
+    CONST DATE_FORMAT = 'Y-m-d\TH:i:s\Z';
+    CONST THE_DRAW = "58805";
 
     public function __construct(
         ExternalSystemBase $externalSystem,
@@ -99,8 +108,12 @@ class Betfair implements ExternalSystemInterface
         $this->maxDaysBeforeImport = $maxDaysBeforeImport;
     }
 
-    public function getImportStartDeadLine( \DateTimeImmutable $matchStartDateTime ) {
-        return $matchStartDateTime->modify("-".$this->maxDaysBeforeImport." days");
+    public function getImportPeriod() {
+        if( $this->period === null ) {
+            $now = new \DateTimeImmutable();
+            $this->period = new Period( $now, $now->modify("+".$this->maxDaysBeforeImport." days") );
+        }
+        return $this->period;
     }
 
     /**
@@ -123,66 +136,63 @@ class Betfair implements ExternalSystemInterface
     {
         return PeterColesBetfair::betting('listEvents',
             ['filter' => [
-                'leagueIds' => [$externalObject->getExternalId()]
-            ]]);
+                'competitionIds' => [$externalObject->getExternalId()]
+                ,"marketStartTime" => [
+                    "from" => $this->getImportPeriod()->getStartDate()->format(static::DATE_FORMAT),
+                    "to" => $this->getImportPeriod()->getEndDate()->format(static::DATE_FORMAT)]
+                ]
+            ]);
     }
 
     public function processEvent( League $league, $event, $betType ) {
         $markets = $this->getMarkets( $event->event->id, $betType );
-
         $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $event->event->openDate);
-        $dateTime = new \DateTimeImmutable();
 
         foreach ($markets as $market) {
             $game = $this->getGame($league, $startDateTime, $market->runners);
             if ( $game === null ) {
                 continue;
             }
-            $game = $this->syncStartDateTime( $game, $startDateTime);
-            if( $dateTime < $this->getImportStartDeadLine($startDateTime) ) {
-                continue;
-            }
 
-            foreach ($market->runners as $runner) {
-                // use $runner->selectionId as marketbook
-                //  var_dump($runner->runnerName . " : " . $runner->metadata->runnerId);
-                //  var_dump($runner->sortPriority);
-                // var_dump($runner->metadata->runnerId); die();
-                $poulePlace = null;
-                if( $runner->metadata->runnerId !== "58805" ) { // the draw
-                    $team = $this->getTeamFromExternalId($runner->metadata->runnerId);
-                    if( $team === null ) {
+            $marketBooks = $this->getMarketBooks($market->marketId);
+            foreach ($marketBooks as $marketBook) {
+                foreach ($marketBook->runners as $runner) {
+                    $betLine = $this->syncBetLine($game, $betType, $runner);
+                    if ($betLine === null) {
                         continue;
                     }
-                    $poulePlace = $game->getPoulePlaceForTeam($team);
-                }
-                $betLine = $this->betLineRepos->findOneBy(array(
-                    "game" => $game,
-                    "betType" => $betType,
-                    "poulePlace" => $poulePlace
-                ));
-                if( $betLine === null ) {
-                    $betLine = new BetLine($game, $betType);
-                    $betLine->setPoulePlace($poulePlace);
-                }
-                // maybe save close state here
-                $this->betLineRepos->save($betLine);
-
-                $marketBooks = $this->getMarketBooks($market->marketId, $runner->metadata->runnerId);
-                foreach ($marketBooks as $marketBook) {
-
                     // var_dump($betLine->status); // IF CLOSED => UPDATE GAME!!
-                    $runnerOne = $marketBook->runners[0];
                     // var_dump($runnerOne->status); // "ACTIVE"
-                    $backs = $runnerOne->ex->availableToBack;
-                    $lays = $runnerOne->ex->availableToLay;
-                    $this->saveLayBacks( $dateTime, $betLine, $backs, true );
-                    $this->saveLayBacks( $dateTime, $betLine, $lays, false );
-                    break; // should not be necessary
+                    $backs = $runner->ex->availableToBack;
+                    $lays = $runner->ex->availableToLay;
+                    $this->saveLayBacks( $this->getImportPeriod()->getStartDate(), $betLine, $backs, true );
+                    $this->saveLayBacks( $this->getImportPeriod()->getStartDate(), $betLine, $lays, false );
                 }
-                // break;
             }
         }
+    }
+
+    protected function syncBetLine( Game $game, $betType, $runner)
+    {
+        $poulePlace = null;
+        if( $runner->selectionId !== static::THE_DRAW ) { // the draw
+        $team = $this->getTeamFromExternalId($runner->selectionId);
+        if( $team === null ) {
+            return null;
+        }
+        $poulePlace = $game->getPoulePlaceForTeam($team);
+        }
+        $betLine = $this->betLineRepos->findOneBy(array(
+            "game" => $game,
+            "betType" => $betType,
+            "poulePlace" => $poulePlace
+        ));
+        if( $betLine === null ) {
+            $betLine = new BetLine($game, $betType);
+            $betLine->setPoulePlace($poulePlace);
+        }
+        // maybe save close state here
+        return $this->betLineRepos->save($betLine);
     }
 
     public function convertHomeAway( $homeAway )
@@ -243,10 +253,10 @@ class Betfair implements ExternalSystemInterface
         ]);
     }
 
-    protected function getMarketBooks( $marketId, $runnerId ) {
-        return PeterColesBetfair::betting('listRunnerBook', [
-            'marketId' => $marketId,
-            'selectionId' => $runnerId,
+    protected function getMarketBooks( $marketId ) {
+        return PeterColesBetfair::betting('listMarketBook', [
+            'marketIds' => [$marketId],
+            // 'selectionId' => $runnerId,
             "priceProjection" => ["priceData" => ["EX_BEST_OFFERS"]],
             "orderProjection" => "ALL",
             "matchProjection" => "ROLLED_UP_BY_PRICE"
