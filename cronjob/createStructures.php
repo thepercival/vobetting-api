@@ -3,24 +3,8 @@
  * Created by PhpStorm.
  * User: coen
  * Date: 6-3-18
- * Time: 22:28
+ * Time: 14:43
  */
-
-//loop door de externalobjects voor externalsystem x en compettion y
-//
-//haal per externalobject de teams op
-//
-//ga dan weer kijken als de teams moeten worden gesynced idem als met comps
-//
-//
-//$unable = true;
-////create structure and assign teams
-//// $numberOfTeams
-//// $numberOfGames
-//// numberOfMatchdays
-//if ( $unable ) {
-//    throw new \Exception("unable to determine structure", E_ERROR );
-//}
 
 namespace App\Cronjob;
 
@@ -34,12 +18,16 @@ require __DIR__ . '/../app/dependencies.php';
 require __DIR__ . '/mailHelper.php';
 
 
-use Voetbal\External\System\Importable\Team as TeamImportable;
+use DoctrineProxies\__CG__\Voetbal\PoulePlace;
+use Voetbal\External\System\Importable\Competition as CompetitionImportable;
+use Voetbal\External\System\Importable\Structure as StructureImportable;
 use Voetbal\Competition\Service as CompetitionService;
 use Voetbal\Competition\Repository as CompetitionRepos;
 use Voetbal\External\System as ExternalSystemBase;
 use Voetbal\External\System\Factory as ExternalSystemFactory;
 use Monolog\Logger;
+
+use JMS\Serializer\Serializer;
 
 $settings = $app->getContainer()->get('settings');
 $logger = $app->getContainer()->get('logger');
@@ -47,9 +35,10 @@ $em = $app->getContainer()->get('em');
 $voetbal = $app->getContainer()->get('voetbal');
 
 try {
+
     $externalSystemRepos = $em->getRepository( \Voetbal\External\System::class );
-    $teamRepos = $em->getRepository( \Voetbal\Team::class );
-    $teamService = $voetbal->getService( \Voetbal\Team::class );
+    $competitionRepos = $em->getRepository( \Voetbal\Competition::class );
+    $competitionService = $voetbal->getService( \Voetbal\Competition::class );
     $competitionRepos = $em->getRepository( \Voetbal\Competition::class );
     $externalTeamRepos = $em->getRepository( \Voetbal\External\Team::class );
     $externalCompetitionRepos = $em->getRepository( \Voetbal\External\Competition::class );
@@ -61,44 +50,40 @@ try {
         echo $externalSystemBase->getName() . PHP_EOL;
         try {
             $externalSystem = $externalSystemFactory->create( $externalSystemBase );
-            if( $externalSystem === null or ( $externalSystem instanceof TeamImportable ) !== true ) {
+            if( $externalSystem === null or ( $externalSystem instanceof StructureImportable ) !== true ) {
                 continue;
             }
             $externalSystem->init();
             foreach( $competitions as $competition ) {
+                if( $competition->getFirstRound() !== null ) {
+                    continue;
+                }
                 $externalCompetition = $externalCompetitionRepos->findOneByImportable( $externalSystemBase, $competition );
                 if( $externalCompetition === null or strlen($externalCompetition->getExternalId()) === null ) {
                     $logger->addNotice('for comopetition '.$competition->getName().' there is no "'.$externalSystemBase->getName().'"-competition available' );
                     continue;
                 }
-                $association = $externalCompetition->getImportableObject()->getLeague()->getAssociation();
-                $externalSystemHelper = $externalSystem->getTeamImporter(
-                    $teamService,
-                    $teamRepos,
+                $externalSystemHelper = $externalSystem->getStructureImporter(
+                    $externalSystem->getCompetitionImporter(
+                        $competitionService,
+                        $competitionRepos,
+                        $externalCompetitionRepos
+                    ),
+                    $externalSystem->getTeamImporter(
+                        $competitionService,
+                        $competitionRepos,
+                        $externalCompetitionRepos
+                    ),
                     $externalTeamRepos
                 );
-                $teams = $externalSystemHelper->get( $externalCompetition );
-                foreach( $teams as $externalSystemTeam ) {
-                    $externalId = $externalSystemHelper->getId( $externalSystemTeam );
-                    $externalTeam = $externalTeamRepos->findOneByExternalId( $externalSystemBase, $externalId );
-                    try {
-                        if( $externalTeam === null ) {
-                            $team = $externalSystemHelper->create($association, $externalSystemTeam);
-                        } else {
-                            $externalSystemHelper->update( $externalTeam->getImportableObject(), $externalSystemTeam );
-                        }
-                    } catch( \Exception $error ) {
-                        $logger->addNotice($externalSystemBase->getName().'"-team could not be created: ' . $error->getMessage() );
-                        continue;
-                    }
-                }
+                $externalSystemHelper->create( $competition, $externalCompetition );
             }
-        } catch (\Exception $error) {
+        } catch (\Exception $e) {
             if( $settings->get('environment') === 'production') {
-                mailAdmin( $error->getMessage() );
-                $logger->addError("GENERAL ERROR: " . $error->getMessage() );
+                mailAdmin( $e->getMessage() );
+                $logger->addError("GENERAL ERROR: " . $e->getMessage() );
             } else {
-                echo $error->getMessage() . PHP_EOL;
+                echo $e->getMessage() . PHP_EOL;
             }
         }
     }
@@ -111,3 +96,5 @@ catch( \Exception $e ) {
         echo $e->getMessage() . PHP_EOL;
     }
 }
+
+

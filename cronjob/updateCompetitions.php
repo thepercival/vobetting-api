@@ -15,12 +15,14 @@ $app = new \Slim\App($settings);
 
 // Set up dependencies
 require __DIR__ . '/../app/dependencies.php';
+require __DIR__ . '/mailHelper.php';
 
 
 use Voetbal\External\System\Importable\Competition as CompetitionImportable;
 use Voetbal\Competition\Service as CompetitionService;
 use Voetbal\Competition\Repository as CompetitionRepos;
 use Voetbal\External\System as ExternalSystemBase;
+use Voetbal\External\System\Factory as ExternalSystemFactory;
 use Monolog\Logger;
 
 use JMS\Serializer\Serializer;
@@ -29,7 +31,6 @@ $settings = $app->getContainer()->get('settings');
 $logger = $app->getContainer()->get('logger');
 $em = $app->getContainer()->get('em');
 $voetbal = $app->getContainer()->get('voetbal');
-$serializer = $app->getContainer()->get('serializer');
 
 try {
     $externalSystemRepos = $em->getRepository( \Voetbal\External\System::class );
@@ -39,13 +40,14 @@ try {
     $externalLeagueRepos = $em->getRepository( \Voetbal\External\League::class );
     $externalSeasonRepos = $em->getRepository( \Voetbal\External\Season::class );
     $externalCompetitionRepos = $em->getRepository( \Voetbal\External\Competition::class );
+    $externalSystemFactory = new ExternalSystemFactory();
 
     $externalSystems = $externalSystemRepos->findAll();
     $seasons = $seasonRepos->findAll();
     foreach( $externalSystems as $externalSystemBase ) {
         echo $externalSystemBase->getName() . PHP_EOL;
         try {
-            $externalSystem = getExternalSystem( $externalSystemBase );
+            $externalSystem = $externalSystemFactory->create( $externalSystemBase );
             if( $externalSystem === null or ( $externalSystem instanceof CompetitionImportable ) !== true ) {
                 continue;
             }
@@ -59,8 +61,8 @@ try {
                 $externalSystemHelper = $externalSystem->getCompetitionImporter(
                     $competitionService,
                     $competitionRepos,
-                    $externalCompetitionRepos,
-                    $serializer);
+                    $externalCompetitionRepos
+                );
                 $competitions = $externalSystemHelper->get( $externalSeason );
                 foreach( $competitions as $externalSystemCompetition ) {
                     $externalLeague = $externalLeagueRepos->findOneByExternalId( $externalSystemBase, $externalSystemCompetition->league );
@@ -102,43 +104,4 @@ catch( \Exception $e ) {
     }
 }
 
-function getExternalSystem( ExternalSystemBase $externalSystemBase ) {
-    $externalSystem = null;
-     if( $externalSystemBase->getName() === "Football Data" ) {
 
-        $externalSystem = new \Voetbal\External\System\FootballData($externalSystemBase);
-    }
-//    else {
-//        throw new \Exception("onbekend extern systeem:" . $externalSystemBase->getName(), E_ERROR );
-//    }
-    return $externalSystem;
-}
-
-function mailAdmin( $errorMessage )
-{
-    $subject = 'fout bij ' . __FILE__;
-    $body = '
-        <p>Hallo,</p>
-        <p>            
-        Onderstaande fout heeft zich voorgedaan bij de cronjob updateBetLines: ' . $errorMessage . '.
-        </p>
-        <p>
-        met vriendelijke groet,
-        <br>
-        VOBetting
-        </p>';
-
-    $from = "VOBetting";
-    $fromEmail = "noreply@VOBetting.nl";
-    $headers  = "MIME-Version: 1.0" . "\r\n";
-    $headers .= "Content-Type: text/html; charset=UTF-8" . "\r\n";
-    $headers .= "From: ".$from." <" . $fromEmail . ">" . "\r\n";
-    $headers .= "X-Mailer: PHP/" . phpversion();
-    $params = "-r ".$fromEmail;
-
-    if ( !mail( 'coendunnink@gmail.com', $subject, $body, $headers, $params) ) {
-        // $app->flash("error", "We're having trouble with our mail servers at the moment.  Please try again later, or contact us directly by phone.");
-        error_log('Mailer Error!' );
-        // $app->halt(500);
-    }
-}
