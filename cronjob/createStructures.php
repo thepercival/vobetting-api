@@ -21,6 +21,7 @@ require __DIR__ . '/mailHelper.php';
 use DoctrineProxies\__CG__\Voetbal\PoulePlace;
 use Voetbal\External\System\Importable\Competition as CompetitionImportable;
 use Voetbal\External\System\Importable\Structure as StructureImportable;
+use Voetbal\External\System\Importable\Team as TeamImportable;
 use Voetbal\Competition\Service as CompetitionService;
 use Voetbal\Competition\Repository as CompetitionRepos;
 use Voetbal\External\System as ExternalSystemBase;
@@ -35,14 +36,17 @@ $em = $app->getContainer()->get('em');
 $voetbal = $app->getContainer()->get('voetbal');
 
 try {
-
+    $conn = $em->getConnection();
     $externalSystemRepos = $em->getRepository( \Voetbal\External\System::class );
+    $structureService = $voetbal->getService( \Voetbal\Structure::class );
     $competitionRepos = $em->getRepository( \Voetbal\Competition::class );
     $competitionService = $voetbal->getService( \Voetbal\Competition::class );
-    $competitionRepos = $em->getRepository( \Voetbal\Competition::class );
+    $teamService = $voetbal->getService( \Voetbal\Team::class );
+    $teamRepos = $em->getRepository( \Voetbal\Team::class );
     $externalTeamRepos = $em->getRepository( \Voetbal\External\Team::class );
     $externalCompetitionRepos = $em->getRepository( \Voetbal\External\Competition::class );
     $externalSystemFactory = new ExternalSystemFactory();
+    $poulePlaceService = $voetbal->getService( \Voetbal\PoulePlace::class );
 
     $externalSystems = $externalSystemRepos->findAll();
     $competitions = $competitionRepos->findAll();
@@ -54,6 +58,15 @@ try {
                 continue;
             }
             $externalSystem->init();
+            $competitionImporter = $externalSystem->getCompetitionImporter(
+                $competitionService,  $competitionRepos, $externalCompetitionRepos
+            );
+            $teamImporter = $externalSystem->getTeamImporter(
+                $teamService, $teamRepos, $externalTeamRepos
+            );
+            $externalSystemHelper = $externalSystem->getStructureImporter(
+                $competitionImporter, $teamImporter, $externalTeamRepos, $structureService, $poulePlaceService
+            );
             foreach( $competitions as $competition ) {
                 if( $competition->getFirstRound() !== null ) {
                     continue;
@@ -63,20 +76,17 @@ try {
                     $logger->addNotice('for comopetition '.$competition->getName().' there is no "'.$externalSystemBase->getName().'"-competition available' );
                     continue;
                 }
-                $externalSystemHelper = $externalSystem->getStructureImporter(
-                    $externalSystem->getCompetitionImporter(
-                        $competitionService,
-                        $competitionRepos,
-                        $externalCompetitionRepos
-                    ),
-                    $externalSystem->getTeamImporter(
-                        $competitionService,
-                        $competitionRepos,
-                        $externalCompetitionRepos
-                    ),
-                    $externalTeamRepos
-                );
-                $externalSystemHelper->create( $competition, $externalCompetition );
+                $conn->beginTransaction();
+                try {
+                    $externalSystemHelper->create( $competition, $externalCompetition );
+                    $conn->commit();
+                } catch( \Exception $e ) {
+                    $logger->addNotice('for "'.$externalSystemBase->getName().'"-competition '.$competition->getName(). ' structure not created: ' . $e->getMessage() );
+                    $conn->rollBack();
+                    continue;
+                }
+
+
             }
         } catch (\Exception $e) {
             if( $settings->get('environment') === 'production') {

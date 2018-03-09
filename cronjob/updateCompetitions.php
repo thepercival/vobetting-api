@@ -33,6 +33,7 @@ $em = $app->getContainer()->get('em');
 $voetbal = $app->getContainer()->get('voetbal');
 
 try {
+    $conn = $em->getConnection();
     $externalSystemRepos = $em->getRepository( \Voetbal\External\System::class );
     $seasonRepos = $em->getRepository( \Voetbal\Season::class );
     $competitionService = $voetbal->getService( \Voetbal\Competition::class );
@@ -71,17 +72,20 @@ try {
                         continue;
                     }
                     $externalCompetition = $externalCompetitionRepos->findOneByExternalId( $externalSystemBase, $externalSystemCompetition->id );
-                    if( $externalCompetition === null ) { // add and create structure
-                        $league = $externalLeague->getImportableObject();
-                        try {
+                    $conn->beginTransaction();
+                    try {
+                        if( $externalCompetition === null ) { // add and create structure
+                            $league = $externalLeague->getImportableObject();
                             $competition = $externalSystemHelper->create($league, $season, $externalSystemCompetition);
-                        } catch( \Exception $e ) {
-                            $logger->addNotice('for "'.$externalSystemBase->getName().'" league '.($externalSystemCompetition->league). ' could not be created: ' . $e->getMessage() );
-                            continue;
                         }
-                    }
-                    else {
-                        // maybe update something??
+                        else {
+                            // maybe update something??
+                        }
+                        $conn->commit();
+                    } catch( \Exception $e ) {
+                        $logger->addNotice('for "'.$externalSystemBase->getName().'" league '.($externalSystemCompetition->league). ' could not be created: ' . $e->getMessage() );
+                        $conn->rollBack();
+                        continue;
                     }
                 }
             }

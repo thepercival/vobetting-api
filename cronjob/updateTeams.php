@@ -47,6 +47,7 @@ $em = $app->getContainer()->get('em');
 $voetbal = $app->getContainer()->get('voetbal');
 
 try {
+    $conn = $em->getConnection();
     $externalSystemRepos = $em->getRepository( \Voetbal\External\System::class );
     $teamRepos = $em->getRepository( \Voetbal\Team::class );
     $teamService = $voetbal->getService( \Voetbal\Team::class );
@@ -81,14 +82,17 @@ try {
                 foreach( $teams as $externalSystemTeam ) {
                     $externalId = $externalSystemHelper->getId( $externalSystemTeam );
                     $externalTeam = $externalTeamRepos->findOneByExternalId( $externalSystemBase, $externalId );
+                    $conn->beginTransaction();
                     try {
                         if( $externalTeam === null ) {
                             $team = $externalSystemHelper->create($association, $externalSystemTeam);
                         } else {
                             $externalSystemHelper->update( $externalTeam->getImportableObject(), $externalSystemTeam );
                         }
+                        $conn->commit();
                     } catch( \Exception $error ) {
                         $logger->addNotice($externalSystemBase->getName().'"-team could not be created: ' . $error->getMessage() );
+                        $conn->rollBack();
                         continue;
                     }
                 }
