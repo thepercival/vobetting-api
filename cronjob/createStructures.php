@@ -17,12 +17,10 @@ $app = new \Slim\App($settings);
 require __DIR__ . '/../app/dependencies.php';
 require __DIR__ . '/mailHelper.php';
 
-
-use DoctrineProxies\__CG__\Voetbal\PoulePlace;
 use Voetbal\External\System\Importable\Competition as CompetitionImportable;
 use Voetbal\External\System\Importable\Structure as StructureImportable;
 use Voetbal\External\System\Importable\Team as TeamImportable;
-use Voetbal\Competition\Service as CompetitionService;
+use Voetbal\Round\Config\Service as RoundConfigService;
 use Voetbal\Competition\Repository as CompetitionRepos;
 use Voetbal\External\System as ExternalSystemBase;
 use Voetbal\External\System\Factory as ExternalSystemFactory;
@@ -39,6 +37,7 @@ try {
     $conn = $em->getConnection();
     $externalSystemRepos = $em->getRepository( \Voetbal\External\System::class );
     $structureService = $voetbal->getService( \Voetbal\Structure::class );
+    $roundConfigService = $voetbal->getService( \Voetbal\Round\Config::class );
     $competitionRepos = $em->getRepository( \Voetbal\Competition::class );
     $competitionService = $voetbal->getService( \Voetbal\Competition::class );
     $teamService = $voetbal->getService( \Voetbal\Team::class );
@@ -65,7 +64,7 @@ try {
                 $teamService, $teamRepos, $externalTeamRepos
             );
             $externalSystemHelper = $externalSystem->getStructureImporter(
-                $competitionImporter, $teamImporter, $externalTeamRepos, $structureService, $poulePlaceService
+                $competitionImporter, $teamImporter, $externalTeamRepos, $structureService, $poulePlaceService, $roundConfigService
             );
             foreach( $competitions as $competition ) {
                 if( $competition->getFirstRound() !== null ) {
