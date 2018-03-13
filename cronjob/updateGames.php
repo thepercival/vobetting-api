@@ -43,6 +43,7 @@ use Voetbal\External\System as ExternalSystemBase;
 use Voetbal\External\System\Factory as ExternalSystemFactory;
 use Monolog\Logger;
 use Voetbal\Planning\Service as PlanningService;
+use Voetbal\Game;
 
 $settings = $app->getContainer()->get('settings');
 $logger = $app->getContainer()->get('logger');
@@ -52,13 +53,14 @@ $voetbal = $app->getContainer()->get('voetbal');
 try {
     $conn = $em->getConnection();
     $externalSystemRepos = $em->getRepository( \Voetbal\External\System::class );
+    $externalTeamRepos = $em->getRepository( \Voetbal\External\Team::class );
+    $gameRepos = $em->getRepository( \Voetbal\Game::class );
     $teamRepos = $em->getRepository( \Voetbal\Team::class );
-    $gamRepos = $em->getRepository( \Voetbal\Game::class );
     $teamService = $voetbal->getService( \Voetbal\Team::class );
     $gameService = $voetbal->getService( \Voetbal\Game::class );
     $structureService = $voetbal->getService( \Voetbal\Structure::class );
     $competitionRepos = $em->getRepository( \Voetbal\Competition::class );
-    $externalTeamRepos = $em->getRepository( \Voetbal\External\Team::class );
+    $externalGameRepos = $em->getRepository( \Voetbal\External\Game::class );
     $externalCompetitionRepos = $em->getRepository( \Voetbal\External\Competition::class );
     $externalSystemFactory = new ExternalSystemFactory();
     $planningService = $voetbal->getService( \Voetbal\Planning::class );
@@ -75,69 +77,40 @@ try {
                 continue;
             }
             $externalSystem->init();
+            $externalSystemHelper = $externalSystem->getGameImporter(
+                $gameService,
+                $gameRepos,
+                $externalGameRepos,
+                $externalTeamRepos,
+                $externalSystem->getTeamImporter(
+                    $teamService,
+                    $teamRepos,
+                    $externalTeamRepos
+                )
+            );
             foreach( $competitions as $competition ) {
                 $externalCompetition = $externalCompetitionRepos->findOneByImportable( $externalSystemBase, $competition );
                 if( $externalCompetition === null or strlen($externalCompetition->getExternalId()) === null ) {
-                    $logger->addNotice('for comopetition '.$competition->getName().' there is no "'.$externalSystemBase->getName().'"-competition available' );
+                    $logger->addNotice('for competition '.$competition->getName().' there is no "'.$externalSystemBase->getName().'"-competition available' );
                     continue;
                 }
-                $hasGames = $gamRepos->hasCompetitionGames( $competition );
-                if ( $hasGames === false ) {
-                    $planningService->create($competition);
+
+                $conn->beginTransaction();
+                try {
+                   $hasGames = $gameRepos->hasCompetitionGames( $competition );
+                   if ( $hasGames === false ) {
+                       $planningService->create($competition);
+                       $externalSystemHelper->create($externalCompetition);
+                   }
+                   $hasUnfinishedGames = $gameRepos->hasCompetitionGames( $competition, Game::STATE_CREATED + Game::STATE_INPLAY );
+                   if( $hasUnfinishedGames === true ) {
+                       $externalSystemHelper->update($externalCompetition );
+                   }
+                   $conn->commit();
+                } catch( \Exception $error ) {
+                    $logger->addNotice($externalSystemBase->getName().'"-games could not be created or updated: ' . $error->getMessage() );
+                    $conn->rollBack();
                 }
-
-                // update per game, if not all games are finished!!
-                // state
-                // startdatetime
-                // gamescore
-
-                //    pouleid
-                //    homepouleplaceid
-                //    awaypouleplaceid
-                //    roundnumber
-                //    subnumber
-                //    state
-                //    startdatetime
-                //    resourcebatch
-                //
-                //    "date": "2017-12-03T20:00:00Z",
-                //    "status": OTHER, "IN_PLAY", "FINISHED",
-                //    "matchday": 38,
-                //    "homeTeamName": "Sport Recife",
-                //    "awayTeamName": "Corinthians",
-                //    "result": {
-                //        "goalsHomeTeam": 1,
-                //        "goalsAwayTeam": 0,
-                //        "halfTime": {
-                //            "goalsHomeTeam": 0,
-                //            "goalsAwayTeam": 0
-                //        }
-                //    },
-
-//                $association = $externalCompetition->getImportableObject()->getLeague()->getAssociation();
-//                $externalSystemHelper = $externalSystem->getTeamImporter(
-//                    $teamService,
-//                    $teamRepos,
-//                    $externalTeamRepos
-//                );
-//                $teams = $externalSystemHelper->get( $externalCompetition );
-//                foreach( $teams as $externalSystemTeam ) {
-//                    $externalId = $externalSystemHelper->getId( $externalSystemTeam );
-//                    $externalTeam = $externalTeamRepos->findOneByExternalId( $externalSystemBase, $externalId );
-//                    $conn->beginTransaction();
-//                    try {
-//                        if( $externalTeam === null ) {
-//                            $team = $externalSystemHelper->create($association, $externalSystemTeam);
-//                        } else {
-//                            $externalSystemHelper->update( $externalTeam->getImportableObject(), $externalSystemTeam );
-//                        }
-//                        $conn->commit();
-//                    } catch( \Exception $error ) {
-//                        $logger->addNotice($externalSystemBase->getName().'"-team could not be created: ' . $error->getMessage() );
-//                        $conn->rollBack();
-//                        continue;
-//                    }
-//                }
             }
         } catch (\Exception $error) {
             if( $settings->get('environment') === 'production') {
