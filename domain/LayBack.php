@@ -45,7 +45,7 @@ class LayBack
     private $betLine;
 
     /**
-     * @var ExternalSystem
+     * @var System
      */
     private $externalSystem;
 
@@ -169,7 +169,7 @@ class LayBack
     /**
      * Get externalSystem
      *
-     * @return ExternalSystem
+     * @return System
      */
     public function getExternalSystem()
     {

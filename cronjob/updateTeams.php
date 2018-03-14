@@ -42,9 +42,12 @@ use Voetbal\External\System\Factory as ExternalSystemFactory;
 use Monolog\Logger;
 
 $settings = $app->getContainer()->get('settings');
-$logger = $app->getContainer()->get('logger');
 $em = $app->getContainer()->get('em');
 $voetbal = $app->getContainer()->get('voetbal');
+
+$logger = new Logger('cronjob-teams');
+$logger->pushProcessor(new \Monolog\Processor\UidProcessor());
+$logger->pushHandler(new \Monolog\Handler\StreamHandler($settings['logger']['cronjobpath'] . 'teams.log', $settings['logger']['level']));
 
 try {
     $conn = $em->getConnection();

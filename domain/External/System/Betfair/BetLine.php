@@ -1,64 +1,56 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: coen
- * Date: 21-2-18
- * Time: 10:42
+ * Date: 14-3-18
+ * Time: 12:02
  */
 
-namespace VOBetting\ExternalSystem;
+namespace VOBetting\External\System\Betfair;
 
-use VOBetting\ExternalSystem;
+use VOBetting\External\System\Importer\BetLine as BetLineImporter;
 use Voetbal\External\System as ExternalSystemBase;
-use Voetbal\External\System\Def as ExternalSystemInterface;
-use VOBetting\ExternalSystem as VOBettingExternalSystemInterface;
-use Voetbal\External\Object as ExternalObject;
-use Voetbal\Competition\Repository as CompetitionRepos;
 use Voetbal\League;
-use PeterColes\Betfair\Betfair as PeterColesBetfair;
 use Voetbal\Game;
-use Voetbal\External\Team\Repository as ExternalTeamRepos;
-use Voetbal\Game\Repository as GameRepos;
 use VOBetting\BetLine\Repository as BetLineRepos;
+use Voetbal\External\League as ExternalLeague;
+use PeterColes\Betfair\Betfair as PeterColesBetfair;
+use League\Period\Period;
+use VOBetting\BetLine as BetLineBase;
+use Voetbal\Competition\Repository as CompetitionRepos;
+use Voetbal\Game\Repository as GameRepos;
+use Voetbal\External\Team\Repository as ExternalTeamRepos;
 use VOBetting\LayBack\Repository as LayBackRepos;
-use VOBetting\BetLine;
 use VOBetting\LayBack;
 use Monolog\Logger;
-use League\Period\Period;
 
-
-class Betfair implements ExternalSystemInterface, VOBettingExternalSystemInterface
+class BetLine implements BetLineImporter
 {
     /**
-     * @var ExternalSystem
+     * @var ExternalSystemBase
      */
-    private $externalSystem;
-
+    private $externalSystemBase;
     /**
-     * @var CompetitionRepos
+     * @var ApiHelper
      */
-    private $competitionRepos;
-
-    /**
-     * @var ExternalTeamRepos
-     */
-    private $externalTeamRepos;
-
+    private $apiHelper;
     /**
      * @var GameRepos
      */
     private $gameRepos;
-
+    /**
+     * @var ExternalTeamRepos
+     */
+    private $externalTeamRepos;
     /**
      * @var BetLineRepos
      */
     private $betLineRepos;
-
     /**
      * @var LayBackRepos
      */
     private $layBackRepos;
-
     /**
      * @var Logger
      */
@@ -68,85 +60,53 @@ class Betfair implements ExternalSystemInterface, VOBettingExternalSystemInterfa
      * @var int
      */
     private $maxDaysBeforeImport;
-
     /**
      * @var Period
      */
     private $period;
 
-    CONST DATE_FORMAT = 'Y-m-d\TH:i:s\Z';
-    CONST THE_DRAW = "58805";
 
     public function __construct(
-        ExternalSystemBase $externalSystem,
+        ExternalSystemBase $externalSystemBase,
+        ApiHelper $apiHelper,
+        BetLineRepos $repos,
         CompetitionRepos $competitionRepos,
-        ExternalTeamRepos $externalTeamRepos,
         GameRepos $gameRepos,
-        BetLineRepos $betLineRepos, LayBackRepos $layBackRepos,
+        ExternalTeamRepos $externalTeamRepos,
+        LayBackRepos $layBackRepos,
         Logger $logger
-    )
-    {
-        $this->setExternalSystem( $externalSystem );
+
+    ) {
+        $this->externalSystemBase = $externalSystemBase;
+        $this->apiHelper = $apiHelper;
+        $this->repos = $repos;
         $this->competitionRepos = $competitionRepos;
-        $this->externalTeamRepos = $externalTeamRepos;
         $this->gameRepos = $gameRepos;
-        $this->betLineRepos = $betLineRepos;
+        $this->externalTeamRepos = $externalTeamRepos;
         $this->layBackRepos = $layBackRepos;
         $this->logger = $logger;
     }
 
-    public function init() {
-
-        PeterColesBetfair::init(
-            $this->externalSystem->getApikey(),
-            $this->externalSystem->getUsername(),
-            $this->externalSystem->getPassword()
-        );
-    }
-
-    public function setMaxDaysBeforeImport( $maxDaysBeforeImport ) {
-        $this->maxDaysBeforeImport = $maxDaysBeforeImport;
-    }
-
-    public function getImportPeriod() {
-        if( $this->period === null ) {
-            $now = new \DateTimeImmutable();
-            $this->period = new Period( $now, $now->modify("+".$this->maxDaysBeforeImport." days") );
-        }
-        return $this->period;
-    }
-
-    /**
-     * @return ExternalSystemBase
-     */
-    public function getExternalSystem()
-    {
-        return $this->externalSystem;
-    }
-
-    /**
-     * @param ExternalSystemBase $externalSystem
-     */
-    public function setExternalSystem( ExternalSystemBase $externalSystem )
-    {
-        $this->externalSystem = $externalSystem;
-    }
-
-    public function getEvents( ExternalObject $externalObject )
+    public function get( ExternalLeague $externalLeague )
     {
         return PeterColesBetfair::betting('listEvents',
             ['filter' => [
-                'competitionIds' => [$externalObject->getExternalId()]
+                'competitionIds' => [$externalLeague->getExternalId()]
                 ,"marketStartTime" => [
-                    "from" => $this->getImportPeriod()->getStartDate()->format(static::DATE_FORMAT),
-                    "to" => $this->getImportPeriod()->getEndDate()->format(static::DATE_FORMAT)]
-                ]
+                    "from" => $this->getImportPeriod()->getStartDate()->format($this->apiHelper->getDateFormat()),
+                    "to" => $this->getImportPeriod()->getEndDate()->format($this->apiHelper->getDateFormat())]
+            ]
             ]);
     }
 
-    public function processEvent( League $league, $event, $betType ) {
-        $markets = $this->getMarkets( $event->event->id, $betType );
-        $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $event->event->openDate);
+    public function getId( $externalSystemBetLine )
+    {
+        throw new \Exception("notimplyet", E_ERROR );
+    }
+
+    public function process( League $league, $externalSystemEvent, $betType ) {
+        $markets = $this->getMarkets( $externalSystemEvent->event->id, $betType );
+        $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $externalSystemEvent->event->openDate);
 
         foreach ($markets as $market) {
             $game = $this->getGame($league, $startDateTime, $market->runners);
@@ -172,15 +132,27 @@ class Betfair implements ExternalSystemInterface, VOBettingExternalSystemInterfa
         }
     }
 
+    public function setMaxDaysBeforeImport( int $maxDaysBeforeImport ) {
+        $this->maxDaysBeforeImport = $maxDaysBeforeImport;
+    }
+
+    protected function getImportPeriod() {
+        if( $this->period === null ) {
+            $now = new \DateTimeImmutable();
+            $this->period = new Period( $now, $now->modify("+".$this->maxDaysBeforeImport." days") );
+        }
+        return $this->period;
+    }
+
     protected function syncBetLine( Game $game, $betType, $runner)
     {
         $poulePlace = null;
         if( $runner->selectionId !== static::THE_DRAW ) { // the draw
-        $team = $this->getTeamFromExternalId($runner->selectionId);
-        if( $team === null ) {
-            return null;
-        }
-        $poulePlace = $game->getPoulePlaceForTeam($team);
+            $team = $this->getTeamFromExternalId($runner->selectionId);
+            if( $team === null ) {
+                return null;
+            }
+            $poulePlace = $game->getPoulePlaceForTeam($team);
         }
         $betLine = $this->betLineRepos->findOneBy(array(
             "game" => $game,
@@ -211,7 +183,7 @@ class Betfair implements ExternalSystemInterface, VOBettingExternalSystemInterfa
 
     public function convertBetType( $betType )
     {
-        if( $betType === BetLine::_MATCH_ODDS ) {
+        if( $betType === BetLineBase::_MATCH_ODDS ) {
             return 'MATCH_ODDS';
         }
         throw new \Exception("unknown bettype", E_ERROR);
@@ -223,7 +195,7 @@ class Betfair implements ExternalSystemInterface, VOBettingExternalSystemInterfa
         $layBacks, $layBack
     ) {
         foreach( $layBacks as $layBackIt ){
-            $layBackNew = new LayBack( $dateTime, $betLine, $this->externalSystem );
+            $layBackNew = new LayBack( $dateTime, $betLine, $this->externalSystemBase );
             $layBackNew->setBack( $layBack );
             $layBackNew->setPrice( $layBackIt->price );
             $layBackNew->setSize( $layBackIt->size );
@@ -265,9 +237,9 @@ class Betfair implements ExternalSystemInterface, VOBettingExternalSystemInterfa
 
     protected function getTeamFromExternalId( $externalId )
     {
-        $team = $this->externalTeamRepos->findImportableBy( $this->externalSystem, $externalId );
+        $team = $this->externalTeamRepos->findImportable( $this->externalSystemBase, $externalId );
         if( $team === null ) {
-            $this->logger->addNotice("team not found for externalid " . $externalId . " and externalSystem " . $this->externalSystem->getName() );
+            $this->logger->addNotice("team not found for externalid " . $externalId . " and externalSystem " . $this->externalSystemBase->getName() );
         }
         return $team;
     }

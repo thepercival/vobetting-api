@@ -29,9 +29,12 @@ use Monolog\Logger;
 use JMS\Serializer\Serializer;
 
 $settings = $app->getContainer()->get('settings');
-$logger = $app->getContainer()->get('logger');
 $em = $app->getContainer()->get('em');
 $voetbal = $app->getContainer()->get('voetbal');
+
+$logger = new Logger('cronjob-structures');
+$logger->pushProcessor(new \Monolog\Processor\UidProcessor());
+$logger->pushHandler(new \Monolog\Handler\StreamHandler($settings['logger']['cronjobpath'] . 'structures.log', $settings['logger']['level']));
 
 try {
     $conn = $em->getConnection();

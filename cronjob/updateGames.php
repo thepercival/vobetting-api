@@ -46,9 +46,13 @@ use Voetbal\Planning\Service as PlanningService;
 use Voetbal\Game;
 
 $settings = $app->getContainer()->get('settings');
-$logger = $app->getContainer()->get('logger');
 $em = $app->getContainer()->get('em');
 $voetbal = $app->getContainer()->get('voetbal');
+
+$logger = new Logger('cronjob-games');
+$logger->pushProcessor(new \Monolog\Processor\UidProcessor());
+$logger->pushHandler(new \Monolog\Handler\StreamHandler($settings['logger']['cronjobpath'] . 'games.log', $settings['logger']['level']));
+
 
 try {
     $conn = $em->getConnection();

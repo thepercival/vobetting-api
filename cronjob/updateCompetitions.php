@@ -17,7 +17,6 @@ $app = new \Slim\App($settings);
 require __DIR__ . '/../app/dependencies.php';
 require __DIR__ . '/mailHelper.php';
 
-
 use Voetbal\External\System\Importable\Competition as CompetitionImportable;
 use Voetbal\Competition\Service as CompetitionService;
 use Voetbal\Competition\Repository as CompetitionRepos;
@@ -28,9 +27,12 @@ use Monolog\Logger;
 use JMS\Serializer\Serializer;
 
 $settings = $app->getContainer()->get('settings');
-$logger = $app->getContainer()->get('logger');
 $em = $app->getContainer()->get('em');
 $voetbal = $app->getContainer()->get('voetbal');
+
+$logger = new Logger('cronjob-competitions');
+$logger->pushProcessor(new \Monolog\Processor\UidProcessor());
+$logger->pushHandler(new \Monolog\Handler\StreamHandler($settings['logger']['cronjobpath'] . 'competitions.log', $settings['logger']['level']));
 
 try {
     $conn = $em->getConnection();
