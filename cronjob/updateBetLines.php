@@ -101,35 +101,6 @@ catch( \Exception $e ) {
     }
 }
 
-function getExternalSystem(
-    ExternalSystemBase $externalSystemBase,
-    CompetitionRepos $competitionRepos,
-    ExternalTeamRepos $externalTeamRepos,
-    GameRepos $gameRepos,
-    BetLineRepos $betLineRepos, LayBackRepos $layBackRepos,
-    Logger $logger
-) {
-    $externalSystem = null;
-    if( $externalSystemBase->getName() === "betfair" ) {
-
-        $externalSystem = new \VOBetting\ExternalSystem\Betfair(
-            $externalSystemBase, $competitionRepos, $externalTeamRepos, $gameRepos,
-            $betLineRepos, $layBackRepos, $logger
-        );
-    }
-//    else if( $externalSystemBase->getName() === "Football Data" ) {
-//
-//        $externalSystem = new \VOBetting\ExternalSystem\FootballData(
-//            $externalSystemBase, $competitionRepos, $externalTeamRepos, $gameRepos,
-//            $betLineRepos, $layBackRepos, $logger
-//        );
-//    }
-//    else {
-//        throw new \Exception("onbekend extern systeem:" . $externalSystemBase->getName(), E_ERROR );
-//    }
-    return $externalSystem;
-}
-
 function mailAdmin( $errorMessage )
 {
     $subject = 'fout bij updateBetLines';
