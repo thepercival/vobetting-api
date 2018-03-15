@@ -19,20 +19,14 @@ require __DIR__ . '/../app/dependencies.php';
 $settings = $app->getContainer()->get('settings');
 $em = $app->getContainer()->get('em');
 
-$logger = new Logger('cronjob-betlines');
-$logger->pushProcessor(new \Monolog\Processor\UidProcessor());
-$logger->pushHandler(new \Monolog\Handler\StreamHandler($settings['logger']['cronjobpath'] . 'betlines.log', $settings['logger']['level']));
-
-use Voetbal\Competition\Repository as CompetitionRepos;
-use Voetbal\External\System as ExternalSystemBase;
-use Voetbal\External\Team\Repository as ExternalTeamRepos;
-use Voetbal\Game\Repository as GameRepos;
-use VOBetting\BetLine\Repository as BetLineRepos;
-use VOBetting\LayBack\Repository as LayBackRepos;
 use VOBetting\BetLine;
 use Monolog\Logger;
 use VOBetting\External\System\Factory as ExternalSystemFactory;
 use VOBetting\External\System\Importable\BetLine as BetLineImportable;
+
+$logger = new Logger('cronjob-betlines');
+$logger->pushProcessor(new \Monolog\Processor\UidProcessor());
+$logger->pushHandler(new \Monolog\Handler\StreamHandler($settings['logger']['cronjobpath'] . 'betlines.log', $settings['logger']['level']));
 
 try {
     $maxDaysBeforeImport = 14;
