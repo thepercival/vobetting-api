@@ -15,6 +15,9 @@ use VOBetting\BetLine\Repository as BetLineRepos;
 use VOBetting\External\System\Importable\BetLine as BetLineImportable;
 use VOBetting\External\System\Importer\BetLine as BetLineImporter;
 use VOBetting\External\System\Betfair\BetLine as BetfairBetLineImporter;
+use Voetbal\External\System\Importable\Team as TeamImportable;
+use Voetbal\External\System\Importer\Team as TeamImporter;
+use VOBetting\External\System\Betfair\BetLine as BetfairTeamImporter;
 use Voetbal\Competition\Repository as CompetitionRepos;
 use Voetbal\Game\Repository as GameRepos;
 use Voetbal\External\Team\Repository as ExternalTeamRepos;
@@ -48,6 +51,21 @@ class Betfair implements \Voetbal\External\System\Def, BetLineImportable
     {
         return new Betfair\ApiHelper( $this->getExternalSystem() );
     }
+
+//    public function getTeamImporter(
+//        TeamService $service,
+//        TeamRepos $repos,
+//        ExternalTeamRepos $externalRepos
+//    ) : TeamImporter
+//    {
+//        return new BetfairTeamImporter(
+//            $this->getExternalSystem(),
+//            $this->getApiHelper(),
+//            $service,
+//            $repos,
+//            $externalRepos
+//        );
+//    }
 
     public function getBetLineImporter(
         BetLineRepos $repos,

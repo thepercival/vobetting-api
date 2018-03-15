@@ -13,6 +13,7 @@ use VOBetting\External\System\Importer\BetLine as BetLineImporter;
 use Voetbal\External\System as ExternalSystemBase;
 use Voetbal\League;
 use Voetbal\Game;
+use VOBetting\External\System\Betfair as ExternalSystemBetfair;
 use VOBetting\BetLine\Repository as BetLineRepos;
 use Voetbal\External\League as ExternalLeague;
 use PeterColes\Betfair\Betfair as PeterColesBetfair;
@@ -147,24 +148,24 @@ class BetLine implements BetLineImporter
     protected function syncBetLine( Game $game, $betType, $runner)
     {
         $poulePlace = null;
-        if( $runner->selectionId !== static::THE_DRAW ) { // the draw
+        if( $runner->selectionId !== ExternalSystemBetfair::THE_DRAW ) { // the draw
             $team = $this->getTeamFromExternalId($runner->selectionId);
             if( $team === null ) {
                 return null;
             }
             $poulePlace = $game->getPoulePlaceForTeam($team);
         }
-        $betLine = $this->betLineRepos->findOneBy(array(
+        $betLine = $this->repos->findOneBy(array(
             "game" => $game,
             "betType" => $betType,
             "poulePlace" => $poulePlace
         ));
         if( $betLine === null ) {
-            $betLine = new BetLine($game, $betType);
+            $betLine = new BetLineBase($game, $betType);
             $betLine->setPoulePlace($poulePlace);
         }
         // maybe save close state here
-        return $this->betLineRepos->save($betLine);
+        return $this->repos->save($betLine);
     }
 
     public function convertHomeAway( $homeAway )
@@ -191,7 +192,7 @@ class BetLine implements BetLineImporter
 
     protected function saveLayBacks(
         \DateTimeImmutable $dateTime,
-        BetLine $betLine,
+        BetLineBase $betLine,
         $layBacks, $layBack
     ) {
         foreach( $layBacks as $layBackIt ){
@@ -278,10 +279,10 @@ class BetLine implements BetLineImporter
         }
 
         $states = Game::STATE_CREATED + Game::STATE_INPLAY;
-        $game = $this->gameRepos->findByExt( $homeTeam, $awayTeam, $competition, $states );
-        if( $game === null ) {
+        $games = $this->gameRepos->findByExt( $homeTeam, $awayTeam, $competition, $states );
+        if( $games === null ) {
             $this->logger->addNotice("game not found for hometeam " . $homeTeam->getName() . ",awayteam " . $awayTeam->getName() . ", competition " . $competition->getName() . " and states " . $states );
         }
-        return $game;
+        return reset( $games );
     }
 }
