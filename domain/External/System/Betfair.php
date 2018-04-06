@@ -31,7 +31,7 @@ class Betfair implements \Voetbal\External\System\Def, BetLineImportable
      */
     private $externalSystem;
 
-    CONST THE_DRAW = "58805";
+    CONST THE_DRAW = 58805;
 
     public function __construct( ExternalSystemBase $externalSystem )
     {
