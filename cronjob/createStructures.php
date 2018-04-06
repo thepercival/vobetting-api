@@ -85,10 +85,7 @@ try {
                 } catch( \Exception $e ) {
                     $logger->addNotice('for "'.$externalSystemBase->getName().'"-competition '.$competition->getName(). ' structure not created: ' . $e->getMessage() );
                     $conn->rollBack();
-                    continue;
                 }
-
-
             }
         } catch (\Exception $e) {
             if( $settings->get('environment') === 'production') {
