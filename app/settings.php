@@ -46,6 +46,10 @@ return [
                 'dbname'   => getenv('DB_NAME'),
                 'user'     => getenv('DB_USERNAME'),
                 'password' => getenv('DB_PASSWORD'),
+                'charset'  => 'utf8',
+                'driverOptions' => array(
+                    1002 => 'SET NAMES utf8'
+                )
             ],
             'serializer' => array(
                 'enabled' => true,
