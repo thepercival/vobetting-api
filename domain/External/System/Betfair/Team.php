@@ -10,17 +10,23 @@
 namespace VOBetting\External\System\Betfair;
 
 use Voetbal\External\System as ExternalSystemBase;
-use Voetbal\External\System\Importer\Team as TeamImporter;
-use Voetbal\External\Importable as ImportableObject;
-use Voetbal\Team\Service as TeamService;
-use Voetbal\Team\Repository as TeamRepos;
-use Voetbal\External\Object\Service as ExternalObjectService;
-use Voetbal\External\Team\Repository as ExternalTeamRepos;
-use Voetbal\Association;
-use Voetbal\Team as TeamBase;
-use Voetbal\External\Competition as ExternalCompetition;
 
-class Team implements TeamImporter
+use Voetbal\External\League as ExternalLeague;
+use VOBetting\BetLine;
+use League\Period\Period;
+use VOBetting\External\System\Betfair as ExternalSystemBetfair;
+
+//use Voetbal\External\System\Importer\Team as TeamImporter;
+//use Voetbal\External\Importable as ImportableObject;
+//use Voetbal\Team\Service as TeamService;
+//use Voetbal\Team\Repository as TeamRepos;
+//use Voetbal\External\Object\Service as ExternalObjectService;
+//use Voetbal\External\Team\Repository as ExternalTeamRepos;
+//use Voetbal\Association;
+//use Voetbal\Team as TeamBase;
+//use Voetbal\External\Competition as ExternalCompetition;
+
+class Team
 {
     /**
      * @var ExternalSystemBase
@@ -32,93 +38,68 @@ class Team implements TeamImporter
      */
     private $apiHelper;
 
-    /**
-     * @var TeamService
-     */
-    private $service;
-
-    /**
-     * @var TeamRepos
-     */
-    private $repos;
-
-    /**
-     * @var ExternalObjectService
-     */
-    private $externalObjectService;
-
-    /**
-     * @var ExternalTeamRepos
-     */
-    private $externalObjectRepos;
+//    /**
+//     * @var TeamService
+//     */
+//    private $service;
+//
+//    /**
+//     * @var TeamRepos
+//     */
+//    private $repos;
+//
+//    /**
+//     * @var ExternalObjectService
+//     */
+//    private $externalObjectService;
+//
+//    /**
+//     * @var ExternalTeamRepos
+//     */
+//    private $externalObjectRepos;
 
     public function __construct(
         ExternalSystemBase $externalSystemBase,
-        ApiHelper $apiHelper,
+        ApiHelper $apiHelper/*,
         TeamService $service,
         TeamRepos $repos,
-        ExternalTeamRepos $externalRepos
+        ExternalTeamRepos $externalRepos*/
     ) {
         $this->externalSystemBase = $externalSystemBase;
         $this->apiHelper = $apiHelper;
-        $this->service = $service;
+        /*$this->service = $service;
         $this->repos = $repos;
         $this->externalObjectRepos = $externalRepos;
         $this->externalObjectService = new ExternalObjectService(
             $this->externalObjectRepos
-        );
+        );*/
     }
 
-    public function get(ExternalCompetition $externalCompetition)
-    {
-        $retVal = $this->apiHelper->getData("competitions/" . $externalCompetition->getExternalId() . "/teams");
-        return $retVal->teams;
-    }
-
-    public function getId($externalSystemTeam): int
-    {
-        $url = $externalSystemTeam->_links->self->href;
-        $strPos = strrpos($url, '/');
-        if ($strPos === false) {
-            throw new \Exception("could not get id of fd-team", E_ERROR);
+    public function getTeams(ExternalLeague $externalLeague) {
+        $teams = [];
+        $betType = BetLine::_MATCH_ODDS;
+        $events = $this->apiHelper->getEvents( $externalLeague, $this->getImportPeriod() );
+        foreach( $events as $event  )
+        {
+            $markets = $this->apiHelper->getMarkets( $event->event->id, $betType );
+            foreach ($markets as $market) {
+                foreach( $market->runners as $runner ) {
+                    if( $runner->metadata->runnerId == ExternalSystemBetfair::THE_DRAW ) {
+                        continue;
+                    }
+                    $team = ["id" => $runner->metadata->runnerId, "name" => $runner->runnerName ];
+                    if( in_array ( $team , $teams ) ) {
+                        continue;
+                    }
+                    $teams[] = $team;
+                }
+            }
         }
-        $id = substr($url, $strPos + 1);
-        if (strlen($id) == 0 || !is_numeric($id)) {
-            throw new \Exception("could not get id of fd-team", E_ERROR);
-        }
-        return (int)$id;
+        return $teams;
     }
 
-    public function create(Association $association, $externalSystemTeam)
-    {
-        $id = $this->getId($externalSystemTeam);
-        $team = $this->repos->findOneBy(["association" => $association, "name" => $externalSystemTeam->name]);
-        if ($team === null) {
-            throw new \Exception("for " . $this->externalSystemBase->getName() ."-team ".$id." no team found", E_ERROR);
-        }
-        $externalTeam = $this->createExternal($team, $this->getId($externalSystemTeam));
-        return $team;
-    }
-
-    public function update(TeamBase $team, $externalSystemObject)
-    {
-        // is no source
-        return true;
-    }
-
-    protected function createExternal(ImportableObject $importable, $externalId)
-    {
-        $externalTeam = $this->externalObjectRepos->findOneByExternalId(
-            $this->externalSystemBase,
-            $externalId
-        );
-        if ($externalTeam === null) {
-            $externalTeam = $this->externalObjectService->create(
-                $importable,
-                $this->externalSystemBase,
-                $externalId
-            );
-        }
-        return $externalTeam;
+    protected function getImportPeriod() {
+        $now = new \DateTimeImmutable();
+        return new Period( $now, $now->modify("+14 days") );
     }
 }

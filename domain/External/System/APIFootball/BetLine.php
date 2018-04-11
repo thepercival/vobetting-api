@@ -1,19 +1,18 @@
 <?php
-
 /**
  * Created by PhpStorm.
  * User: coen
- * Date: 14-3-18
- * Time: 12:02
+ * Date: 9-4-18
+ * Time: 10:48
  */
 
-namespace VOBetting\External\System\Betfair;
+namespace VOBetting\External\System\APIFootball;
 
 use VOBetting\External\System\Importer\BetLine as BetLineImporter;
 use Voetbal\External\System as ExternalSystemBase;
 use Voetbal\League;
 use Voetbal\Game;
-use VOBetting\External\System\Betfair as ExternalSystemBetfair;
+use VOBetting\External\System\APIFootball as ExternalSystemAPIFootball;
 use VOBetting\BetLine\Repository as BetLineRepos;
 use Voetbal\External\League as ExternalLeague;
 use League\Period\Period;
@@ -89,7 +88,14 @@ class BetLine implements BetLineImporter
 
     public function get( ExternalLeague $externalLeague )
     {
-        return $this->apiHelper->getEvents( $externalLeague, $this->getImportPeriod() );
+        return PeterColesBetfair::betting('listEvents',
+            ['filter' => [
+                'competitionIds' => [$externalLeague->getExternalId()]
+                ,"marketStartTime" => [
+                    "from" => $this->getImportPeriod()->getStartDate()->format($this->apiHelper->getDateFormat()),
+                    "to" => $this->getImportPeriod()->getEndDate()->format($this->apiHelper->getDateFormat())]
+            ]
+            ]);
     }
 
     public function getId( $externalSystemBetLine )
@@ -98,7 +104,7 @@ class BetLine implements BetLineImporter
     }
 
     public function process( League $league, $externalSystemEvent, $betType ) {
-        $markets = $this->apiHelper->getMarkets( $externalSystemEvent->event->id, $betType );
+        $markets = $this->getMarkets( $externalSystemEvent->event->id, $betType );
         $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $externalSystemEvent->event->openDate);
 
         foreach ($markets as $market) {
@@ -107,7 +113,7 @@ class BetLine implements BetLineImporter
                 continue;
             }
 
-            $marketBooks = $this->apiHelper->getMarketBooks($market->marketId);
+            $marketBooks = $this->getMarketBooks($market->marketId);
             foreach ($marketBooks as $marketBook) {
                 foreach ($marketBook->runners as $runner) {
                     $betLine = $this->syncBetLine($game, $betType, $runner);
@@ -140,7 +146,7 @@ class BetLine implements BetLineImporter
     protected function syncBetLine( Game $game, $betType, $runner)
     {
         $poulePlace = null;
-        if( $runner->selectionId != ExternalSystemBetfair::THE_DRAW ) { // the draw
+        if( $runner->selectionId !== ExternalSystemBetfair::THE_DRAW ) { // the draw
             $team = $this->getTeamFromExternalId($runner->selectionId);
             if( $team === null ) {
                 return null;
@@ -174,7 +180,13 @@ class BetLine implements BetLineImporter
         throw new \Exception("betfair homeaway-value unknown", E_ERROR );
     }
 
-
+    public function convertBetType( $betType )
+    {
+        if( $betType === BetLineBase::_MATCH_ODDS ) {
+            return 'MATCH_ODDS';
+        }
+        throw new \Exception("unknown bettype", E_ERROR);
+    }
 
     protected function saveLayBacks(
         \DateTimeImmutable $dateTime,
@@ -198,6 +210,28 @@ class BetLine implements BetLineImporter
             return $this->gameRepos->save( $game );
         }
         return $game;
+    }
+
+    protected function getMarkets( $eventId, $betType )
+    {
+        return PeterColesBetfair::betting('listMarketCatalogue', [
+            'filter' => [
+                'eventIds' => [$eventId],
+                'marketTypeCodes' => [$this->convertBetType( $betType )]
+            ],
+            'maxResults' => 3,
+            'marketProjection' => ['RUNNER_METADATA']
+        ]);
+    }
+
+    protected function getMarketBooks( $marketId ) {
+        return PeterColesBetfair::betting('listMarketBook', [
+            'marketIds' => [$marketId],
+            // 'selectionId' => $runnerId,
+            "priceProjection" => ["priceData" => ["EX_BEST_OFFERS"]],
+            "orderProjection" => "ALL",
+            "matchProjection" => "ROLLED_UP_BY_PRICE"
+        ]);
     }
 
     protected function getTeamFromExternalId( $externalId )

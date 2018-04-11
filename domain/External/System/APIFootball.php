@@ -2,35 +2,33 @@
 /**
  * Created by PhpStorm.
  * User: coen
- * Date: 21-2-18
- * Time: 10:42
+ * Date: 9-4-18
+ * Time: 10:41
  */
 
 namespace VOBetting\External\System;
 
+use Voetbal\External\System\Def as SystemDef;
 use Voetbal\External\System as ExternalSystem;
-use PeterColes\Betfair\Betfair as PeterColesBetfair;
-use VOBetting\BetLine\Repository as BetLineRepos;
 use VOBetting\External\System\Importable\BetLine as BetLineImportable;
 use VOBetting\External\System\Importer\BetLine as BetLineImporter;
-use VOBetting\External\System\Betfair\BetLine as BetfairBetLineImporter;
-use VOBetting\External\System\Betfair\Team as BetfairTeamGetter;
+use VOBetting\External\System\APIFootball\BetLine as APIFootballBetLineImporter;
+use Voetbal\External\League as ExternalLeague;
+use Voetbal\External\System\Importer\TeamGetter;
+
+use VOBetting\BetLine\Repository as BetLineRepos;
 use Voetbal\Competition\Repository as CompetitionRepos;
 use Voetbal\Game\Repository as GameRepos;
 use Voetbal\External\Team\Repository as ExternalTeamRepos;
 use VOBetting\LayBack\Repository as LayBackRepos;
 use Monolog\Logger;
-use Voetbal\External\System\Importer\TeamGetter;
-use Voetbal\External\League as ExternalLeague;
 
-class Betfair implements \Voetbal\External\System\Def, BetLineImportable, TeamGetter
+class APIFootball implements SystemDef, BetLineImportable, TeamGetter
 {
     /**
      * @var ExternalSystem
      */
     private $externalSystem;
-
-    CONST THE_DRAW = 58805;
 
     public function __construct( ExternalSystem $externalSystem )
     {
@@ -39,16 +37,12 @@ class Betfair implements \Voetbal\External\System\Def, BetLineImportable, TeamGe
 
     public function init() {
 
-        PeterColesBetfair::init(
-            $this->externalSystem->getApikey(),
-            $this->externalSystem->getUsername(),
-            $this->externalSystem->getPassword()
-        );
+
     }
 
     protected function getApiHelper()
     {
-        return new Betfair\ApiHelper( $this->getExternalSystem() );
+        return new APIFootball\ApiHelper( $this->getExternalSystem() );
     }
 
     public function getBetLineImporter(
@@ -59,7 +53,7 @@ class Betfair implements \Voetbal\External\System\Def, BetLineImportable, TeamGe
         LayBackRepos $layBackRepos,
         Logger $logger
     ) : BetLineImporter {
-        return new BetfairBetLineImporter(
+        return new APIFootballBetLineImporter(
             $this->getExternalSystem(),
             $this->getApiHelper(),
             $repos,
@@ -89,7 +83,14 @@ class Betfair implements \Voetbal\External\System\Def, BetLineImportable, TeamGe
 
     public function getTeams( ExternalLeague $externalLeague ): array
     {
-        $teamGetterHelper = new BetfairTeamGetter( $this->getExternalSystem(), $this->getApiHelper() );
-        return $teamGetterHelper->getTeams( $externalLeague );
+        $apiHelper = $this->getApiHelper();
+        $teams = $apiHelper->getData("action=get_standings&league_id=".$externalLeague->getExternalId() );
+        if( $teams === null ) {
+            return [];
+        }
+        // var_dump($teams); die();
+        return array_map( function( $standing ) {
+            return [ "id" => $standing->team_name, "name" => $standing->team_name ];
+        }, $teams);
     }
 }

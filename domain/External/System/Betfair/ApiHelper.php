@@ -8,6 +8,10 @@
 
 namespace VOBetting\External\System\Betfair;
 
+
+use Voetbal\External\League as ExternalLeague;
+use PeterColes\Betfair\Betfair as PeterColesBetfair;
+use VOBetting\BetLine;
 //use Voetbal\External\System as ExternalSystem;
 //use Voetbal\External\Object as ExternalObject;
 //use Voetbal\Competition\Service as CompetitionService;
@@ -55,5 +59,47 @@ class ApiHelper
 //
     public function getDateFormat() {
         return 'Y-m-d\TH:i:s\Z';
+    }
+
+    public function convertBetType( $betType )
+    {
+        if( $betType === BetLine::_MATCH_ODDS ) {
+            return 'MATCH_ODDS';
+        }
+        throw new \Exception("unknown bettype", E_ERROR);
+    }
+
+    public function getEvents( ExternalLeague $externalLeague, $importPeriod )
+    {
+        return PeterColesBetfair::betting('listEvents',
+            ['filter' => [
+                'competitionIds' => [$externalLeague->getExternalId()]
+                ,"marketStartTime" => [
+                    "from" => $importPeriod->getStartDate()->format($this->getDateFormat()),
+                    "to" => $importPeriod->getEndDate()->format($this->getDateFormat())]
+            ]
+            ]);
+    }
+
+    public function getMarkets( $eventId, $betType )
+    {
+        return PeterColesBetfair::betting('listMarketCatalogue', [
+            'filter' => [
+                'eventIds' => [$eventId],
+                'marketTypeCodes' => [$this->convertBetType( $betType )]
+            ],
+            'maxResults' => 3,
+            'marketProjection' => ['RUNNER_METADATA']
+        ]);
+    }
+
+    public function getMarketBooks( $marketId ) {
+        return PeterColesBetfair::betting('listMarketBook', [
+            'marketIds' => [$marketId],
+            // 'selectionId' => $runnerId,
+            "priceProjection" => ["priceData" => ["EX_BEST_OFFERS"]],
+            "orderProjection" => "ALL",
+            "matchProjection" => "ROLLED_UP_BY_PRICE"
+        ]);
     }
 }

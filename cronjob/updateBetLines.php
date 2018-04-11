@@ -45,12 +45,12 @@ try {
     $betType = BetLine::_MATCH_ODDS;
     foreach( $externalSystems as $externalSystemBase ) {
         echo $externalSystemBase->getName() . PHP_EOL;
+        if( $externalSystemBase->getName() !== "API Football") { continue;}
         try {
             $externalSystem = $externalSystemFactory->create( $externalSystemBase );
             if( $externalSystem === null or ( $externalSystem instanceof BetLineImportable ) !== true ) {
                 continue;
             }
-
             $externalSystem->init();
             $externalSystemHelper = $externalSystem->getBetLineImporter(
                 $betLineRepos,
@@ -67,6 +67,7 @@ try {
                     'externalSystem' => $externalSystemBase,
                     'importableObject' => $league
                 ));
+
                 if ($externalLeague === null) {
                     $logger->addNotice("external league not found for externalSystem " . $externalSystemBase->getName() . " and league " . $league->getName() );
                     continue;
