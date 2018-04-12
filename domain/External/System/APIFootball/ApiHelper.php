@@ -65,8 +65,8 @@ class ApiHelper
         $result = curl_exec( $curl );
         return json_decode($result);
     }
-//
-//    public function getDateFormat() {
-//        return 'Y-m-d\TH:i:s\Z';
-//    }
+
+    public function getDateFormat() {
+        return 'Y-m-d';
+    }
 }

@@ -8,6 +8,7 @@
 
 namespace VOBetting\External\System\APIFootball;
 
+use PeterColes\Betfair\Betfair as PeterColesBetfair;
 use VOBetting\External\System\Importer\BetLine as BetLineImporter;
 use Voetbal\External\System as ExternalSystemBase;
 use Voetbal\League;
@@ -88,14 +89,13 @@ class BetLine implements BetLineImporter
 
     public function get( ExternalLeague $externalLeague )
     {
-        return PeterColesBetfair::betting('listEvents',
-            ['filter' => [
-                'competitionIds' => [$externalLeague->getExternalId()]
-                ,"marketStartTime" => [
-                    "from" => $this->getImportPeriod()->getStartDate()->format($this->apiHelper->getDateFormat()),
-                    "to" => $this->getImportPeriod()->getEndDate()->format($this->apiHelper->getDateFormat())]
-            ]
-            ]);
+        $period = "&from=" . $this->getImportPeriod()->getStartDate()->format($this->apiHelper->getDateFormat());
+        $period .= "&to=" . $this->getImportPeriod()->getEndDate()->format($this->apiHelper->getDateFormat());
+        $events = $this->apiHelper->getData("action=get_events&league_id=".$externalLeague->getExternalId() . $period );
+        if( $events === null ) {
+            return [];
+        }
+        return $events;
     }
 
     public function getId( $externalSystemBetLine )
@@ -103,32 +103,45 @@ class BetLine implements BetLineImporter
         throw new \Exception("notimplyet", E_ERROR );
     }
 
-    public function process( League $league, $externalSystemEvent, $betType ) {
-        $markets = $this->getMarkets( $externalSystemEvent->event->id, $betType );
-        $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $externalSystemEvent->event->openDate);
-
-        foreach ($markets as $market) {
-            $game = $this->getGame($league, $startDateTime, $market->runners);
-            if ( $game === null ) {
-                continue;
-            }
-
-            $marketBooks = $this->getMarketBooks($market->marketId);
-            foreach ($marketBooks as $marketBook) {
-                foreach ($marketBook->runners as $runner) {
-                    $betLine = $this->syncBetLine($game, $betType, $runner);
-                    if ($betLine === null) {
-                        continue;
-                    }
-                    // var_dump($betLine->status); // IF CLOSED => UPDATE GAME!!
-                    // var_dump($runnerOne->status); // "ACTIVE"
-                    $backs = $runner->ex->availableToBack;
-                    $lays = $runner->ex->availableToLay;
-                    $this->saveLayBacks( $this->getImportPeriod()->getStartDate(), $betLine, $backs, true );
-                    $this->saveLayBacks( $this->getImportPeriod()->getStartDate(), $betLine, $lays, false );
-                }
-            }
+    public function getOdds(  )
+    {
+        $period = "&from=" . $this->getOddsPeriod()->getStartDate()->format($this->apiHelper->getDateFormat());
+        $period .= "&to=" . $this->getOddsPeriod()->getEndDate()->format($this->apiHelper->getDateFormat());
+        $period .= "&match_id=284044";
+        $odds = $this->apiHelper->getData("action=get_odds" . $period );
+        if( $odds === null ) {
+            return [];
         }
+        return $odds;
+    }
+
+    public function process( League $league, $externalSystemEvent, $betType ) {
+        $odds = $this->getOdds( $externalSystemEvent->event->id, $betType );
+        var_dump($odds); die();
+//        $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $externalSystemEvent->event->openDate);
+//
+//        foreach ($markets as $market) {
+//            $game = $this->getGame($league, $startDateTime, $market->runners);
+//            if ( $game === null ) {
+//                continue;
+//            }
+//
+//            $marketBooks = $this->getMarketBooks($market->marketId);
+//            foreach ($marketBooks as $marketBook) {
+//                foreach ($marketBook->runners as $runner) {
+//                    $betLine = $this->syncBetLine($game, $betType, $runner);
+//                    if ($betLine === null) {
+//                        continue;
+//                    }
+//                    // var_dump($betLine->status); // IF CLOSED => UPDATE GAME!!
+//                    // var_dump($runnerOne->status); // "ACTIVE"
+//                    $backs = $runner->ex->availableToBack;
+//                    $lays = $runner->ex->availableToLay;
+//                    $this->saveLayBacks( $this->getImportPeriod()->getStartDate(), $betLine, $backs, true );
+//                    $this->saveLayBacks( $this->getImportPeriod()->getStartDate(), $betLine, $lays, false );
+//                }
+//            }
+//        }
     }
 
     public function setMaxDaysBeforeImport( int $maxDaysBeforeImport ) {
@@ -141,6 +154,11 @@ class BetLine implements BetLineImporter
             $this->period = new Period( $now, $now->modify("+".$this->maxDaysBeforeImport." days") );
         }
         return $this->period;
+    }
+
+    protected function getOddsPeriod() {
+        $now = new \DateTimeImmutable();
+        return new Period( $now, $now->modify("+4 days") );
     }
 
     protected function syncBetLine( Game $game, $betType, $runner)

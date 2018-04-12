@@ -93,14 +93,6 @@ $container['App\Action\User'] = function ($c) {
     $repos = new VOBetting\User\Repository($em,$em->getClassMetaData(VOBetting\User::class));
     return new App\Action\User($repos,$c->get('serializer'),$c->get('settings'));
 };
-$container['App\Action\Testcdk'] = function ($c) {
-    return new App\Action\Testcdk(
-        /*$tournamentService,
-        $tournamentRepos,
-        $userRepository,
-        $voetbalService->getService(Voetbal\Structure::class),*/
-        $c->get('serializer'),$c->get('settings'));
-};
 $container['App\Action\BetLine'] = function ($c) {
     $em = $c->get('em');
     $repos = new VOBetting\BetLine\Repository($em,$em->getClassMetaData(VOBetting\BetLine::class));
@@ -112,4 +104,10 @@ $container['App\Action\LayBack'] = function ($c) {
     $repos = new VOBetting\LayBack\Repository($em,$em->getClassMetaData(VOBetting\LayBack::class));
     $betLineRepository = new VOBetting\BetLine\Repository($em,$em->getClassMetaData(VOBetting\BetLine::class));
     return new App\Action\LayBack($repos,$betLineRepository,$c->get('serializer'));
+};
+$container['App\Action\Bookmaker'] = function ($c) {
+    $em = $c->get('em');
+    $repos = new VOBetting\Bookmaker\Repository($em,$em->getClassMetaData(VOBetting\Bookmaker::class));
+    $service = new VOBetting\Bookmaker\Service($repos);
+    return new App\Action\Bookmaker($repos,$service,$c->get('serializer'));
 };

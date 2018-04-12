@@ -8,8 +8,6 @@
 
 namespace VOBetting;
 
-use Voetbal\Game;
-use Voetbal\PoulePlace;
 use Voetbal\External\System as ExternalSystem;
 
 class LayBack
@@ -45,16 +43,27 @@ class LayBack
     private $betLine;
 
     /**
+     * @var Bookmaker
+     */
+    private $bookmaker;
+
+    /**
      * @var System
      */
     private $externalSystem;
 
     // const _MATCH_ODDS = 1;
 
-    public function __construct( \DateTimeImmutable $dateTime, BetLine $betLine, ExternalSystem $externalSystem )
+    public function __construct(
+        \DateTimeImmutable $dateTime,
+        BetLine $betLine,
+        Bookmaker $bookmaker,
+        ExternalSystem $externalSystem
+    )
     {
         $this->setDateTime( $dateTime );
         $this->setBetLine( $betLine );
+        $this->setBookmaker( $bookmaker );
         $this->setExternalSystem( $externalSystem );
     }
 
@@ -164,6 +173,24 @@ class LayBack
     public function setBetLine( $betLine )
     {
         $this->betLine = $betLine;
+    }
+
+    /**
+     * Get bookmaker
+     *
+     * @return Bookmaker
+     */
+    public function getBookmaker()
+    {
+        return $this->bookmaker;
+    }
+
+    /**
+     * @param $bookmaker
+     */
+    public function setBookmaker( $bookmaker )
+    {
+        $this->bookmaker = $bookmaker;
     }
 
     /**

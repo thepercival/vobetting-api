@@ -1,0 +1,12 @@
+VOBetting\Bookmaker:
+  exclusion_policy: ALL
+  exclude: false
+  access_type: public_method
+
+  properties:
+    id:
+      type: integer
+    name:
+      type: string
+    exchange:
+      type: boolean

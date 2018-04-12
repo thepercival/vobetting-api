@@ -39,3 +39,10 @@ VOBetting\LayBack:
         referencedColumnName: id
         nullable: false
         onDelete: CASCADE
+    bookmaker:
+      targetEntity: VOBetting\Bookmaker
+      joinColumn:
+        name: bookmakerid
+        referencedColumnName: id
+        nullable: true
+        onDelete: CASCADE
