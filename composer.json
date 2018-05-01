@@ -30,7 +30,7 @@
 		"petercoles/betfair-exchange": "^1.1"
 	},
     "require-dev": {
-      "phpunit/phpunit": "^6.0.0"
+      "phpunit/phpunit": "6.x"
     },
     "autoload": {
       "psr-4": {
@@ -47,7 +47,7 @@
     "scripts": {
       "start": "php -S localhost:4201 -t public public/index.php",
       "test": [
-        "phpunit -c tests/config.xml"
+        "vendor/bin/phpunit --bootstrap vendor/autoload.php tests/"
       ]
     }
 }

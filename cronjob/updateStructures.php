@@ -3,30 +3,30 @@
  * Created by PhpStorm.
  * User: coen
  * Date: 6-3-18
- * Time: 22:28
+ * Time: 14:43
  */
 
 require __DIR__ . '/../vendor/autoload.php';
+
 $settings = require __DIR__ . '/../app/settings.php';
 $app = new \Slim\App($settings);
-// Set up dependencies
 require __DIR__ . '/../app/dependencies.php';
 require __DIR__ . '/mailHelper.php';
 
+use Voetbal\External\Structure\Importer as StructureImporter;
 use Monolog\Logger;
-use Voetbal\External\Team\Importer as TeamImporter;
 
 $settings = $app->getContainer()->get('settings');
 $em = $app->getContainer()->get('em');
 $voetbal = $app->getContainer()->get('voetbal');
 
-$logger = new Logger('cronjob-teams');
+$logger = new Logger('cronjob-structures');
 $logger->pushProcessor(new \Monolog\Processor\UidProcessor());
-$logger->pushHandler(new \Monolog\Handler\StreamHandler($settings['logger']['cronjobpath'] . 'teams.log', $settings['logger']['level']));
+$logger->pushHandler(new \Monolog\Handler\StreamHandler($settings['logger']['cronjobpath'] . 'structures.log', $settings['logger']['level']));
 
 try {
-    $importer = new TeamImporter(
-        $voetbal->getService( \Voetbal\Team::class ),
+    $importer = new StructureImporter(
+        $voetbal->getService( \Voetbal\Structure::class ),
         $voetbal,
         $em->getConnection(),
         $logger
