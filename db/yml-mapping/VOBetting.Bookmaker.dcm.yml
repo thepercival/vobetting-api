@@ -10,7 +10,7 @@ VOBetting\Bookmaker:
   fields:
     name:
       type: string
-      length : !php/const:VOBetting\Bookmaker::MAX_LENGTH_NAME
+      length : !php/const VOBetting\Bookmaker::MAX_LENGTH_NAME
       nullable: false
     exchange:
       type: boolean

@@ -1,22 +1,16 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 28-1-17
- * Time: 18:35
- */
-
-ini_set('display_errors', '1');
-
 if (PHP_SAPI == 'cli-server') {
-	// To help the built-in PHP dev server, check if the request was actually for
-	// something which should probably be served as a static file
-	$url  = parse_url($_SERVER['REQUEST_URI']);
-	$file = __DIR__ . $url['path'];
-	if (is_file($file)) {
-		return false;
-	}
+    // To help the built-in PHP dev server, check if the request was actually for
+    // something which should probably be served as a static file
+    $url  = parse_url($_SERVER['REQUEST_URI']);
+    $file = __DIR__ . $url['path'];
+    if (is_file($file)) {
+        return false;
+    }
 }
+
+// this line can move to php.settings if allwebsites use it
+date_default_timezone_set ( 'UTC' );
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -33,8 +27,8 @@ require __DIR__ . '/../app/dependencies.php';
 require __DIR__ . '/../app/middleware.php';
 
 // Register routes
-require __DIR__ . '/../app/routes.php';
+require __DIR__ . '/../app/routes/token.php';
+require __DIR__ . '/../app/routes/all.php';
 
 // Run app
 $app->run();
-

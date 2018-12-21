@@ -2,7 +2,6 @@
 // DIC configuration
 
 use \JMS\Serializer\SerializerBuilder;
-// use \Slim\Middleware\JwtAuthentication;
 
 $container = $app->getContainer();
 
@@ -39,43 +38,35 @@ $container['em'] = function ($c) {
     );
     $config->setMetadataDriverImpl( new CustomYamlDriver( $settings['meta']['entity_path'] ));
 
-    return Doctrine\ORM\EntityManager::create($settings['connection'], $config);
+    $em = Doctrine\ORM\EntityManager::create($settings['connection'], $config);
+    // $em->getConnection()->setAutoCommit(false);
+    return $em;
 };
 
 // symfony serializer
 $container['serializer'] = function( $c ) {
-    $settings = $c->get('settings');
-
-    $serializerBuilder = SerializerBuilder::create()
-        ->setDebug($settings['displayErrorDetails'])
-        /*->setCacheDir($settings['serializer']['cache_dir'])*/;
-
-    $serializerBuilder
-//        ->configureListeners(function(JMS\Serializer\EventDispatcher\EventDispatcher $dispatcher) {
-//            $dispatcher->addListener('serializer.pre_serialize',
-//                function(JMS\Serializer\EventDispatcher\PostSerializeEvent $event) {
-//                    // do something
-//
-//                }
-//            );
-//            // $dispatcher->addSubscriber(new MyEventSubscriber());
-//        })
-    ;
-
-    foreach( $settings['serializer']['yml_dir'] as $ymlnamespace => $ymldir ){
-        $serializerBuilder->addMetadataDir($ymldir,$ymlnamespace);
-    }
-
-
-    return $serializerBuilder->build();
+    // temporary, real one is set in middleware
+    return SerializerBuilder::create()->build();
 };
 
 // voetbalService
 $container['voetbal'] = function( $c ) {
-    $voetbalService = new Voetbal\Service($c->get('em'));
-
-    return $voetbalService;
+    return new Voetbal\Service($c->get('em'));
 };
+
+// toernooiService
+//$container['toernooi'] = function( $c ) {
+//    $em = $c->get('em');
+//    $tournamentRepos = new FCToernooi\Tournament\Repository($em,$em->getClassMetaData(FCToernooi\Tournament::class));
+//    $roleRepos = new FCToernooi\Role\Repository($em,$em->getClassMetaData(FCToernooi\Role::class));
+//    $userRepos = new FCToernooi\User\Repository($em,$em->getClassMetaData(FCToernooi\User::class));
+//    return new FCToernooi\Tournament\Service(
+//        $c->get('voetbal'),
+//        $tournamentRepos,
+//        $roleRepos,
+//        $userRepos
+//    );
+//};
 
 // JWT
 $container["jwt"] = function ( $c ) {
