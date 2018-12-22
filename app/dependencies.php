@@ -57,10 +57,10 @@ $container['voetbal'] = function( $c ) {
 // toernooiService
 //$container['toernooi'] = function( $c ) {
 //    $em = $c->get('em');
-//    $tournamentRepos = new FCToernooi\Tournament\Repository($em,$em->getClassMetaData(FCToernooi\Tournament::class));
-//    $roleRepos = new FCToernooi\Role\Repository($em,$em->getClassMetaData(FCToernooi\Role::class));
-//    $userRepos = new FCToernooi\User\Repository($em,$em->getClassMetaData(FCToernooi\User::class));
-//    return new FCToernooi\Tournament\Service(
+//    $tournamentRepos = new VOBetting\Tournament\Repository($em,$em->getClassMetaData(VOBetting\Tournament::class));
+//    $roleRepos = new VOBetting\Role\Repository($em,$em->getClassMetaData(VOBetting\Role::class));
+//    $userRepos = new VOBetting\User\Repository($em,$em->getClassMetaData(VOBetting\User::class));
+//    return new VOBetting\Tournament\Service(
 //        $c->get('voetbal'),
 //        $tournamentRepos,
 //        $roleRepos,

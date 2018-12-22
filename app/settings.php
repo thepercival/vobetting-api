@@ -61,7 +61,7 @@ return [
             'activationsecret' => getenv('ACTIVATION_SECRET'),
         ],
         'www' => [
-            'url' => getenv('WWW_URL')
+            'urls' => explode(",", getenv('WWW_URLS') )
         ],
         'email' => [
             'from' => "coendunnink@gmail.com",

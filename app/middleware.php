@@ -1,6 +1,6 @@
 <?php
 
-use FCToernooi\Token;
+use VOBetting\Token;
 // use Crell\ApiProblem\ApiProblem;
 use Gofabian\Negotiation\NegotiationMiddleware;
 // use Micheh\Cache\CacheUtil;
@@ -73,8 +73,8 @@ $container["MyAuthentication"] = function ($container) {
     return new Authentication(
         $container->get('token'),
         new VOBetting\User\Repository($container->get('em'),$container->get('em')->getClassMetaData(VOBetting\User::class)),
-        new VOBetting\Tournament\Repository($container->get('em'),$container->get('em')->getClassMetaData(VOBetting\Tournament::class)),
-        $container->get('toernooi'),
+        // new VOBetting\Tournament\Repository($container->get('em'),$container->get('em')->getClassMetaData(VOBetting\Tournament::class)),
+        // $container->get('toernooi'),
         $container->get('voetbal')
     );
 };

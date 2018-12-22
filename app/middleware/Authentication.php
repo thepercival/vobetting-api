@@ -32,11 +32,11 @@ class Authentication
     /**
      * @var TournamentRepos
      */
-    protected $tournamentRepos;
+    // protected $tournamentRepos;
     /**
      * @var TournamentService
      */
-    protected $tournamentService;
+    // protected $tournamentService;
     /**
      * @var VoetbalService
      */
@@ -45,14 +45,14 @@ class Authentication
     public function __construct(
         Token $token,
         UserRepos $userRepos,
-        TournamentRepos $tournamentRepos,
-        TournamentService $tournamentService,
+        /*TournamentRepos $tournamentRepos,
+        TournamentService $tournamentService,*/
         VoetbalService $voetbalService
     ) {
         $this->token = $token;
         $this->userRepos = $userRepos;
-        $this->tournamentRepos = $tournamentRepos;
-        $this->tournamentService = $tournamentService;
+        // $this->tournamentRepos = $tournamentRepos;
+        // $this->tournamentService = $tournamentService;
         $this->voetbalService = $voetbalService;
     }
 
@@ -62,25 +62,25 @@ class Authentication
         if ($this->token->isPopulated() !== true) {
             return $next($request, $response);
         }
-        if (substr($request->getUri()->getPath(), 0, 12) === "/tournaments"
-        || substr($request->getUri()->getPath(), 0, 9) === "/sponsors" ) {
-            return $next($request, $response);
-        }
-
-        $args = $request->getAttribute('routeInfo')[2];
-        if (array_key_exists('resourceType', $args) === false) {
-            return new ForbiddenResponse("niet geautoriseerd, het pad kan niet bepaalt worden", 401);
-        }
-        $resourceType = $args['resourceType'];
+//        if (substr($request->getUri()->getPath(), 0, 12) === "/tournaments"
+//        || substr($request->getUri()->getPath(), 0, 9) === "/sponsors" ) {
+//            return $next($request, $response);
+//        }
+//
+//        $args = $request->getAttribute('routeInfo')[2];
+//        if (array_key_exists('resourceType', $args) === false) {
+//            return new ForbiddenResponse("niet geautoriseerd, het pad kan niet bepaalt worden", 401);
+//        }
+//        $resourceType = $args['resourceType'];
 
         $user = $this->getUser();
         if ($user === null) {
             return new ForbiddenResponse("gebruiker kan niet gevonden worden", 401);
         }
-        $id = (array_key_exists('id', $args) && ctype_digit($args['id'])) ? (int)$args['id'] : null;
-        if (!$this->authorized($user, $resourceType, $request->getMethod(), $request->getQueryParams(), $id)) {
-            return new ForbiddenResponse("geen autorisatie voor actie gevonden", 401);
-        }
+//        $id = (array_key_exists('id', $args) && ctype_digit($args['id'])) ? (int)$args['id'] : null;
+//        if (!$this->authorized($user, $resourceType, $request->getMethod(), $request->getQueryParams(), $id)) {
+//            return new ForbiddenResponse("geen autorisatie voor actie gevonden", 401);
+//        }
 
         return $next($request, $response);
     }
