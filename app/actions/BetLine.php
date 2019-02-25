@@ -9,14 +9,8 @@
 namespace App\Action;
 
 use JMS\Serializer\Serializer;
-use Voetbal\Team\Service as TeamService;
-use Voetbal\Team\Repository as TeamRepository;
 use Voetbal\Game\Repository as GameRepository;
-use Voetbal\Association\Repository as AssociationRepository;
-use Voetbal;
 use VOBetting\BetLine\Repository as BetLineRepository;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ResponseInterface;
 
 final class BetLine
 {

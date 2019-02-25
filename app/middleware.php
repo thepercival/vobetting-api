@@ -28,8 +28,7 @@ $container["JwtAuthentication"] = function ($container) {
             new JwtAuthentication\RequestPathRule([
                 "path" => "/",
                 "ignore" => [
-                    "/auth/register", "/auth/login","/auth/passwordreset","/auth/passwordchange",
-                    "/tournamentspublic", "/voetbal/structures"
+                    "/auth/register", "/auth/login","/auth/passwordreset","/auth/passwordchange"
                 ]
             ]),
             new JwtAuthentication\RequestMethodRule([

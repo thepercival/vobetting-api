@@ -25,7 +25,7 @@ return [
         // Monolog settings
         'logger' => [
             'name' => 'cronjob',
-            'path' => isset($_ENV['docker']) ? 'php://stdout' : __DIR__ . '/../logs/cronjob.log',
+            'path' => isset($_ENV['docker']) ? 'php://stdout' : __DIR__ . '/../logs/application.log',
             'level' => \Monolog\Logger::DEBUG,
             'cronjobpath' => isset($_ENV['docker']) ? 'php://stdout' : __DIR__ . '/../logs/cronjob_',
         ],
