@@ -7,7 +7,7 @@
  */
 
 include_once "updateCompetitions.php";
-include_once "updateTeams.php";
+include_once "updateCompetitors.php";
 include_once "updateStructures.php";
 include_once "updateGames.php";
 

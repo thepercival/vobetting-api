@@ -3,53 +3,59 @@
  * Created by PhpStorm.
  * User: coen
  * Date: 6-3-18
- * Time: 14:43
+ * Time: 22:28
  */
 
 require __DIR__ . '/../vendor/autoload.php';
 $settings = require __DIR__ . '/../app/settings.php';
 $app = new \Slim\App($settings);
+// Set up dependencies
 require __DIR__ . '/../app/dependencies.php';
 require __DIR__ . '/mailHelper.php';
 
 use Monolog\Logger;
 use Voetbal\External\System\Factory as ExternalSystemFactory;
-use Voetbal\External\System\Importable\Competition as CompetitionImportable;
+use Voetbal\External\System\Importable\Competitor as CompetitorImportable;
 
 $settings = $app->getContainer()->get('settings');
 $em = $app->getContainer()->get('em');
 $voetbal = $app->getContainer()->get('voetbal');
 
-$logger = new Logger('cronjob-competitions');
+$logger = new Logger('cronjob-teams');
 $logger->pushProcessor(new \Monolog\Processor\UidProcessor());
 
 try {
-    $logger->pushHandler(new \Monolog\Handler\StreamHandler($settings['logger']['cronjobpath'] . 'competitions.log', $settings['logger']['level']));
+    $logger->pushHandler(new \Monolog\Handler\StreamHandler($settings['logger']['cronjobpath'] . 'competitors.log', $settings['logger']['level']));
 
     $externalSystemFactory = new ExternalSystemFactory( $voetbal, $logger, $em->getConnection() );
-
     $externalSystemRepos = $voetbal->getRepository( \Voetbal\External\System::class );
-    $seasonRepos = $voetbal->getRepository( \Voetbal\Season::class );
-    $leagueRepos = $voetbal->getRepository( \Voetbal\League::class );
+    $competitionRepos = $voetbal->getRepository( \Voetbal\Competition::class );
 
     $externalSystems = $externalSystemRepos->findAll();
     foreach( $externalSystems as $externalSystemBase ) {
         echo $externalSystemBase->getName() . PHP_EOL;
         try {
             $externalSystem = $externalSystemFactory->create( $externalSystemBase );
-            if( $externalSystem === null or ( $externalSystem instanceof CompetitionImportable ) !== true ) {
+            if( $externalSystem === null or ( $externalSystem instanceof CompetitorImportable ) !== true ) {
                 continue;
             }
             $externalSystem->init();
-            $importer = $externalSystem->getCompetitionImporter();
-            $importer->createByLeaguesAndSeasons( $leagueRepos->findAll(), $seasonRepos->findAll());
-        } catch (\Exception $e) {
-            $logger->addError("GENERAL ERROR: " . $e->getMessage() );
-//                if( $environment === 'production' ) {
-//                    echo $e->getMessage() . PHP_EOL;
+            $importer = $externalSystem->getCompetitorImporter();
+            $importer->createByCompetitions( $competitionRepos->findAll() );
+
+        } catch (\Exception $error) {
+            $this->logger->addError("GENERAL ERROR: " . $error->getMessage() );
+//                if( $settings->get('environment') === 'production') {
+//                    mailAdmin( $error->getMessage() );
+//                    $logger->addError("GENERAL ERROR: " . $error->getMessage() );
+//                } else {
+//                    echo $error->getMessage() . PHP_EOL;
 //                }
         }
     }
+
+
+
 }
 catch( \Exception $e ) {
     if( $settings->get('environment') === 'production') {
@@ -59,5 +65,3 @@ catch( \Exception $e ) {
         echo $e->getMessage() . PHP_EOL;
     }
 }
-
-
