@@ -45,17 +45,8 @@ try {
 
         } catch (\Exception $error) {
             $this->logger->addError("GENERAL ERROR: " . $error->getMessage() );
-//                if( $settings->get('environment') === 'production') {
-//                    mailAdmin( $error->getMessage() );
-//                    $logger->addError("GENERAL ERROR: " . $error->getMessage() );
-//                } else {
-//                    echo $error->getMessage() . PHP_EOL;
-//                }
         }
     }
-
-
-
 }
 catch( \Exception $e ) {
     if( $settings->get('environment') === 'production') {

@@ -45,9 +45,6 @@ try {
             $importer->createByLeaguesAndSeasons( $leagueRepos->findAll(), $seasonRepos->findAll());
         } catch (\Exception $e) {
             $logger->addError("GENERAL ERROR: " . $e->getMessage() );
-//                if( $environment === 'production' ) {
-//                    echo $e->getMessage() . PHP_EOL;
-//                }
         }
     }
 }

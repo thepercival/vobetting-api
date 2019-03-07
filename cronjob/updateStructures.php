@@ -7,31 +7,46 @@
  */
 
 require __DIR__ . '/../vendor/autoload.php';
-
 $settings = require __DIR__ . '/../app/settings.php';
 $app = new \Slim\App($settings);
+// Set up dependencies
 require __DIR__ . '/../app/dependencies.php';
 require __DIR__ . '/mailHelper.php';
 
-use Voetbal\External\Structure\Importer as StructureImporter;
 use Monolog\Logger;
+use Voetbal\External\System\Factory as ExternalSystemFactory;
+use Voetbal\External\System\Importable\Structure as StructureImportable;
 
 $settings = $app->getContainer()->get('settings');
 $em = $app->getContainer()->get('em');
 $voetbal = $app->getContainer()->get('voetbal');
 
-$logger = new Logger('cronjob-structures');
+$logger = new Logger('cronjob-teams');
 $logger->pushProcessor(new \Monolog\Processor\UidProcessor());
-$logger->pushHandler(new \Monolog\Handler\StreamHandler($settings['logger']['cronjobpath'] . 'structures.log', $settings['logger']['level']));
 
 try {
-    $importer = new StructureImporter(
-        $voetbal->getService( \Voetbal\Structure::class ),
-        $voetbal,
-        $em->getConnection(),
-        $logger
-    );
-    $importer->import();
+    $logger->pushHandler(new \Monolog\Handler\StreamHandler($settings['logger']['cronjobpath'] . 'structures.log', $settings['logger']['level']));
+
+    $externalSystemFactory = new ExternalSystemFactory( $voetbal, $logger, $em->getConnection() );
+    $externalSystemRepos = $voetbal->getRepository( \Voetbal\External\System::class );
+    $competitionRepos = $voetbal->getRepository( \Voetbal\Competition::class );
+
+    $externalSystems = $externalSystemRepos->findAll();
+    foreach( $externalSystems as $externalSystemBase ) {
+        echo $externalSystemBase->getName() . PHP_EOL;
+        try {
+            $externalSystem = $externalSystemFactory->create( $externalSystemBase );
+            if( $externalSystem === null or ( $externalSystem instanceof StructureImportable ) !== true ) {
+                continue;
+            }
+            $externalSystem->init();
+            $importer = $externalSystem->getStructureImporter();
+            $importer->createByCompetitions( $competitionRepos->findAll() );
+
+        } catch (\Exception $error) {
+            $this->logger->addError("GENERAL ERROR: " . $error->getMessage() );
+        }
+    }
 }
 catch( \Exception $e ) {
     if( $settings->get('environment') === 'production') {
