@@ -44,7 +44,7 @@ try {
             $importer->createByCompetitions( $competitionRepos->findAll() );
 
         } catch (\Exception $error) {
-            $this->logger->addError("GENERAL ERROR: " . $error->getMessage() );
+            $logger->addError("GENERAL ERROR: " . $error->getMessage() );
         }
     }
 }

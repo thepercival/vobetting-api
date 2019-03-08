@@ -24,6 +24,8 @@ $logger = new Logger('cronjob-games');
 $logger->pushProcessor(new \Monolog\Processor\UidProcessor());
 $logger->pushHandler(new \Monolog\Handler\StreamHandler($settings['logger']['cronjobpath'] . 'games.log', $settings['logger']['level']));
 
+// hier nu wedstrijden bijwerken, voetbal->importer verplaatsen naar hier
+
 try {
     $importer = new GameImporter(
         $voetbal->getService( \Voetbal\Game::class ),
