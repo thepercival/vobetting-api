@@ -14,16 +14,16 @@ use VOBetting\BetLine\Repository as BetLineRepos;
 use VOBetting\External\System\Importable\BetLine as BetLineImportable;
 use VOBetting\External\System\Importer\BetLine as BetLineImporter;
 use VOBetting\External\System\Betfair\BetLine as BetfairBetLineImporter;
-use VOBetting\External\System\Betfair\Team as BetfairTeamGetter;
+use VOBetting\External\System\Betfair\Competitor as BetfairCompetitorGetter;
 use Voetbal\Competition\Repository as CompetitionRepos;
 use Voetbal\Game\Repository as GameRepos;
-use Voetbal\External\Team\Repository as ExternalTeamRepos;
+use Voetbal\External\Competitor\Repository as ExternalCompetitorRepos;
 use VOBetting\LayBack\Repository as LayBackRepos;
 use Monolog\Logger;
-use Voetbal\External\System\Importer\TeamGetter;
+use Voetbal\External\System\Importer\CompetitorGetter;
 use Voetbal\External\League as ExternalLeague;
 
-class Betfair implements \Voetbal\External\System\Def, BetLineImportable, TeamGetter
+class Betfair implements \Voetbal\External\System\Def, BetLineImportable, CompetitorGetter
 {
     /**
      * @var ExternalSystem
@@ -48,14 +48,14 @@ class Betfair implements \Voetbal\External\System\Def, BetLineImportable, TeamGe
 
     protected function getApiHelper()
     {
-        return new Betfair\ApiHelper( $this->getExternalSystem() );
+        return new Betfair\ApiHelper( /*$this->getExternalSystem()*/ );
     }
 
     public function getBetLineImporter(
         BetLineRepos $repos,
         CompetitionRepos $competitionRepos,
         GameRepos $gameRepos,
-        ExternalTeamRepos $externalTeamRepos,
+        ExternalCompetitorRepos $externalCompetitorRepos,
         LayBackRepos $layBackRepos,
         Logger $logger
     ) : BetLineImporter {
@@ -65,7 +65,7 @@ class Betfair implements \Voetbal\External\System\Def, BetLineImportable, TeamGe
             $repos,
             $competitionRepos,
             $gameRepos,
-            $externalTeamRepos,
+            $externalCompetitorRepos,
             $layBackRepos,
             $logger
         );
@@ -87,9 +87,9 @@ class Betfair implements \Voetbal\External\System\Def, BetLineImportable, TeamGe
         $this->externalSystem = $externalSystem;
     }
 
-    public function getTeams( ExternalLeague $externalLeague ): array
+    public function getCompetitors( ExternalLeague $externalLeague ): array
     {
-        $teamGetterHelper = new BetfairTeamGetter( $this->getExternalSystem(), $this->getApiHelper() );
-        return $teamGetterHelper->getTeams( $externalLeague );
+        $competitorGetterHelper = new BetfairCompetitorGetter( $this->getExternalSystem(), $this->getApiHelper() );
+        return $competitorGetterHelper->getCompetitors( $externalLeague );
     }
 }

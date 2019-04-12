@@ -20,7 +20,7 @@ use League\Period\Period;
 use VOBetting\BetLine as BetLineBase;
 use Voetbal\Competition\Repository as CompetitionRepos;
 use Voetbal\Game\Repository as GameRepos;
-use Voetbal\External\Team\Repository as ExternalTeamRepos;
+use Voetbal\External\Competitor\Repository as ExternalCompetitorRepos;
 use VOBetting\LayBack\Repository as LayBackRepos;
 use VOBetting\LayBack;
 use Monolog\Logger;
@@ -40,13 +40,17 @@ class BetLine implements BetLineImporter
      */
     private $gameRepos;
     /**
-     * @var ExternalTeamRepos
+     * @var ExternalCompetitorRepos
      */
-    private $externalTeamRepos;
+    private $externalCompetitorRepos;
     /**
      * @var BetLineRepos
      */
-    private $betLineRepos;
+    private $repos;
+    /**
+     * @var CompetitionRepos
+     */
+    private $competitionRepos;
     /**
      * @var LayBackRepos
      */
@@ -72,7 +76,7 @@ class BetLine implements BetLineImporter
         BetLineRepos $repos,
         CompetitionRepos $competitionRepos,
         GameRepos $gameRepos,
-        ExternalTeamRepos $externalTeamRepos,
+        ExternalCompetitorRepos $externalCompetitorRepos,
         LayBackRepos $layBackRepos,
         Logger $logger
 
@@ -82,7 +86,7 @@ class BetLine implements BetLineImporter
         $this->repos = $repos;
         $this->competitionRepos = $competitionRepos;
         $this->gameRepos = $gameRepos;
-        $this->externalTeamRepos = $externalTeamRepos;
+        $this->externalCompetitorRepos = $externalCompetitorRepos;
         $this->layBackRepos = $layBackRepos;
         $this->logger = $logger;
     }
@@ -116,8 +120,8 @@ class BetLine implements BetLineImporter
     }
 
     public function process( League $league, $externalSystemEvent, $betType ) {
-        $odds = $this->getOdds( $externalSystemEvent->event->id, $betType );
-        var_dump($odds); die();
+        // $odds = $this->getOdds( $externalSystemEvent->event->id, $betType );
+        // var_dump($odds); die();
 //        $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $externalSystemEvent->event->openDate);
 //
 //        foreach ($markets as $market) {
@@ -163,13 +167,14 @@ class BetLine implements BetLineImporter
 
     protected function syncBetLine( Game $game, $betType, $runner)
     {
-        $poulePlace = null;
+        throw new \Exception("not implemented yet", E_ERROR );
+        /*$poulePlace = null;
         if( $runner->selectionId !== ExternalSystemBetfair::THE_DRAW ) { // the draw
-            $team = $this->getTeamFromExternalId($runner->selectionId);
-            if( $team === null ) {
+            $competitor = $this->getCompetitorFromExternalId($runner->selectionId);
+            if( $competitor === null ) {
                 return null;
             }
-            $poulePlace = $game->getPoulePlaceForTeam($team);
+            $poulePlace = $game->getPoulePlaceForCompetitor($competitor);
         }
         $betLine = $this->repos->findOneBy(array(
             "game" => $game,
@@ -181,7 +186,7 @@ class BetLine implements BetLineImporter
             $betLine->setPoulePlace($poulePlace);
         }
         // maybe save close state here
-        return $this->repos->save($betLine);
+        return $this->repos->save($betLine);*/
     }
 
     public function convertHomeAway( $homeAway )
@@ -211,8 +216,10 @@ class BetLine implements BetLineImporter
         BetLineBase $betLine,
         $layBacks, $layBack
     ) {
+        throw new \Exception("bookmaker should be added to layback", E_ERROR );
+        $bookMaker = null;
         foreach( $layBacks as $layBackIt ){
-            $layBackNew = new LayBack( $dateTime, $betLine, $this->externalSystemBase );
+            $layBackNew = new LayBack( $dateTime, $betLine, $bookMaker, $this->externalSystemBase );
             $layBackNew->setBack( $layBack );
             $layBackNew->setPrice( $layBackIt->price );
             $layBackNew->setSize( $layBackIt->size );
@@ -252,13 +259,13 @@ class BetLine implements BetLineImporter
         ]);
     }
 
-    protected function getTeamFromExternalId( $externalId )
+    protected function getCompetitorFromExternalId( $externalId )
     {
-        $team = $this->externalTeamRepos->findImportable( $this->externalSystemBase, $externalId );
-        if( $team === null ) {
-            $this->logger->addNotice("team not found for externalid " . $externalId . " and externalSystem " . $this->externalSystemBase->getName() );
+        $competitor = $this->externalCompetitorRepos->findImportable( $this->externalSystemBase, $externalId );
+        if( $competitor === null ) {
+            $this->logger->addNotice("competitor not found for externalid " . $externalId . " and externalSystem " . $this->externalSystemBase->getName() );
         }
-        return $team;
+        return $competitor;
     }
 
     protected function getGame( League $league, \DateTimeImmutable $startDateTime, $runners )
@@ -285,19 +292,19 @@ class BetLine implements BetLineImporter
             // use $runner->selectionId as marketbook
         }
 
-        $homeTeam = $this->getTeamFromExternalId( $homeRunnerId );
-        if( $homeTeam === null ) {
+        $homeCompetitor = $this->getCompetitorFromExternalId( $homeRunnerId );
+        if( $homeCompetitor === null ) {
             return null;
         }
-        $awayTeam = $this->getTeamFromExternalId( $awayRunnerId );
-        if( $awayTeam === null  ) {
+        $awayCompetitor = $this->getCompetitorFromExternalId( $awayRunnerId );
+        if( $awayCompetitor === null  ) {
             return null;
         }
 
         $states = Game::STATE_CREATED + Game::STATE_INPLAY;
-        $games = $this->gameRepos->findByExt( $homeTeam, $awayTeam, $competition, $states );
+        $games = $this->gameRepos->findByExt( $homeCompetitor, $awayCompetitor, $competition, $states );
         if( $games === null ) {
-            $this->logger->addNotice("game not found for hometeam " . $homeTeam->getName() . ",awayteam " . $awayTeam->getName() . ", competition " . $competition->getName() . " and states " . $states );
+            $this->logger->addNotice("game not found for homecompetitor " . $homeCompetitor->getName() . ",awaycompetitor" . $awayCompetitor->getName() . ", competition " . $competition->getName() . " and states " . $states );
         }
         return reset( $games );
     }

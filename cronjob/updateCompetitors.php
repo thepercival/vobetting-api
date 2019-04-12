@@ -21,7 +21,7 @@ $settings = $app->getContainer()->get('settings');
 $em = $app->getContainer()->get('em');
 $voetbal = $app->getContainer()->get('voetbal');
 
-$logger = new Logger('cronjob-teams');
+$logger = new Logger('cronjob-competitors');
 $logger->pushProcessor(new \Monolog\Processor\UidProcessor());
 
 try {

@@ -28,7 +28,7 @@ class LayBack
     private $price;
 
     /**
-     * @var size
+     * @var double
      */
     private $size;
 
@@ -36,7 +36,7 @@ class LayBack
      * @var \DateTimeImmutable
      */
     private $dateTime;
-    
+
     /**
      * @var BetLine
      */
@@ -48,7 +48,7 @@ class LayBack
     private $bookmaker;
 
     /**
-     * @var System
+     * @var ExternalSystem
      */
     private $externalSystem;
 
@@ -125,7 +125,7 @@ class LayBack
     /**
      * Get size
      *
-     * @return boolean
+     * @return double
      */
     public function getSize()
     {
@@ -133,7 +133,7 @@ class LayBack
     }
 
     /**
-     * @param $size
+     * @param double $size
      */
     public function setSize( $size )
     {
@@ -155,7 +155,7 @@ class LayBack
     {
         $this->dateTime = $dateTime;
     }
-    
+
 
     /**
      * Get betLine
@@ -196,7 +196,7 @@ class LayBack
     /**
      * Get externalSystem
      *
-     * @return System
+     * @return ExternalSystem
      */
     public function getExternalSystem()
     {
@@ -211,6 +211,6 @@ class LayBack
         $this->externalSystem = $externalSystem;
     }
 
-    
+
 
 }

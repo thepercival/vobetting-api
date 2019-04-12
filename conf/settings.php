@@ -1,6 +1,6 @@
 <?php
 
-$dotenv = new \Dotenv\Dotenv( __DIR__ . '/../' );
+$dotenv = new \Dotenv\Dotenv(__DIR__ . '/../');
 $dotenv->load();
 
 return [
@@ -18,8 +18,8 @@ return [
         'serializer' => [
             'cache_dir' =>  __DIR__.'/../cache/serializer',
             'yml_dir' => [
-                "Voetbal" =>__DIR__.'/../vendor/thepercival/voetbal/serialization/yml',
-                "VOBetting" => __DIR__.'/../serialization/yml'
+                "Voetbal" => __DIR__ . '/../vendor/thepercival/voetbal/serialization/yml',
+                "VOBetting" => __DIR__ . '/../serialization/yml'
             ]
         ],
         // Monolog settings
@@ -37,7 +37,7 @@ return [
                     __DIR__ . '/../db/yml-mapping'
                 ],
                 'auto_generate_proxies' => true,
-                'proxy_dir' =>  __DIR__.'/../cache/proxies',
+                'proxy_dir' => __DIR__ . '/../cache/proxies',
                 'cache' => null,
             ],
             'connection' => [

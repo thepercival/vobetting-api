@@ -47,13 +47,13 @@ $app->post("/token", function ($request, $response, $arguments) {
         ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
 });
 /* This is just for debugging, not usefull in real life. */
-$app->get("/dump", function ($request, $response, $arguments) {
-    print_r($this->token);
-});
-$app->post("/dump", function ($request, $response, $arguments) {
-    print_r($this->token);
-});
-/* This is just for debugging, not usefull in real life. */
-$app->get("/info", function ($request, $response, $arguments) {
-    phpinfo();
-});
+//$app->get("/dump", function ($request, $response, $arguments) {
+//    print_r($this->token);
+//});
+//$app->post("/dump", function ($request, $response, $arguments) {
+//    print_r($this->token);
+//});
+///* This is just for debugging, not usefull in real life. */
+//$app->get("/info", function ($request, $response, $arguments) {
+//    phpinfo();
+//});

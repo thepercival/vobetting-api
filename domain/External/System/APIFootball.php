@@ -14,16 +14,16 @@ use VOBetting\External\System\Importable\BetLine as BetLineImportable;
 use VOBetting\External\System\Importer\BetLine as BetLineImporter;
 use VOBetting\External\System\APIFootball\BetLine as APIFootballBetLineImporter;
 use Voetbal\External\League as ExternalLeague;
-use Voetbal\External\System\Importer\TeamGetter;
+use Voetbal\External\System\Importer\CompetitorGetter;
 
 use VOBetting\BetLine\Repository as BetLineRepos;
 use Voetbal\Competition\Repository as CompetitionRepos;
 use Voetbal\Game\Repository as GameRepos;
-use Voetbal\External\Team\Repository as ExternalTeamRepos;
+use Voetbal\External\Competitor\Repository as ExternalCompetitorRepos;
 use VOBetting\LayBack\Repository as LayBackRepos;
 use Monolog\Logger;
 
-class APIFootball implements SystemDef, BetLineImportable, TeamGetter
+class APIFootball implements SystemDef, BetLineImportable, CompetitorGetter
 {
     /**
      * @var ExternalSystem
@@ -49,7 +49,7 @@ class APIFootball implements SystemDef, BetLineImportable, TeamGetter
         BetLineRepos $repos,
         CompetitionRepos $competitionRepos,
         GameRepos $gameRepos,
-        ExternalTeamRepos $externalTeamRepos,
+        ExternalCompetitorRepos $externalCompetitorRepos,
         LayBackRepos $layBackRepos,
         Logger $logger
     ) : BetLineImporter {
@@ -59,7 +59,7 @@ class APIFootball implements SystemDef, BetLineImportable, TeamGetter
             $repos,
             $competitionRepos,
             $gameRepos,
-            $externalTeamRepos,
+            $externalCompetitorRepos,
             $layBackRepos,
             $logger
         );
@@ -81,16 +81,16 @@ class APIFootball implements SystemDef, BetLineImportable, TeamGetter
         $this->externalSystem = $externalSystem;
     }
 
-    public function getTeams( ExternalLeague $externalLeague ): array
+    public function getCompetitors( ExternalLeague $externalLeague ): array
     {
         $apiHelper = $this->getApiHelper();
-        $teams = $apiHelper->getData("action=get_standings&league_id=".$externalLeague->getExternalId() );
-        if( $teams === null ) {
+        $competitor = $apiHelper->getData("action=get_standings&league_id=".$externalLeague->getExternalId() );
+        if( $competitor === null ) {
             return [];
         }
-        // var_dump($teams); die();
+        // var_dump($competitors); die();
         return array_map( function( $standing ) {
             return [ "id" => $standing->team_name, "name" => $standing->team_name ];
-        }, $teams);
+        }, $competitor);
     }
 }

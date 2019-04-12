@@ -34,7 +34,7 @@ try {
     $leagueRepos = $em->getRepository( \Voetbal\League::class );
     $competitionRepos = $em->getRepository( \Voetbal\Competition::class );
     $externalLeagueRepos = $em->getRepository( \Voetbal\External\League::class );
-    $externalTeamRepos = $em->getRepository( \Voetbal\External\Team::class );
+    $externalCompetitorRepos = $em->getRepository( \Voetbal\External\Competitor::class );
     $gameRepos = $em->getRepository( \Voetbal\Game::class );
     $betLineRepos = $em->getRepository( \VOBetting\BetLine::class );
     $layBackRepos = $em->getRepository( \VOBetting\LayBack::class );
@@ -56,7 +56,7 @@ try {
                 $betLineRepos,
                 $competitionRepos,
                 $gameRepos,
-                $externalTeamRepos,
+                $externalCompetitorRepos,
                 $layBackRepos,
                 $logger
             );

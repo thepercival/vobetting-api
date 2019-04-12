@@ -16,17 +16,17 @@ use VOBetting\BetLine;
 use League\Period\Period;
 use VOBetting\External\System\Betfair as ExternalSystemBetfair;
 
-//use Voetbal\External\System\Importer\Team as TeamImporter;
+//use Voetbal\External\System\Importer\Competitor as CompetitorImporter;
 //use Voetbal\External\Importable as ImportableObject;
-//use Voetbal\Team\Service as TeamService;
-//use Voetbal\Team\Repository as TeamRepos;
+//use Voetbal\Competitor\Service as CompetitorService;
+//use Voetbal\Competitor\Repository as CompetitorRepos;
 //use Voetbal\External\Object\Service as ExternalObjectService;
-//use Voetbal\External\Team\Repository as ExternalTeamRepos;
+//use Voetbal\External\Competitor\Repository as ExternalCompetitorRepos;
 //use Voetbal\Association;
-//use Voetbal\Team as TeamBase;
+//use Voetbal\Competitor as CompetitorBase;
 //use Voetbal\External\Competition as ExternalCompetition;
 
-class Team
+class Competitor
 {
     /**
      * @var ExternalSystemBase
@@ -39,12 +39,12 @@ class Team
     private $apiHelper;
 
 //    /**
-//     * @var TeamService
+//     * @var CompetitorService
 //     */
 //    private $service;
 //
 //    /**
-//     * @var TeamRepos
+//     * @var CompetitorRepos
 //     */
 //    private $repos;
 //
@@ -54,16 +54,16 @@ class Team
 //    private $externalObjectService;
 //
 //    /**
-//     * @var ExternalTeamRepos
+//     * @var ExternalCompetitorRepos
 //     */
 //    private $externalObjectRepos;
 
     public function __construct(
         ExternalSystemBase $externalSystemBase,
         ApiHelper $apiHelper/*,
-        TeamService $service,
-        TeamRepos $repos,
-        ExternalTeamRepos $externalRepos*/
+        CompetitorService $service,
+        CompetitorRepos $repos,
+        ExternalCompetitorRepos $externalRepos*/
     ) {
         $this->externalSystemBase = $externalSystemBase;
         $this->apiHelper = $apiHelper;
@@ -75,8 +75,8 @@ class Team
         );*/
     }
 
-    public function getTeams(ExternalLeague $externalLeague) {
-        $teams = [];
+    public function getCompetitors(ExternalLeague $externalLeague) {
+        $competitors = [];
         $betType = BetLine::_MATCH_ODDS;
         $events = $this->apiHelper->getEvents( $externalLeague, $this->getImportPeriod() );
         foreach( $events as $event  )
@@ -87,15 +87,15 @@ class Team
                     if( $runner->metadata->runnerId == ExternalSystemBetfair::THE_DRAW ) {
                         continue;
                     }
-                    $team = ["id" => $runner->metadata->runnerId, "name" => $runner->runnerName ];
-                    if( in_array ( $team , $teams ) ) {
+                    $competitor = ["id" => $runner->metadata->runnerId, "name" => $runner->runnerName ];
+                    if( in_array ( $competitor, $competitors ) ) {
                         continue;
                     }
-                    $teams[] = $team;
+                    $competitors[] = $competitor;
                 }
             }
         }
-        return $teams;
+        return $competitors;
     }
 
     protected function getImportPeriod() {

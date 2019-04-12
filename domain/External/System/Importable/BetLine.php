@@ -12,7 +12,7 @@ use VOBetting\BetLine\Repository as BetLineRepos;
 use VOBetting\External\System\Importer\BetLine as BetLineImporter;
 use Voetbal\Competition\Repository as CompetitionRepos;
 use Voetbal\Game\Repository as GameRepos;
-use Voetbal\External\Team\Repository as ExternalTeamRepos;
+use Voetbal\External\Competitor\Repository as ExternalCompetitorRepos;
 use VOBetting\LayBack\Repository as LayBackRepos;
 use Monolog\Logger;
 
@@ -22,7 +22,7 @@ interface BetLine
         BetLineRepos $repos,
         CompetitionRepos $competitionRepos,
         GameRepos $gameRepos,
-        ExternalTeamRepos $externalTeamRepos,
+        ExternalCompetitorRepos $externalCompetitorRepos,
         LayBackRepos $layBackRepos,
         Logger $logger
     ) : BetLineImporter;

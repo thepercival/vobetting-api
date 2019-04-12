@@ -41,7 +41,7 @@ try {
         if( $externalSystemBase->getName() !== "betfair") { continue;}
         try {
             $externalSystem = $externalSystemFactory->create( $externalSystemBase );
-            if( $externalSystem === null or ( $externalSystem instanceof TeamGetter ) !== true ) {
+            if( $externalSystem === null or ( $externalSystem instanceof CompetitorGetter ) !== true ) {
                 continue;
             }
             $externalSystem->init();
@@ -60,9 +60,9 @@ try {
                     echo $league->getName() . PHP_EOL;
                 }
                 if( $externalLeague->getImportableObject()->getName() !== "Ligue 2") { continue;}
-                $teams = $externalSystem->getTeams( $externalLeague );
-                foreach( $teams as $team ) {
-                    echo "  " . $team["id"] . " : " . $team["name"] . PHP_EOL;
+                $competitors = $externalSystem->getCompetitors( $externalLeague );
+                foreach( $competitors as $competitor ) {
+                    echo "  " . $competitor["id"] . " : " . $competitor["name"] . PHP_EOL;
                 }
             }
         } catch (\Exception $e) {
