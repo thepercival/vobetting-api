@@ -47,7 +47,7 @@
     },
     "autoload-dev": {
       "psr-4": {
-        "VOBetting\\Tests\\": "tests/"
+        "VOBetting\\Tests\\": "tests"
       }
     },
     "scripts": {

@@ -4,7 +4,7 @@ use Doctrine\ORM\Tools\Console\ConsoleRunner;
 
 require 'vendor/autoload.php';
 
-$settings = include 'app/settings.php';
+$settings = include 'conf/settings.php';
 $settings = $settings['settings']['doctrine'];
 
 class CustomYamlDriver extends Doctrine\ORM\Mapping\Driver\YamlDriver

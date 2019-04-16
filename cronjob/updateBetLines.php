@@ -10,11 +10,11 @@ namespace App\Cronjob;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$settings = require __DIR__ . '/../app/settings.php';
+$settings = require __DIR__ . '/../conf/settings.php';
 $app = new \Slim\App($settings);
 
 // Set up dependencies
-require __DIR__ . '/../app/dependencies.php';
+require __DIR__ . '/../conf/dependencies.php';
 
 $settings = $app->getContainer()->get('settings');
 $em = $app->getContainer()->get('em');
