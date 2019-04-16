@@ -21,24 +21,9 @@ $settings = $app->getContainer()->get('settings');
 $em = $app->getContainer()->get('em');
 $voetbal = $app->getContainer()->get('voetbal');
 
-$appUrl = reset( $settings['www']['urls'] );
-$logger = new App\UrlLogger('cronjob-games', $appUrl );
+$wwwUrls = $settings['www']['urls'];
+$logger = new App\GameLogger('cronjob-games', reset( $wwwUrls ) );
 $logger->pushProcessor(new \Monolog\Processor\UidProcessor());
-
-
-// the action shoud be defined here, dependant of the type of error ofcourse
-// parameters should not be included here
-
-// no game found for externalsystemgame for certain externalsystem
-$this->addNotice('game could not be found, check here if games are created at ' . $this->errorUrl . 'admin/games/' . $competition->getId()  );
-// no externalgame found for a game and certain externalsystem
-$this->addNotice('game could not be found for externalsystem "'.$this->externalSystemBase->getName().'" and gameid '.$game->getId().' for competition "' . $competition->getName(). '" for updating' );
-
-// no competitor found externalsystemcompetitor and certain externalsystembase
-$this->addNotice("homecompetitor could not be found for ".$this->externalSystemBase->getName()."-competitorid " . $externalSystemGame->homecompetitor );
-// no competitor found for competition and externalsystemcompetitors(home and away)
-$this->addNotice( $this->externalSystemBase->getName() . "-game could not be found for : " . $externalSystemGame->homecompetitor . " vs " . $externalSystemGame->awaycompetitor );
-
 
 try {
     $logger->pushHandler(new \Monolog\Handler\StreamHandler($settings['logger']['cronjobpath'] . 'games.log', $settings['logger']['level']));
@@ -56,7 +41,7 @@ try {
                 continue;
             }
             $externalSystem->init();
-            $importer = $externalSystem->getGameImporter();
+            $importer = $externalSystem->getGameImporter( $logger );
             $importer->createByCompetitions( $competitionRepos->findAll() );
 
         } catch (\Exception $error) {
