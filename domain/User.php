@@ -64,7 +64,7 @@ class User
     }
 
     /**
-     * @param $id
+     * @param int $id
      */
     public function setId( $id )
     {
@@ -104,7 +104,7 @@ class User
     }
 
     /**
-     * @param string
+     * @param string $password
      */
     public function setPassword( $password )
     {

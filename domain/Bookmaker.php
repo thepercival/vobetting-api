@@ -43,7 +43,7 @@ class Bookmaker
     }
 
     /**
-     * @param $id
+     * @param int $id
      */
     public function setId( $id )
     {
@@ -80,7 +80,7 @@ class Bookmaker
     }
 
     /**
-     * @param $exchange
+     * @param bool $exchange
      */
     public function setExchange( $exchange )
     {

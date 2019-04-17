@@ -52,7 +52,7 @@ class BetLine
     }
 
     /**
-     * @param $id
+     * @param int $id
      */
     public function setId( $id )
     {
@@ -71,7 +71,7 @@ class BetLine
     }
 
     /**
-     * @param $betType
+     * @param int $betType
      */
     public function setBetType( $betType )
     {
@@ -89,7 +89,7 @@ class BetLine
     }
 
     /**
-     * @param $game
+     * @param Game $game
      */
     public function setGame( $game )
     {
@@ -107,13 +107,13 @@ class BetLine
     }
 
     /**
-     * @param $poulePlace
+     * @param PoulePlace $poulePlace
      */
     public function setPoulePlace( PoulePlace $poulePlace = null )
     {
         $this->poulePlace = $poulePlace;
     }
 
-    
+
 
 }

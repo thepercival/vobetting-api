@@ -78,7 +78,7 @@ class LayBack
     }
 
     /**
-     * @param $id
+     * @param int $id
      */
     public function setId( $id )
     {
@@ -89,7 +89,7 @@ class LayBack
     /**
      * Get back
      *
-     * @return boolean
+     * @return bool
      */
     public function getBack()
     {
@@ -97,7 +97,7 @@ class LayBack
     }
 
     /**
-     * @param $back
+     * @param bool $back
      */
     public function setBack( $back )
     {
@@ -107,7 +107,7 @@ class LayBack
     /**
      * Get price
      *
-     * @return boolean
+     * @return double
      */
     public function getPrice()
     {
@@ -115,7 +115,7 @@ class LayBack
     }
 
     /**
-     * @param $price
+     * @param double $price
      */
     public function setPrice( $price )
     {
@@ -168,7 +168,7 @@ class LayBack
     }
 
     /**
-     * @param $betLine
+     * @param BetLine $betLine
      */
     public function setBetLine( $betLine )
     {
@@ -186,7 +186,7 @@ class LayBack
     }
 
     /**
-     * @param $bookmaker
+     * @param Bookmaker $bookmaker
      */
     public function setBookmaker( $bookmaker )
     {
@@ -204,7 +204,7 @@ class LayBack
     }
 
     /**
-     * @param $externalSystem
+     * @param ExternalSystem $externalSystem
      */
     public function setExternalSystem( ExternalSystem $externalSystem )
     {
