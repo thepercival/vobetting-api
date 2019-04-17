@@ -24,6 +24,8 @@ use Voetbal\External\Competitor\Repository as ExternalCompetitorRepos;
 use VOBetting\LayBack\Repository as LayBackRepos;
 use VOBetting\LayBack;
 use Monolog\Logger;
+use Voetbal\PoulePlace;
+use Voetbal\Game\PoulePlace as GamePoulePlace;
 
 class BetLine implements BetLineImporter
 {
@@ -149,7 +151,7 @@ class BetLine implements BetLineImporter
             if( $competitor === null ) {
                 return null;
             }
-            $poulePlace = $game->getPoulePlaceForCompetitor($competitor);
+            $poulePlace = $this->getPoulePlace( $game, $competitor );
         }
         $betLine = $this->repos->findOneBy(array(
             "game" => $game,
@@ -162,6 +164,17 @@ class BetLine implements BetLineImporter
         }
         // maybe save close state here
         return $this->repos->save($betLine);
+    }
+
+    protected function getPoulePlace( Game $game, Competitor $competitor ): ?PoulePlace
+    {
+        $poulePlaces = $game->getPoulePlaces()->map( function( GamePoulePlace $gamePoulePlace ) {
+            return $gamePoulePlace->getPoulePlace();
+        });
+        $foundPoulePlaces = $poulePlaces->filter( function( PoulePlace $poulePlace ) use ( $competitor ) {
+            return $poulePlace->getCompetitor() === $competitor;
+        });
+        return $foundPoulePlaces->first();
     }
 
     public function convertHomeAway( $homeAway )

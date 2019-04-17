@@ -16,9 +16,9 @@ class Factory extends \Voetbal\External\System\Factory
         if( $externalSystem->getName() === "betfair" ) {
             return new Betfair($externalSystem);
         }
-        if( $externalSystem->getName() === "API Football" ) {
-            return new APIFootball($externalSystem);
-        }
+//        if( $externalSystem->getName() === "API Football" ) {
+//            return new APIFootball($externalSystem);
+//        }
         return parent::create($externalSystem);
     }
 }

@@ -9,7 +9,7 @@
 namespace VOBetting\External\System;
 
 use Voetbal\External\System as ExternalSystem;
-use PeterColes\Betfair\Betfair as PeterColesBetfair;
+use PeterColes\Betfair\Api\Auth as BetfairAuth;
 use VOBetting\BetLine\Repository as BetLineRepos;
 use VOBetting\External\System\Importable\BetLine as BetLineImportable;
 use VOBetting\External\System\Importer\BetLine as BetLineImporter;
@@ -39,7 +39,8 @@ class Betfair implements \Voetbal\External\System\Def, BetLineImportable, Compet
 
     public function init() {
 
-        PeterColesBetfair::init(
+        $auth = new BetfairAuth();
+        $auth->init(
             $this->externalSystem->getApikey(),
             $this->externalSystem->getUsername(),
             $this->externalSystem->getPassword()
