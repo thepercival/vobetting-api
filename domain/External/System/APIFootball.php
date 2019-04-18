@@ -21,6 +21,7 @@ use Voetbal\Competition\Repository as CompetitionRepos;
 use Voetbal\Game\Repository as GameRepos;
 use Voetbal\External\Competitor\Repository as ExternalCompetitorRepos;
 use VOBetting\LayBack\Repository as LayBackRepos;
+use VOBetting\Bookmaker\Repository as BookmakerRepos;
 use Monolog\Logger;
 
 class APIFootball implements SystemDef, BetLineImportable, CompetitorGetter
@@ -51,6 +52,7 @@ class APIFootball implements SystemDef, BetLineImportable, CompetitorGetter
         GameRepos $gameRepos,
         ExternalCompetitorRepos $externalCompetitorRepos,
         LayBackRepos $layBackRepos,
+        BookmakerRepos $bookmakerRepos,
         Logger $logger
     ) : BetLineImporter {
         return new APIFootballBetLineImporter(
@@ -61,6 +63,7 @@ class APIFootball implements SystemDef, BetLineImportable, CompetitorGetter
             $gameRepos,
             $externalCompetitorRepos,
             $layBackRepos,
+            $bookmakerRepos,
             $logger
         );
     }

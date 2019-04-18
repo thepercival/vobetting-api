@@ -19,6 +19,7 @@ use Voetbal\Competition\Repository as CompetitionRepos;
 use Voetbal\Game\Repository as GameRepos;
 use Voetbal\External\Competitor\Repository as ExternalCompetitorRepos;
 use VOBetting\LayBack\Repository as LayBackRepos;
+use VOBetting\Bookmaker\Repository as BookmakerRepos;
 use Monolog\Logger;
 use Voetbal\External\System\Importer\CompetitorGetter;
 use Voetbal\External\League as ExternalLeague;
@@ -58,6 +59,7 @@ class Betfair implements \Voetbal\External\System\Def, BetLineImportable, Compet
         GameRepos $gameRepos,
         ExternalCompetitorRepos $externalCompetitorRepos,
         LayBackRepos $layBackRepos,
+        BookmakerRepos $bookmakerRepos,
         Logger $logger
     ) : BetLineImporter {
         return new BetfairBetLineImporter(
@@ -68,6 +70,7 @@ class Betfair implements \Voetbal\External\System\Def, BetLineImportable, Compet
             $gameRepos,
             $externalCompetitorRepos,
             $layBackRepos,
+            $bookmakerRepos,
             $logger
         );
     }

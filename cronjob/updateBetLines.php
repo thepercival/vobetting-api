@@ -36,10 +36,11 @@ try {
     $leagueRepos = $voetbal->getRepository( \Voetbal\League::class );
     $competitionRepos = $voetbal->getRepository( \Voetbal\Competition::class );
     $externalLeagueRepos = $voetbal->getRepository( \Voetbal\External\League::class );
-    $externalCompetitorRepos = $voetbal->getRepository( \Voetbal\External\Competitor::class );
+    $externalCompetitorRepos = new \Voetbal\External\Competitor\Repository($em,$em->getClassMetaData(\Voetbal\External\Competitor::class));
     $gameRepos = $voetbal->getRepository( \Voetbal\Game::class );
     $betLineRepos = $voetbal->getRepository( \VOBetting\BetLine::class );
     $layBackRepos = $voetbal->getRepository( \VOBetting\LayBack::class );
+    $bookmakerRepos = $voetbal->getRepository( \VOBetting\Bookmaker::class );
 
 
     $externalSystems = $externalSystemRepos->findAll();
@@ -60,6 +61,7 @@ try {
                 $gameRepos,
                 $externalCompetitorRepos,
                 $layBackRepos,
+                $bookmakerRepos,
                 $logger
             );
             $externalSystemHelper->setMaxDaysBeforeImport( $maxDaysBeforeImport );

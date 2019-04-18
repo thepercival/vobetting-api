@@ -22,8 +22,10 @@ use Voetbal\Competition\Repository as CompetitionRepos;
 use Voetbal\Game\Repository as GameRepos;
 use Voetbal\External\Competitor\Repository as ExternalCompetitorRepos;
 use VOBetting\LayBack\Repository as LayBackRepos;
+use VOBetting\Bookmaker\Repository as BookmakerRepos;
 use VOBetting\LayBack;
 use Monolog\Logger;
+use VOBetting\Bookmaker;
 use Voetbal\PoulePlace;
 use Voetbal\Game\PoulePlace as GamePoulePlace;
 
@@ -58,6 +60,10 @@ class BetLine implements BetLineImporter
      */
     private $layBackRepos;
     /**
+     * @var BookmakerRepos
+     */
+    private $bookmakerRepos;
+    /**
      * @var Logger
      */
     private $logger;
@@ -80,6 +86,7 @@ class BetLine implements BetLineImporter
         GameRepos $gameRepos,
         ExternalCompetitorRepos $externalCompetitorRepos,
         LayBackRepos $layBackRepos,
+        BookmakerRepos $bookmakerRepos,
         Logger $logger
 
     ) {
@@ -90,6 +97,7 @@ class BetLine implements BetLineImporter
         $this->gameRepos = $gameRepos;
         $this->externalCompetitorRepos = $externalCompetitorRepos;
         $this->layBackRepos = $layBackRepos;
+        $this->bookmakerRepos = $bookmakerRepos;
         $this->logger = $logger;
     }
 
@@ -101,6 +109,11 @@ class BetLine implements BetLineImporter
     public function getId( $externalSystemBetLine )
     {
         throw new \Exception("notimplyet", E_ERROR );
+    }
+
+    private function getBookmaker(): Bookmaker
+    {
+        return $this->bookmakerRepos->findOneBy( array("name" => "Betfair") );
     }
 
     public function process( League $league, $externalSystemEvent, $betType ) {
@@ -166,7 +179,7 @@ class BetLine implements BetLineImporter
         return $this->repos->save($betLine);
     }
 
-    protected function getPoulePlace( Game $game, Competitor $competitor ): ?PoulePlace
+    protected function getPoulePlace( Game $game, $competitor ): ?PoulePlace
     {
         $poulePlaces = $game->getPoulePlaces()->map( function( GamePoulePlace $gamePoulePlace ) {
             return $gamePoulePlace->getPoulePlace();
@@ -198,10 +211,9 @@ class BetLine implements BetLineImporter
         BetLineBase $betLine,
         $layBacks, $layBack
     ) {
-        throw new \Exception("bookmaker should be included to layback", E_ERROR );
-        $bookMaker = null;
+        $bookmaker = $this->getBookmaker();
         foreach( $layBacks as $layBackIt ){
-            $layBackNew = new LayBack( $dateTime, $betLine, $bookMaker, $this->externalSystemBase );
+            $layBackNew = new LayBack( $dateTime, $betLine, $bookmaker, $this->externalSystemBase );
             $layBackNew->setBack( $layBack );
             $layBackNew->setPrice( $layBackIt->price );
             $layBackNew->setSize( $layBackIt->size );
@@ -232,7 +244,7 @@ class BetLine implements BetLineImporter
     {
         $competition = $this->competitionRepos->findOneByLeagueAndDate( $league,  $startDateTime );
 
-        if( $competition === null ) {
+        if( $competition === false ) {
             $this->logger->addNotice("competition not found for league " . $league->getName() . " and date " . $startDateTime->format(\DATE_ISO8601));
             return null;
         }

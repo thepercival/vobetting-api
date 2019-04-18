@@ -23,6 +23,7 @@ use Voetbal\Game\Repository as GameRepos;
 use Voetbal\External\Competitor\Repository as ExternalCompetitorRepos;
 use VOBetting\LayBack\Repository as LayBackRepos;
 use VOBetting\LayBack;
+use VOBetting\Bookmaker\Repository as BookmakerRepos;
 use Monolog\Logger;
 
 class BetLine // implements BetLineImporter
@@ -56,6 +57,10 @@ class BetLine // implements BetLineImporter
      */
     private $layBackRepos;
     /**
+     * @var BookmakerRepos
+     */
+    private $bookmakerRepos;
+    /**
      * @var Logger
      */
     private $logger;
@@ -78,6 +83,7 @@ class BetLine // implements BetLineImporter
         GameRepos $gameRepos,
         ExternalCompetitorRepos $externalCompetitorRepos,
         LayBackRepos $layBackRepos,
+        BookmakerRepos $bookmakerRepos,
         Logger $logger
 
     ) {
@@ -88,6 +94,7 @@ class BetLine // implements BetLineImporter
         $this->gameRepos = $gameRepos;
         $this->externalCompetitorRepos = $externalCompetitorRepos;
         $this->layBackRepos = $layBackRepos;
+        $this->bookmakerRepos = $bookmakerRepos;
         $this->logger = $logger;
     }
 
