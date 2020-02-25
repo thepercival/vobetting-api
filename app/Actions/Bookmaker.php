@@ -34,34 +34,6 @@ final class Bookmaker
         $this->serializer = $serializer;
     }
 
-    public function fetch( $request, $response, $args)
-    {
-        $sErrorMessage = null;
-        try {
-            $bookmakers = $this->repos->findAll();
-
-            return $response
-                ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $bookmakers, 'json'));
-            ;
-        }
-        catch( \Exception $e ){
-            $sErrorMessage = $e->getMessage();
-        }
-        return $response->withStatus(404)->write( $sErrorMessage );
-    }
-
-    public function fetchOne( $request, $response, $args)
-    {
-        $object = $this->repos->find($args['id']);
-        if ($object) {
-            return $response
-                ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $object, 'json'));
-            ;
-        }
-        return $response->withStatus(404, 'geen bookmakers met het opgegeven id gevonden');
-    }
 
     public function add( $request, $response, $args)
     {

@@ -47,9 +47,9 @@ final class BookmakerAction extends Action
     public function fetch( Request $request, Response $response, $args ): Response
     {
         try {
-            /** @var \FCToernooi\Tournament $tournament */
-            $tournament = $request->getAttribute("tournament");
-            $json = $this->serializer->serialize( $tournament->getSponsors(), 'json');
+            $bookmakers = $this->bookmakerRepos->findAll();
+
+            $json = $this->serializer->serialize( $bookmakers, 'json');
             return $this->respondWithJson( $response, $json );
         }
         catch( \Exception $e ){
@@ -57,20 +57,15 @@ final class BookmakerAction extends Action
         }
     }
 
+
     public function fetchOne( Request $request, Response $response, $args ): Response
     {
         try {
-            /** @var \FCToernooi\Tournament $tournament */
-            $tournament = $request->getAttribute("tournament");
-
-            $sponsor = $this->sponsorRepos->find((int) $args['sponsorId']);
-            if ( $sponsor === null ) {
-                throw new \Exception("geen sponsor met het opgegeven id gevonden", E_ERROR);
+            $bookmaker = $this->bookmakerRepos->find((int) $args['id']);
+            if ( $bookmaker === null ) {
+                throw new \Exception("geen bookmakers met het opgegeven id gevonden", E_ERROR);
             }
-            if ( $sponsor->getTournament() !== $tournament ) {
-                return new ForbiddenResponse("het toernooi komt niet overeen met het toernooi van de sponsor");
-            }
-            $json = $this->serializer->serialize( $sponsor, 'json');
+            $json = $this->serializer->serialize( $bookmaker, 'json');
             return $this->respondWithJson( $response, $json );
         }
         catch( \Exception $e ){
