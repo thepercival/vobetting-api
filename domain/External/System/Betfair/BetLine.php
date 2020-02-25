@@ -26,8 +26,9 @@ use VOBetting\Bookmaker\Repository as BookmakerRepos;
 use VOBetting\LayBack;
 use Monolog\Logger;
 use VOBetting\Bookmaker;
-use Voetbal\PoulePlace;
-use Voetbal\Game\PoulePlace as GamePoulePlace;
+use Voetbal\Place;
+use Voetbal\Game\Place as GamePlace;
+use Voetbal\State;
 
 class BetLine implements BetLineImporter
 {
@@ -179,12 +180,12 @@ class BetLine implements BetLineImporter
         return $this->repos->save($betLine);
     }
 
-    protected function getPoulePlace( Game $game, $competitor ): ?PoulePlace
+    protected function getPoulePlace( Game $game, $competitor ): ?Place
     {
-        $poulePlaces = $game->getPoulePlaces()->map( function( GamePoulePlace $gamePoulePlace ) {
-            return $gamePoulePlace->getPoulePlace();
+        $poulePlaces = $game->getPlaces()->map( function( GamePlace $gamePoulePlace ) {
+            return $gamePoulePlace->getPlace();
         });
-        $foundPoulePlaces = $poulePlaces->filter( function( PoulePlace $poulePlace ) use ( $competitor ) {
+        $foundPoulePlaces = $poulePlaces->filter( function( Place $poulePlace ) use ( $competitor ) {
             return $poulePlace->getCompetitor() === $competitor;
         });
         return $foundPoulePlaces->first();
@@ -235,7 +236,7 @@ class BetLine implements BetLineImporter
     {
         $competitor = $this->externalCompetitorRepos->findImportable( $this->externalSystemBase, $externalId );
         if( $competitor === null ) {
-            $this->logger->addNotice("competitor not found for externalid " . $externalId . " and externalSystem " . $this->externalSystemBase->getName() );
+            $this->logger->notice("competitor not found for externalid " . $externalId . " and externalSystem " . $this->externalSystemBase->getName() );
         }
         return $competitor;
     }
@@ -245,7 +246,7 @@ class BetLine implements BetLineImporter
         $competition = $this->competitionRepos->findOneByLeagueAndDate( $league,  $startDateTime );
 
         if( $competition === false ) {
-            $this->logger->addNotice("competition not found for league " . $league->getName() . " and date " . $startDateTime->format(\DATE_ISO8601));
+            $this->logger->notice("competition not found for league " . $league->getName() . " and date " . $startDateTime->format(\DATE_ISO8601));
             return null;
         }
 
@@ -273,10 +274,10 @@ class BetLine implements BetLineImporter
             return null;
         }
 
-        $states = Game::STATE_CREATED + Game::STATE_INPLAY;
+        $states = State::Created + State::InProgress;
         $games = $this->gameRepos->findByExt( $homeCompetitor, $awayCompetitor, $competition, $states );
         if( $games === null ) {
-            $this->logger->addNotice("game not found for homecompetitor " . $homeCompetitor->getName() . ",awaycompetitor " . $awayCompetitor->getName() . ", competition " . $competition->getName() . " and states " . $states );
+            $this->logger->notice("game not found for homecompetitor " . $homeCompetitor->getName() . ",awaycompetitor " . $awayCompetitor->getName() . ", competition " . $competition->getName() . " and states " . $states );
         }
         return reset( $games );
     }

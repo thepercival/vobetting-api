@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <entity name="VOBetting\Bookmaker" table="bookmakers" repository-class="VOBetting\Bookmaker\Repository">
+    <id name="id" type="integer" column="id">
+      <generator strategy="AUTO"/>
+    </id>
+    <field name="name" column="name" type="string" length="15" nullable="false" unique="false"/>
+    <field name="exchange" column="exchange" type="boolean" nullable="false"/>
+  </entity>
+</doctrine-mapping>

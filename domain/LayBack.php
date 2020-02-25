@@ -148,9 +148,6 @@ class LayBack
         return $this->dateTime;
     }
 
-    /**
-     * @return \DateTimeImmutable
-     */
     public function setDateTime( \DateTimeImmutable $dateTime )
     {
         $this->dateTime = $dateTime;

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <entity name="VOBetting\BetLine" table="betlines" repository-class="VOBetting\BetLine\Repository">
+    <id name="id" type="integer" column="id">
+      <generator strategy="AUTO"/>
+    </id>
+    <field name="betType" column="betType" type="integer" nullable="false" unique="false"/>
+    <many-to-one field="competition" target-entity="Voetbal\Game">
+      <join-columns>
+        <join-column name="gameid" referenced-column-name="id" nullable="false" on-delete="CASCADE"/>
+      </join-columns>
+    </many-to-one>
+    <many-to-one field="pouleplace" target-entity="Voetbal\Place">
+      <join-columns>
+        <join-column name="pouleplaceid" referenced-column-name="id" nullable="false" on-delete="CASCADE"/>
+      </join-columns>
+    </many-to-one>
+  </entity>
+
+</doctrine-mapping>

@@ -3,4 +3,4 @@
 !/logs/README.md
 .env
 *.log
-/.idea/**
+.idea

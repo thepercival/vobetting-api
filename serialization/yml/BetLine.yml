@@ -10,5 +10,5 @@ VOBetting\BetLine:
       type: integer
       serialized_name: betType
     poulePlace:
-      type: Voetbal\PoulePlace
+      type: Voetbal\Place
       serialized_name: poulePlace

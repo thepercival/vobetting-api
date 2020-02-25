@@ -21,7 +21,7 @@ VOBetting\BetLine:
         nullable: false
         onDelete: CASCADE
     poulePlace:
-      targetEntity: Voetbal\PoulePlace
+      targetEntity: Voetbal\Place
       joinColumn:
         name: pouleplaceid
         referencedColumnName: id

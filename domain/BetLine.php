@@ -9,7 +9,7 @@
 namespace VOBetting;
 
 use Voetbal\Game;
-use Voetbal\PoulePlace;
+use Voetbal\Place;
 
 class BetLine
 {
@@ -29,7 +29,7 @@ class BetLine
     private $game;
 
     /**
-     * @var PoulePlace
+     * @var Place
      */
     private $poulePlace;
 
@@ -99,7 +99,7 @@ class BetLine
     /**
      * Get pouleplace
      *
-     * @return PoulePlace
+     * @return Place
      */
     public function getPoulePlace()
     {
@@ -107,9 +107,9 @@ class BetLine
     }
 
     /**
-     * @param PoulePlace $poulePlace
+     * @param Place $poulePlace
      */
-    public function setPoulePlace( PoulePlace $poulePlace = null )
+    public function setPoulePlace( Place $poulePlace = null )
     {
         $this->poulePlace = $poulePlace;
     }

@@ -1,34 +1,3 @@
 <?php
-if (PHP_SAPI == 'cli-server') {
-    // To help the built-in PHP dev server, check if the request was actually for
-    // something which should probably be served as a static file
-    $url  = parse_url($_SERVER['REQUEST_URI']);
-    $file = __DIR__ . $url['path'];
-    if (is_file($file)) {
-        return false;
-    }
-}
 
-// this line can move to php.settings if allwebsites use it
-date_default_timezone_set ( 'UTC' );
-
-require __DIR__ . '/../vendor/autoload.php';
-
-session_start();
-
-// Instantiate the app
-$settings = require __DIR__ . '/../conf/settings.php';
-$app = new \Slim\App($settings);
-
-// Set up dependencies
-require __DIR__ . '/../conf/dependencies.php';
-
-// Register middleware
-require __DIR__ . '/../conf/middleware.php';
-
-// Register routes
-require __DIR__ . '/../conf/routes/token.php';
-require __DIR__ . '/../conf/routes/all.php';
-
-// Run app
-$app->run();
+(require __DIR__ . '/../config/bootstrap.php')->run();
