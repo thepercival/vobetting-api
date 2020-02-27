@@ -12,14 +12,11 @@ use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
 use Selective\Config\Configuration;
 use Slim\Factory\ServerRequestCreatorFactory;
-use \Suin\ImageResizer\ImageResizer;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
-use FCToernooi\Sponsor\Repository as SponsorRepository;
-use FCToernooi\Tournament\Repository as TournamentRepository;
-use FCToernooi\Sponsor;
+use VOBetting\Bookmaker\Repository as BookmakerRepository;
 
 final class BookmakerAction extends Action
 {
@@ -75,22 +72,21 @@ final class BookmakerAction extends Action
 
     public function add( Request $request, Response $response, $args ): Response
     {
+
+
         try {
-            /** @var \FCToernooi\Tournament $tournament */
-            $tournament = $request->getAttribute("tournament");
+            /** @var \VOBetting\Bookmaker $bookmakerSer */
+            $bookmakerSer = $this->serializer->deserialize($this->getRawData(), 'VOBetting\Bookmaker', 'json');
 
-            /** @var \FCToernooi\Sponsor $sponsor */
-            $sponsor = $this->serializer->deserialize( $this->getRawData(), 'FCToernooi\Sponsor', 'json');
+            $bookmakerWithSameName = $this->bookmakerRepos->findOneBy( array('name' => $bookmakerSer->getName() ) );
+            if ( $bookmakerWithSameName !== null ){
+                throw new \Exception("de bookmaker met de naam ".$bookmakerSer->getName()." bestaat al", E_ERROR );
+            }
 
-            $this->sponsorRepos->checkNrOfSponsors($tournament, $sponsor->getScreenNr() );
+            $newBookmaker = new \VOBetting\Bookmaker( $bookmakerSer->getName(), $bookmakerSer->getExchange() );
+            $this->bookmakerRepos->save($newBookmaker);
 
-            $newSponsor = new Sponsor($tournament, $sponsor->getName());
-            $newSponsor->setUrl($sponsor->getUrl());
-            $newSponsor->setLogoUrl( $sponsor->getLogoUrl() );
-            $newSponsor->setScreenNr( $sponsor->getScreenNr() );
-            $this->sponsorRepos->save($newSponsor);
-
-            $json = $this->serializer->serialize( $newSponsor, 'json');
+            $json = $this->serializer->serialize( $newBookmaker, 'json');
             return $this->respondWithJson( $response, $json );
         }
         catch( \Exception $e ){
@@ -101,29 +97,23 @@ final class BookmakerAction extends Action
     public function edit( Request $request, Response $response, $args ): Response
     {
         try {
-            /** @var \FCToernooi\Tournament $tournament */
-            $tournament = $request->getAttribute("tournament");
+            /** @var \VOBetting\Bookmaker $bookmakerSer */
+            $bookmakerSer = $this->serializer->deserialize($this->getRawData(), 'VOBetting\Bookmaker', 'json');
 
-            /** @var \FCToernooi\Sponsor $sponsorSer */
-            $sponsorSer = $this->serializer->deserialize( $this->getRawData(), 'FCToernooi\Sponsor', 'json');
-
-            $sponsor = $this->sponsorRepos->find((int) $args['sponsorId']);
-            if ( $sponsor === null ) {
-                throw new \Exception("geen sponsor met het opgegeven id gevonden", E_ERROR);
-            }
-            if ( $sponsor->getTournament() !== $tournament ) {
-                return new ForbiddenResponse("het toernooi komt niet overeen met het toernooi van de sponsor");
+            $bookmaker = $this->bookmakerRepos->find( (int) $args['id'] );
+            if ( $bookmaker === null ){
+                throw new \Exception("de bookmaker met het opgegeven id bestaat niet meer", E_ERROR );
             }
 
-            $this->sponsorRepos->checkNrOfSponsors($tournament, $sponsorSer->getScreenNr(), $sponsor );
+            $bookmakerWithSameName = $this->bookmakerRepos->findOneBy( array('name' => $bookmakerSer->getName() ) );
+            if ( $bookmakerWithSameName !== null and $bookmakerWithSameName !== $bookmaker ){
+                throw new \Exception("de bookmaker met de naam ".$bookmakerSer->getName()." bestaat al", E_ERROR );
+            }
+            $bookmaker->setName( $bookmakerSer->getName() );
+            $bookmaker->setExchange( $bookmakerSer->getExchange());
+            $this->bookmakerRepos->save($bookmaker);
 
-            $sponsor->setName( $sponsorSer->getName() );
-            $sponsor->setUrl( $sponsorSer->getUrl() );
-            $sponsor->setLogoUrl( $sponsorSer->getLogoUrl() );
-            $sponsor->setScreenNr( $sponsorSer->getScreenNr() );
-            $this->sponsorRepos->save($sponsor);
-
-            $json = $this->serializer->serialize( $sponsor, 'json');
+            $json = $this->serializer->serialize( $bookmaker, 'json');
             return $this->respondWithJson( $response, $json );
         }
         catch( \Exception $e ){
@@ -134,19 +124,11 @@ final class BookmakerAction extends Action
     public function remove( Request $request, Response $response, $args ): Response
     {
         try{
-            /** @var \FCToernooi\Tournament $tournament */
-            $tournament = $request->getAttribute("tournament");
-
-            $sponsor = $this->sponsorRepos->find((int) $args['sponsorId']);
-            if ( $sponsor === null ) {
-                throw new \Exception("geen sponsor met het opgegeven id gevonden", E_ERROR);
+            $bookmaker = $this->bookmakerRepos->find((int) $args['id']);
+            if ( $bookmaker === null ) {
+                throw new \Exception("geen bookmaker met het opgegeven id gevonden", E_ERROR);
             }
-            if ( $sponsor->getTournament() !== $tournament ) {
-                return new ForbiddenResponse("het toernooi komt niet overeen met het toernooi van de sponsor");
-            }
-
-            $this->sponsorRepos->remove( $sponsor );
-
+            $this->bookmakerRepos->remove( $bookmaker );
             return $response->withStatus(200);
         }
         catch( \Exception $e ){

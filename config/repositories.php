@@ -62,7 +62,7 @@ return [
         return new LayBackRepository($entityManager, $entityManager->getClassMetaData(LayBack::class));
     },
 
-    SportRepository::class => function (ContainerInterface $container) {
+    /*SportRepository::class => function (ContainerInterface $container) {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new SportRepository($entityManager, $entityManager->getClassMetaData(Sport::class));
     },
@@ -93,11 +93,11 @@ return [
             $entityManager,
             $entityManager->getClassMetaData(PlanningInput::class)
         );
-    },
+    },*/
     GameRepository::class => function (ContainerInterface $container) {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new GameRepository($entityManager, $entityManager->getClassMetaData(Game::class));
-    },
+    }/*,
     GameScoreRepository::class => function (ContainerInterface $container) {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new GameScoreRepository($entityManager, $entityManager->getClassMetaData(GameScore::class));
@@ -136,5 +136,5 @@ return [
     PlanningConfigRepository::class => function (ContainerInterface $container) {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new PlanningConfigRepository($entityManager, $entityManager->getClassMetaData(PlanningConfig::class));
-    },
+    },*/
 ];

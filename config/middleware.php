@@ -36,7 +36,7 @@ return function (App $app) {
 
     $app->add( new JwtAuthentication(
                    [
-                       "secret" => $config->getString('auth.jwtsecret'),
+                       "secret" => $config->getString('auth.password'),
                        "logger" => $container->get(LoggerInterface::class),
                        "rules" => [
                            new JwtAuthentication\RequestPathRule(

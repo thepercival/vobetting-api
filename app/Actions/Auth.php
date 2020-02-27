@@ -10,36 +10,31 @@ namespace App\Actions;
 
 use App\Exceptions\DomainRecordNotFoundException;
 use App\Response\ErrorResponse;
+use App\Response\ForbiddenResponse as ForbiddenResponse;
 use JMS\Serializer\SerializerInterface;
-use FCToernooi\User;
 use \Firebase\JWT\JWT;
-use FCToernooi\User\Repository as UserRepository;
-use FCToernooi\Auth\Service as AuthService;
-use \Slim\Middleware\JwtAuthentication;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Selective\Config\Configuration;
 use Tuupola\Base62;
 
 final class Auth extends Action
 {
     /**
-     * @var AuthService
+     * @var Configuration
      */
-	private $authService;
-    /**
-     * @var UserRepository
-     */
-    private $userRepository;
+    protected $config;
     /**
      * @var SerializerInterface
      */
     protected $serializer;
 
-	public function __construct(AuthService $authService, UserRepository $userRepository, SerializerInterface $serializer )
+	public function __construct(
+        SerializerInterface $serializer,
+        Configuration $config )
 	{
-        $this->authService = $authService;
-        $this->userRepository = $userRepository;
 		$this->serializer = $serializer;
+        $this->config = $config;
 	}
 
     public function validateToken( Request $request, Response $response, $args ): Response
@@ -51,33 +46,18 @@ final class Auth extends Action
 	{
        try{
            $authData = $this->getFormData( $request );
-           if( !property_exists( $authData, "emailaddress") || strlen($authData->emailaddress) === 0 ) {
-               throw new \Exception( "het emailadres is niet opgegeven");
-           }
-           $emailaddress = filter_var($authData->emailaddress, FILTER_VALIDATE_EMAIL);
-           if( $emailaddress === false ) {
-               throw new \Exception( "het emailadres \"".$authData->emailaddress."\" is onjuist");
-           }
            if( !property_exists( $authData, "password") || strlen($authData->password) === 0 ) {
                throw new \Exception( "het wachtwoord is niet opgegeven");
            }
-
-           $user = $this->userRepository->findOneBy(
-               array( 'emailaddress' => $emailaddress )
-           );
-
-           if (!$user or !password_verify( $user->getSalt() . $authData->password, $user->getPassword() ) ) {
-               throw new \Exception( "ongeldige emailadres en wachtwoord combinatie");
+           if ( !password_verify( $this->config->getString("auth.salt") . $authData->password, $this->config->getString("auth.password") ) ) {
+               throw new \Exception( "ongeldig wachtwoord");
            }
 
            /*if ( !$user->getActive() ) {
 		    throw new \Exception( "activeer eerst je account met behulp van de link in je ontvangen email", E_ERROR );
 		    }*/
 
-           $data = [
-               "token" => $this->authService->getToken( $user ),
-               "userid" => $user->getId()
-           ];
+           $data = ["token" => $this->getToken() ];
 
            return $this->respondWithJson( $response, $this->serializer->serialize( $data, 'json') );
 		}
@@ -85,4 +65,20 @@ final class Auth extends Action
             return new ErrorResponse($e->getMessage(), 422);
 		}
 	}
+
+    public function getToken()
+    {
+        $jti = (new Base62)->encode(random_bytes(16));
+
+        $now = new \DateTimeImmutable();
+        $future = new \DateTimeImmutable("now +3 months");
+
+        $payload = [
+            "iat" => $now->getTimeStamp(),
+            "exp" => $future->getTimeStamp(),
+            "jti" => $jti
+        ];
+
+        return JWT::encode($payload, $this->config->getString("auth.password"));
+    }
 }
