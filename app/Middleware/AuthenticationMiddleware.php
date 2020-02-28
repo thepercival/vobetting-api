@@ -8,6 +8,7 @@
 
 namespace App\Middleware;
 
+use Slim\Routing\RouteContext;
 use VOBetting\Token as AuthToken;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
 use Psr\Http\Server\MiddlewareInterface;
@@ -26,11 +27,18 @@ class AuthenticationMiddleware implements MiddlewareInterface
         if ($request->getMethod() === "OPTIONS") {
             return $handler->handle($request);
         }
+
+        $noAuthUrl = "/public";
+        if( substr( $request->getUri()->getPath(), 0, strlen($noAuthUrl) ) === $noAuthUrl ) {
+            return $handler->handle($request);
+        }
+
         /** @var AuthToken|null $token */
         $token = $request->getAttribute('token');
         if ($token === null || !$token->isPopulated()) {
-           return new ForbiddenResponse("lege of ongeldige token");
+            return new ForbiddenResponse("lege of ongeldige token");
         }
+
         return $handler->handle($request);
     }
 

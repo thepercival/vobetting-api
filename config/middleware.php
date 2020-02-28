@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 use App\Middleware\AuthenticationMiddleware;
@@ -34,32 +35,33 @@ return function (App $app) {
 
     $app->add(AuthenticationMiddleware::class);
 
-    $app->add( new JwtAuthentication(
-                   [
-                       "secret" => $config->getString('auth.password'),
-                       "logger" => $container->get(LoggerInterface::class),
-                       "rules" => [
-                           new JwtAuthentication\RequestPathRule(
-                               [
-                                   "path" => "/",
-                                   "ignore" => ["/public"]
-                               ]
-                           ),
-                           new JwtAuthentication\RequestMethodRule(
-                               [
-                                   "ignore" => ["OPTIONS"]
-                               ]
-                           )
-                       ],
-                       "error" => function (Response $response, $arguments) {
-                return new UnauthorizedResponse($arguments["message"]);
-            },
-            "before" => function ( Request $request, $arguments) {
-                $token = new AuthToken( $arguments["decoded"] );
-                return $request->withAttribute("token", $token);
-            }
-                   ]
-               )
+    $app->add(
+        new JwtAuthentication(
+            [
+                "secret" => $config->getString('auth.password'),
+                "logger" => $container->get(LoggerInterface::class),
+                "rules" => [
+                    new JwtAuthentication\RequestPathRule(
+                        [
+                            "path" => "/",
+                            "ignore" => ["/public"]
+                        ]
+                    ),
+                    new JwtAuthentication\RequestMethodRule(
+                        [
+                            "ignore" => ["OPTIONS"]
+                        ]
+                    )
+                ],
+                "error" => function (Response $response, $arguments) {
+                    return new UnauthorizedResponse($arguments["message"]);
+                },
+                "before" => function (Request $request, $arguments) {
+                    $token = new AuthToken($arguments["decoded"]);
+                    return $request->withAttribute("token", $token);
+                }
+            ]
+        )
     );
 
     $app->add((new Middlewares\ContentType(['html', 'json']))->errorResponse());
@@ -79,14 +81,16 @@ return function (App $app) {
         HttpNotFoundException::class,
         function (Request $request, Throwable $exception, bool $displayErrorDetails) {
             return new ErrorResponse($exception->getMessage(), 404);
-        });
+        }
+    );
 
     // Set the Not Allowed Handler
     $errorMiddleware->setErrorHandler(
         HttpMethodNotAllowedException::class,
         function (Request $request, Throwable $exception, bool $displayErrorDetails) {
             return new ErrorResponse($exception->getMessage(), 405);
-        });
+        }
+    );
 };
 
 

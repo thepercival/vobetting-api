@@ -57,16 +57,16 @@
         },
         {
             "name": "cakephp/chronos",
-            "version": "2.0.2",
+            "version": "2.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cakephp/chronos.git",
-                "reference": "e1044d27cabf12d19097b436001aa96a3c2e4b0a"
+                "reference": "0b176c8e8abb18b552b789f60250188a74d534ab"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cakephp/chronos/zipball/e1044d27cabf12d19097b436001aa96a3c2e4b0a",
-                "reference": "e1044d27cabf12d19097b436001aa96a3c2e4b0a",
+                "url": "https://api.github.com/repos/cakephp/chronos/zipball/0b176c8e8abb18b552b789f60250188a74d534ab",
+                "reference": "0b176c8e8abb18b552b789f60250188a74d534ab",
                 "shasum": ""
             },
             "require": {
@@ -108,7 +108,7 @@
                 "datetime",
                 "time"
             ],
-            "time": "2020-02-08T02:38:43+00:00"
+            "time": "2020-02-26T20:24:12+00:00"
         },
         {
             "name": "dasprid/enum",
@@ -1167,23 +1167,23 @@
         },
         {
             "name": "firebase/php-jwt",
-            "version": "v5.0.0",
+            "version": "v5.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/firebase/php-jwt.git",
-                "reference": "9984a4d3a32ae7673d6971ea00bae9d0a1abba0e"
+                "reference": "4566062c68f76f43d44f1643f4970fe89757d4c6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/firebase/php-jwt/zipball/9984a4d3a32ae7673d6971ea00bae9d0a1abba0e",
-                "reference": "9984a4d3a32ae7673d6971ea00bae9d0a1abba0e",
+                "url": "https://api.github.com/repos/firebase/php-jwt/zipball/4566062c68f76f43d44f1643f4970fe89757d4c6",
+                "reference": "4566062c68f76f43d44f1643f4970fe89757d4c6",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.0"
             },
             "require-dev": {
-                "phpunit/phpunit": " 4.8.35"
+                "phpunit/phpunit": "^4.8|^5"
             },
             "type": "library",
             "autoload": {
@@ -1209,7 +1209,7 @@
             ],
             "description": "A simple library to encode and decode JSON Web Tokens (JWT) in PHP. Should conform to the current spec.",
             "homepage": "https://github.com/firebase/php-jwt",
-            "time": "2017-06-27T22:17:23+00:00"
+            "time": "2020-02-24T23:15:03+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -4653,12 +4653,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/voetbal.git",
-                "reference": "3b8f8e56e55b1426c163d5d83dee3d2d4dce7e91"
+                "reference": "138d9ce549117faaa7c9e415f1d14a3468456266"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/voetbal/zipball/3b8f8e56e55b1426c163d5d83dee3d2d4dce7e91",
-                "reference": "3b8f8e56e55b1426c163d5d83dee3d2d4dce7e91",
+                "url": "https://api.github.com/repos/thepercival/voetbal/zipball/138d9ce549117faaa7c9e415f1d14a3468456266",
+                "reference": "138d9ce549117faaa7c9e415f1d14a3468456266",
                 "shasum": ""
             },
             "require": {
@@ -4710,7 +4710,7 @@
                 "Voetbal",
                 "football"
             ],
-            "time": "2020-02-23T11:59:57+00:00"
+            "time": "2020-02-26T06:57:50+00:00"
         },
         {
             "name": "tuupola/base62",
@@ -5314,16 +5314,16 @@
         },
         {
             "name": "phpdocumentor/reflection-docblock",
-            "version": "5.0.0",
+            "version": "5.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpDocumentor/ReflectionDocBlock.git",
-                "reference": "a48807183a4b819072f26e347bbd0b5199a9d15f"
+                "reference": "cd72d394ca794d3466a3b2fc09d5a6c1dc86b47e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpDocumentor/ReflectionDocBlock/zipball/a48807183a4b819072f26e347bbd0b5199a9d15f",
-                "reference": "a48807183a4b819072f26e347bbd0b5199a9d15f",
+                "url": "https://api.github.com/repos/phpDocumentor/ReflectionDocBlock/zipball/cd72d394ca794d3466a3b2fc09d5a6c1dc86b47e",
+                "reference": "cd72d394ca794d3466a3b2fc09d5a6c1dc86b47e",
                 "shasum": ""
             },
             "require": {
@@ -5363,7 +5363,7 @@
                 }
             ],
             "description": "With this component, a library can provide support for annotations via DocBlocks or otherwise retrieve information that is embedded in a DocBlock.",
-            "time": "2020-02-09T09:16:15+00:00"
+            "time": "2020-02-22T12:28:44+00:00"
         },
         {
             "name": "phpdocumentor/type-resolver",
