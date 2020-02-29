@@ -8,6 +8,7 @@ use App\Actions\Auth as AuthAction;
 use App\Actions\BookmakerAction;
 use Slim\App;
 use Slim\Interfaces\RouteCollectorProxyInterface as Group;
+use App\Actions\Voetbal\AssociationAction;
 
 return function (App $app) {
 
@@ -33,5 +34,13 @@ return function (App $app) {
         $group->get('/{id}', BookmakerAction::class . ':fetchOne');
         $group->put('/{id}', BookmakerAction::class . ':edit');
         $group->delete('/{id}', BookmakerAction::class . ':remove');
+    });
+
+    $app->group('/associations', function ( Group $group ) {
+        $group->post('', AssociationAction::class . ':add');
+        $group->get('', AssociationAction::class . ':fetch');
+        $group->get('/{id}', AssociationAction::class . ':fetchOne');
+        $group->put('/{id}', AssociationAction::class . ':edit');
+        $group->delete('/{id}', AssociationAction::class . ':remove');
     });
 };
