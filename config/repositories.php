@@ -12,6 +12,11 @@ use VOBetting\BetLine;
 use VOBetting\LayBack\Repository as LayBackRepository;
 use VOBetting\LayBack;
 
+use Voetbal\External\System\Repository as ExternalSystemRepository;
+use Voetbal\External\System as ExternalSystemBase;
+
+use Voetbal\Association\Repository as AssociationRepository;
+use Voetbal\Association;
 
 use Voetbal\Planning\Config\Repository as PlanningConfigRepository;
 use Voetbal\Planning\Config as PlanningConfig;
@@ -60,6 +65,15 @@ return [
     LayBackRepository::class => function (ContainerInterface $container) {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new LayBackRepository($entityManager, $entityManager->getClassMetaData(LayBack::class));
+    },
+    AssociationRepository::class => function (ContainerInterface $container) {
+        $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
+        return new AssociationRepository($entityManager, $entityManager->getClassMetaData(Association::class));
+    },
+
+    ExternalSystemRepository::class => function (ContainerInterface $container) {
+        $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
+        return new ExternalSystemRepository($entityManager, $entityManager->getClassMetaData(ExternalSystemBase::class));
     },
 
     /*SportRepository::class => function (ContainerInterface $container) {
