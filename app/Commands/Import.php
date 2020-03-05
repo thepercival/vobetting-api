@@ -20,12 +20,17 @@ class Import extends Command
      * @var ExternalSystemFactory
      */
     protected $externalSystemFactory;
+    /**
+     * @var ContainerInterface
+     */
+    protected $container;
 
     public function __construct(ContainerInterface $container)
     {
         // $settings = $container->get('settings');
         $this->externalSystemRepos = $container->get(ExternalSystemRepository::class);
 
+        $this->container = $container;
         parent::__construct($container->get(Configuration::class));
     }
 

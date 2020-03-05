@@ -10,6 +10,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Voetbal\External\System as ExternalSystem;
 use Voetbal\Import\Service as VoetbalImportService;
 use App\Commands\Import as PlanningCommand;
+use Voetbal\Association\Repository as AssociationRepository;
 
 class Voetbal extends PlanningCommand
 {
@@ -43,7 +44,8 @@ class Voetbal extends PlanningCommand
         $externalSystems = $this->externalSystemRepos->findAll();
         $importService = new VoetbalImportService( $externalSystems, $this->logger );
         if(  $input->hasOption("associations") ) {
-            $importService->importAssociations();
+            $associationRepos = $this->container->get( AssociationRepository::class );
+            $importService->importAssociations( $associationRepos );
         }
         return 0;
     }

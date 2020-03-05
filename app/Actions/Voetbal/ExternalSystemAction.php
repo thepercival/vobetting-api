@@ -28,7 +28,7 @@ final class ExternalSystemAction extends Action
      */
     protected $externalSystemRepos;
     /**
-     * @var Serializer
+     * @var SerializerInterface
      */
     protected $serializer;
 
