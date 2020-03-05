@@ -30,8 +30,10 @@ return function (App $app) {
 //    $app->get('/laybacks', LayBackAction::class . ':fetch');
 
     $app->group('/bookmakers', function ( Group $group ) {
+        $group->options('', BookmakerAction::class . ':options');
         $group->post('', BookmakerAction::class . ':add');
         $group->get('', BookmakerAction::class . ':fetch');
+        $group->options('/{id}', BookmakerAction::class . ':options');
         $group->get('/{id}', BookmakerAction::class . ':fetchOne');
         $group->put('/{id}', BookmakerAction::class . ':edit');
         $group->delete('/{id}', BookmakerAction::class . ':remove');
@@ -39,15 +41,19 @@ return function (App $app) {
 
     $app->group('/voetbal', function ( Group $group ) {
         $group->group('/associations', function ( Group $group ) {
+            $group->options('', AssociationAction::class . ':options');
             $group->post('', AssociationAction::class . ':add');
             $group->get('', AssociationAction::class . ':fetch');
+            $group->options('/{id}', AssociationAction::class . ':options');
             $group->get('/{id}', AssociationAction::class . ':fetchOne');
             $group->put('/{id}', AssociationAction::class . ':edit');
             $group->delete('/{id}', AssociationAction::class . ':remove');
         });
         $group->group('/externalsystems', function ( Group $group ) {
+            $group->options('', ExternalSystemAction::class . ':options');
             $group->post('', ExternalSystemAction::class . ':add');
             $group->get('', ExternalSystemAction::class . ':fetch');
+            $group->options('/{id}', ExternalSystemAction::class . ':options');
             $group->get('/{id}', ExternalSystemAction::class . ':fetchOne');
             $group->put('/{id}', ExternalSystemAction::class . ':edit');
             $group->delete('/{id}', ExternalSystemAction::class . ':remove');

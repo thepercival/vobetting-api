@@ -8,11 +8,16 @@
 
 namespace App\Actions\Voetbal;
 
-use App\Actions\Action;
+namespace App\Actions\Voetbal;
+
 use App\Response\ErrorResponse;
-use JMS\Serializer\Serializer;
+use App\Response\ForbiddenResponse as ForbiddenResponse;
+use Selective\Config\Configuration;
+use App\Actions\Action;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Log\LoggerInterface;
+use JMS\Serializer\SerializerInterface;
 use Voetbal\External\System\Repository as ExternalSystemRepository;
 use Voetbal\External\System as ExternalSystem;
 
@@ -27,10 +32,14 @@ final class ExternalSystemAction extends Action
      */
     protected $serializer;
 
-    public function __construct(ExternalSystemRepository $externalSystemRepos, Serializer $serializer)
+    public function __construct(
+        LoggerInterface $logger,
+        SerializerInterface $serializer,
+        ExternalSystemRepository $externalSystemRepos
+    )
     {
+        parent::__construct($logger,$serializer);
         $this->externalSystemRepos = $externalSystemRepos;
-        $this->serializer = $serializer;
     }
 
     public function fetch( Request $request, Response $response, $args ): Response
