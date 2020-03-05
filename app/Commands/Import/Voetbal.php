@@ -2,7 +2,6 @@
 
 namespace App\Commands\Import;
 
-use Monolog\Logger;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;

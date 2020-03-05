@@ -49,7 +49,7 @@ final class Auth extends Action
            if( !property_exists( $authData, "password") || strlen($authData->password) === 0 ) {
                throw new \Exception( "het wachtwoord is niet opgegeven");
            }
-           if ( !password_verify( $this->config->getString("auth.salt") . $authData->password, $this->config->getString("auth.password") ) ) {
+           if ( !password_verify( $authData->password, $this->config->getString("auth.password") ) ) {
                throw new \Exception( "ongeldig wachtwoord");
            }
 

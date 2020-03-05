@@ -73,8 +73,6 @@ final class AssociationAction extends Action
 
     public function add( Request $request, Response $response, $args ): Response
     {
-
-
         try {
             /** @var \Voetbal\Association $associationSer */
             $associationSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Association', 'json');
