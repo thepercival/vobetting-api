@@ -13,7 +13,7 @@
         <join-column name="betlineid" referenced-column-name="id" nullable="false" on-delete="CASCADE"/>
       </join-columns>
     </many-to-one>
-    <many-to-one field="externalSystem" target-entity="Voetbal\External\System">
+    <many-to-one field="externalSource" target-entity="Voetbal\ExternalSource">
       <join-columns>
         <join-column name="externalsystemid" referenced-column-name="id" nullable="false" on-delete="CASCADE"/>
       </join-columns>

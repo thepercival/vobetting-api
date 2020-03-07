@@ -9,7 +9,7 @@ use App\Actions\BookmakerAction;
 use Slim\App;
 use Slim\Interfaces\RouteCollectorProxyInterface as Group;
 use App\Actions\Voetbal\AssociationAction;
-use App\Actions\Voetbal\ExternalSystemAction;
+use App\Actions\Voetbal\ExternalSourceAction;
 
 return function (App $app) {
 
@@ -49,14 +49,14 @@ return function (App $app) {
             $group->put('/{id}', AssociationAction::class . ':edit');
             $group->delete('/{id}', AssociationAction::class . ':remove');
         });
-        $group->group('/externalsystems', function ( Group $group ) {
-            $group->options('', ExternalSystemAction::class . ':options');
-            $group->post('', ExternalSystemAction::class . ':add');
-            $group->get('', ExternalSystemAction::class . ':fetch');
-            $group->options('/{id}', ExternalSystemAction::class . ':options');
-            $group->get('/{id}', ExternalSystemAction::class . ':fetchOne');
-            $group->put('/{id}', ExternalSystemAction::class . ':edit');
-            $group->delete('/{id}', ExternalSystemAction::class . ':remove');
+        $group->group('/externalsources', function ( Group $group ) {
+            $group->options('', ExternalSourceAction::class . ':options');
+            $group->post('', ExternalSourceAction::class . ':add');
+            $group->get('', ExternalSourceAction::class . ':fetch');
+            $group->options('/{id}', ExternalSourceAction::class . ':options');
+            $group->get('/{id}', ExternalSourceAction::class . ':fetchOne');
+            $group->put('/{id}', ExternalSourceAction::class . ':edit');
+            $group->delete('/{id}', ExternalSourceAction::class . ':remove');
         });
     });
 };

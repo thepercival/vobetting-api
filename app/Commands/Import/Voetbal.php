@@ -7,12 +7,12 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Voetbal\External\System as ExternalSystem;
 use Voetbal\Import\Service as VoetbalImportService;
-use App\Commands\Import as PlanningCommand;
+use App\Commands\Import as ImportCommand;
 use Voetbal\Association\Repository as AssociationRepository;
+use Voetbal\Attacher\Association\Repository as AssociationAttacherRepository;
 
-class Voetbal extends PlanningCommand
+class Voetbal extends ImportCommand
 {
     public function __construct(ContainerInterface $container)
     {
@@ -41,11 +41,12 @@ class Voetbal extends PlanningCommand
     {
         $this->init($input, 'cron-import-voetbal');
 
-        $externalSystems = $this->externalSystemRepos->findAll();
-        $importService = new VoetbalImportService( $externalSystems, $this->logger );
+        $externalSources = $this->externalSourceRepos->findAll();
+        $importService = new VoetbalImportService( $externalSources, $this->logger );
         if(  $input->hasOption("associations") ) {
             $associationRepos = $this->container->get( AssociationRepository::class );
-            $importService->importAssociations( $associationRepos );
+            $associationAttacherRepos = $this->container->get( AssociationAttacherRepository::class );
+            $importService->importAssociations( $associationRepos , $associationAttacherRepos);
         }
         return 0;
     }

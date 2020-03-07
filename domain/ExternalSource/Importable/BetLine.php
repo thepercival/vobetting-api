@@ -6,7 +6,7 @@
  * Time: 11:58
  */
 
-namespace VOBetting\External\System\Importable;
+namespace VOBetting\ExternalSource\Importable;
 
 use VOBetting\BetLine\Repository as BetLineRepos;
 use VOBetting\External\System\Importer\BetLine as BetLineImporter;
@@ -19,13 +19,13 @@ use Monolog\Logger;
 
 interface BetLine
 {
-    public function getBetLineImporter(
-        BetLineRepos $repos,
-        CompetitionRepos $competitionRepos,
-        GameRepos $gameRepos,
-        ExternalCompetitorRepos $externalCompetitorRepos,
-        LayBackRepos $layBackRepos,
-        BookmakerRepos $bookmakerRepos,
-        Logger $logger
-    ) : BetLineImporter;
+//    public function getBetLineImporter(
+//        BetLineRepos $repos,
+//        CompetitionRepos $competitionRepos,
+//        GameRepos $gameRepos,
+//        ExternalCompetitorRepos $externalCompetitorRepos,
+//        LayBackRepos $layBackRepos,
+//        BookmakerRepos $bookmakerRepos,
+//        Logger $logger
+//    ) : BetLineImporter;
 }

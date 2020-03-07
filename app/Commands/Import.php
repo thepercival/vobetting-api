@@ -7,19 +7,19 @@ use App\Command;
 use Selective\Config\Configuration;
 
 use Symfony\Component\Console\Input\InputInterface;
-use Voetbal\External\System\Repository as ExternalSystemRepository;
-use Voetbal\External\System\Factory as ExternalSystemFactory;
+use Voetbal\ExternalSource\Repository as ExternalSourceRepository;
+use Voetbal\ExternalSource\Factory as ExternalSourceFactory;
 
 class Import extends Command
 {
     /**
-     * @var ExternalSystemRepository
+     * @var ExternalSourceRepository
      */
-    protected $externalSystemRepos;
+    protected $externalSourceRepos;
     /**
-     * @var ExternalSystemFactory
+     * @var ExternalSourceFactory
      */
-    protected $externalSystemFactory;
+    protected $externalSourceFactory;
     /**
      * @var ContainerInterface
      */
@@ -28,7 +28,7 @@ class Import extends Command
     public function __construct(ContainerInterface $container)
     {
         // $settings = $container->get('settings');
-        $this->externalSystemRepos = $container->get(ExternalSystemRepository::class);
+        $this->externalSourceRepos = $container->get(ExternalSourceRepository::class);
 
         $this->container = $container;
         parent::__construct($container->get(Configuration::class));
@@ -36,11 +36,11 @@ class Import extends Command
 
     protected function init( InputInterface $input, string $name ) {
         $this->initLogger( $input, $name );
-        $this->initExternalSystemFactory();
+        $this->initExternalSourceFactory();
     }
 
-    protected function initExternalSystemFactory() {
+    protected function initExternalSourceFactory() {
 
-        $this->externalSystemFactory = new ExternalSystemFactory( $this->logger );
+        $this->externalSourceFactory = new ExternalSourceFactory( $this->logger );
     }
 }

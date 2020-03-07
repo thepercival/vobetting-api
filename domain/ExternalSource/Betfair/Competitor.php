@@ -7,9 +7,9 @@
  * Time: 12:02
  */
 
-namespace VOBetting\External\System\Betfair;
+namespace VOBetting\ExternalSource\Betfair;
 
-use Voetbal\External\System as ExternalSystemBase;
+use Voetbal\ExternalSource;
 
 use Voetbal\External\League as ExternalLeague;
 use VOBetting\BetLine;
@@ -29,9 +29,9 @@ use VOBetting\External\System\Betfair as ExternalSystemBetfair;
 class Competitor
 {
     /**
-     * @var ExternalSystemBase
+     * @var ExternalSource
      */
-    private $externalSystemBase;
+    private $externalSource;
 
     /**
      * @var ApiHelper
@@ -59,13 +59,13 @@ class Competitor
 //    private $externalObjectRepos;
 
     public function __construct(
-        ExternalSystemBase $externalSystemBase,
+        ExternalSource $externalSource,
         ApiHelper $apiHelper/*,
         CompetitorService $service,
         CompetitorRepos $repos,
         ExternalCompetitorRepos $externalRepos*/
     ) {
-        $this->externalSystemBase = $externalSystemBase;
+        $this->externalSource = $externalSource;
         $this->apiHelper = $apiHelper;
         /*$this->service = $service;
         $this->repos = $repos;
@@ -75,31 +75,31 @@ class Competitor
         );*/
     }
 
-    public function getCompetitors(ExternalLeague $externalLeague) {
-        $competitors = [];
-        $betType = BetLine::_MATCH_ODDS;
-        $events = $this->apiHelper->getEvents( $externalLeague, $this->getImportPeriod() );
-        foreach( $events as $event  )
-        {
-            $markets = $this->apiHelper->getMarkets( $event->event->id, $betType );
-            foreach ($markets as $market) {
-                foreach( $market->runners as $runner ) {
-                    if( $runner->metadata->runnerId == ExternalSystemBetfair::THE_DRAW ) {
-                        continue;
-                    }
-                    $competitor = ["id" => $runner->metadata->runnerId, "name" => $runner->runnerName ];
-                    if( in_array ( $competitor, $competitors ) ) {
-                        continue;
-                    }
-                    $competitors[] = $competitor;
-                }
-            }
-        }
-        return $competitors;
-    }
-
-    protected function getImportPeriod() {
-        $now = new \DateTimeImmutable();
-        return new Period( $now, $now->modify("+14 days") );
-    }
+//    public function getCompetitors(ExternalLeague $externalLeague) {
+//        $competitors = [];
+//        $betType = BetLine::_MATCH_ODDS;
+//        $events = $this->apiHelper->getEvents( $externalLeague, $this->getImportPeriod() );
+//        foreach( $events as $event  )
+//        {
+//            $markets = $this->apiHelper->getMarkets( $event->event->id, $betType );
+//            foreach ($markets as $market) {
+//                foreach( $market->runners as $runner ) {
+//                    if( $runner->metadata->runnerId == ExternalSystemBetfair::THE_DRAW ) {
+//                        continue;
+//                    }
+//                    $competitor = ["id" => $runner->metadata->runnerId, "name" => $runner->runnerName ];
+//                    if( in_array ( $competitor, $competitors ) ) {
+//                        continue;
+//                    }
+//                    $competitors[] = $competitor;
+//                }
+//            }
+//        }
+//        return $competitors;
+//    }
+//
+//    protected function getImportPeriod() {
+//        $now = new \DateTimeImmutable();
+//        return new Period( $now, $now->modify("+14 days") );
+//    }
 }

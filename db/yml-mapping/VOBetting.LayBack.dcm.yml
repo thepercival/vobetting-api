@@ -32,8 +32,8 @@ VOBetting\LayBack:
         referencedColumnName: id
         nullable: false
         onDelete: CASCADE
-    externalSystem:
-      targetEntity: Voetbal\External\System
+    externalSource:
+      targetEntity: Voetbal\ExternalSource
       joinColumn:
         name: externalsystemid
         referencedColumnName: id

@@ -8,7 +8,7 @@
 
 namespace VOBetting;
 
-use Voetbal\External\System as ExternalSystem;
+use Voetbal\ExternalSource;
 
 class LayBack
 {
@@ -48,9 +48,9 @@ class LayBack
     private $bookmaker;
 
     /**
-     * @var ExternalSystem
+     * @var ExternalSource
      */
-    private $externalSystem;
+    private $externalSource;
 
     // const _MATCH_ODDS = 1;
 
@@ -58,13 +58,13 @@ class LayBack
         \DateTimeImmutable $dateTime,
         BetLine $betLine,
         Bookmaker $bookmaker,
-        ExternalSystem $externalSystem
+        ExternalSource $externalSource
     )
     {
         $this->setDateTime( $dateTime );
         $this->setBetLine( $betLine );
         $this->setBookmaker( $bookmaker );
-        $this->setExternalSystem( $externalSystem );
+        $this->setExternalSource( $externalSource );
     }
 
     /**
@@ -191,21 +191,21 @@ class LayBack
     }
 
     /**
-     * Get externalSystem
+     * Get externalSource
      *
-     * @return ExternalSystem
+     * @return ExternalSource
      */
-    public function getExternalSystem()
+    public function getExternalSource()
     {
-        return $this->externalSystem;
+        return $this->externalSource;
     }
 
     /**
-     * @param ExternalSystem $externalSystem
+     * @param ExternalSource $externalSource
      */
-    public function setExternalSystem( ExternalSystem $externalSystem )
+    public function setExternalSource( ExternalSource $externalSource )
     {
-        $this->externalSystem = $externalSystem;
+        $this->externalSource = $externalSource;
     }
 
 

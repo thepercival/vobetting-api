@@ -12,11 +12,14 @@ use VOBetting\BetLine;
 use VOBetting\LayBack\Repository as LayBackRepository;
 use VOBetting\LayBack;
 
-use Voetbal\External\System\Repository as ExternalSystemRepository;
-use Voetbal\External\System as ExternalSystemBase;
+use Voetbal\ExternalSource\Repository as ExternalSourceRepository;
+use Voetbal\ExternalSource;
 
 use Voetbal\Association\Repository as AssociationRepository;
 use Voetbal\Association;
+
+use Voetbal\Attacher\Association\Repository as AssociationAttacherRepository;
+use Voetbal\Attacher\Association as AssociationAttacher;
 
 use Voetbal\Planning\Config\Repository as PlanningConfigRepository;
 use Voetbal\Planning\Config as PlanningConfig;
@@ -70,10 +73,13 @@ return [
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new AssociationRepository($entityManager, $entityManager->getClassMetaData(Association::class));
     },
-
-    ExternalSystemRepository::class => function (ContainerInterface $container) {
+    AssociationAttacherRepository::class => function (ContainerInterface $container) {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
-        return new ExternalSystemRepository($entityManager, $entityManager->getClassMetaData(ExternalSystemBase::class));
+        return new AssociationAttacherRepository($entityManager, $entityManager->getClassMetaData(AssociationAttacher::class));
+    },
+    ExternalSourceRepository::class => function (ContainerInterface $container) {
+        $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
+        return new ExternalSourceRepository($entityManager, $entityManager->getClassMetaData(ExternalSource::class));
     },
 
     /*SportRepository::class => function (ContainerInterface $container) {
