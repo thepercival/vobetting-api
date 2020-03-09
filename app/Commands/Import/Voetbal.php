@@ -11,6 +11,7 @@ use Voetbal\Import\Service as VoetbalImportService;
 use App\Commands\Import as ImportCommand;
 use Voetbal\Association\Repository as AssociationRepository;
 use Voetbal\Attacher\Association\Repository as AssociationAttacherRepository;
+use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
 
 class Voetbal extends ImportCommand
 {
@@ -42,7 +43,8 @@ class Voetbal extends ImportCommand
         $this->init($input, 'cron-import-voetbal');
 
         $externalSources = $this->externalSourceRepos->findAll();
-        $importService = new VoetbalImportService( $externalSources, $this->logger );
+        $cacheItemRepos = $this->container->get( CacheItemDbRepository::class );
+        $importService = new VoetbalImportService( $externalSources, $cacheItemRepos, $this->logger );
         if(  $input->hasOption("associations") ) {
             $associationRepos = $this->container->get( AssociationRepository::class );
             $associationAttacherRepos = $this->container->get( AssociationAttacherRepository::class );

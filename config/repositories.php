@@ -15,6 +15,9 @@ use VOBetting\LayBack;
 use Voetbal\ExternalSource\Repository as ExternalSourceRepository;
 use Voetbal\ExternalSource;
 
+use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
+use Voetbal\CacheItemDb;
+
 use Voetbal\Association\Repository as AssociationRepository;
 use Voetbal\Association;
 
@@ -80,6 +83,10 @@ return [
     ExternalSourceRepository::class => function (ContainerInterface $container) {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new ExternalSourceRepository($entityManager, $entityManager->getClassMetaData(ExternalSource::class));
+    },
+    CacheItemDbRepository::class => function (ContainerInterface $container) {
+        $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
+        return new CacheItemDbRepository($entityManager, $entityManager->getClassMetaData(CacheItemDb::class));
     },
 
     /*SportRepository::class => function (ContainerInterface $container) {

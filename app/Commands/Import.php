@@ -36,11 +36,11 @@ class Import extends Command
 
     protected function init( InputInterface $input, string $name ) {
         $this->initLogger( $input, $name );
-        $this->initExternalSourceFactory();
+//        $this->initExternalSourceFactory();
     }
 
-    protected function initExternalSourceFactory() {
-
-        $this->externalSourceFactory = new ExternalSourceFactory( $this->logger );
-    }
+//    protected function initExternalSourceFactory() {
+//
+//        $this->externalSourceFactory = new ExternalSourceFactory( $this->logger );
+//    }
 }
