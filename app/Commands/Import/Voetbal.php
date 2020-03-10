@@ -14,6 +14,8 @@ use Voetbal\Attacher\Association\Repository as AssociationAttacherRepository;
 use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
 use Voetbal\Season\Repository as SeasonRepository;
 use Voetbal\Attacher\Season\Repository as SeasonAttacherRepository;
+use Voetbal\League\Repository as LeagueRepository;
+use Voetbal\Attacher\League\Repository as LeagueAttacherRepository;
 
 class Voetbal extends ImportCommand
 {
@@ -36,6 +38,7 @@ class Voetbal extends ImportCommand
 
         $this->addOption('associations', null, InputOption::VALUE_NONE, 'associations');
         $this->addOption('seasons', null, InputOption::VALUE_NONE, 'seasons');
+        $this->addOption('leagues', null, InputOption::VALUE_NONE, 'leagues');
 
         parent::configure();
     }
@@ -58,6 +61,14 @@ class Voetbal extends ImportCommand
             $seasonAttacherRepos = $this->container->get( SeasonAttacherRepository::class );
             $importService->importSeasons( $seasonRepos , $seasonAttacherRepos);
         }
+
+        if(  $input->getOption("leagues") ) {
+            $leagueRepos = $this->container->get( LeagueRepository::class );
+            $leagueAttacherRepos = $this->container->get( LeagueAttacherRepository::class );
+            $associationAttacherRepos = $this->container->get( AssociationAttacherRepository::class );
+            $importService->importLeagues( $leagueRepos, $leagueAttacherRepos, $associationAttacherRepos);
+        }
+        
         return 0;
     }
 }
