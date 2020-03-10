@@ -18,8 +18,11 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
+use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
+use Voetbal\ExternalSource\Association as ExternalSourceAssociation;
 use Voetbal\ExternalSource\Repository as ExternalSourceRepository;
 use Voetbal\ExternalSource;
+use Voetbal\ExternalSource\Factory as ExternalSourceFactory;
 
 final class ExternalSourceAction extends Action
 {
@@ -28,6 +31,11 @@ final class ExternalSourceAction extends Action
      */
     protected $externalSourceRepos;
     /**
+     * @var ExternalSourceFactory
+     */
+    protected $externalSourceFactory;
+
+    /**
      * @var SerializerInterface
      */
     protected $serializer;
@@ -35,18 +43,20 @@ final class ExternalSourceAction extends Action
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        ExternalSourceRepository $externalSourceRepos
+        ExternalSourceRepository $externalSourceRepos,
+        CacheItemDbRepository $cacheItemDbRepos
     )
     {
         parent::__construct($logger,$serializer);
         $this->externalSourceRepos = $externalSourceRepos;
+        $this->externalSourceFactory = new ExternalSourceFactory( $cacheItemDbRepos, $this->logger );
     }
 
     public function fetch( Request $request, Response $response, $args ): Response
     {
         try {
             $externalSources = $this->externalSourceRepos->findAll();
-
+            $this->externalSourceFactory->setImplementations( $externalSources );
             $json = $this->serializer->serialize( $externalSources, 'json');
             return $this->respondWithJson( $response, $json );
         }
@@ -62,6 +72,7 @@ final class ExternalSourceAction extends Action
             if ( $externalSource === null ) {
                 throw new \Exception("geen extern systeem met het opgegeven id gevonden", E_ERROR);
             }
+            $this->externalSourceFactory->setImplementations( $externalSource );
             $json = $this->serializer->serialize( $externalSource, 'json');
             return $this->respondWithJson( $response, $json );
         }
@@ -82,6 +93,7 @@ final class ExternalSourceAction extends Action
             }
 
             $newExternalSource = $this->externalSourceRepos->save( $externalSourceSer );
+            $this->externalSourceFactory->setImplementations( $newExternalSource );
 
             $json = $this->serializer->serialize( $newExternalSource, 'json');
             return $this->respondWithJson( $response, $json );
@@ -113,9 +125,10 @@ final class ExternalSourceAction extends Action
             $externalSource->setPassword( $externalSourceSer->getPassword() );
             $externalSource->setApiurl( $externalSourceSer->getApiurl() );
             $externalSource->setApikey( $externalSourceSer->getApikey() );
-            $externalSourceret = $this->externalSourceRepos->save( $externalSource );
+            $externalSourceRet = $this->externalSourceRepos->save( $externalSource );
+            $this->externalSourceFactory->setImplementations( $externalSourceRet );
 
-            $json = $this->serializer->serialize( $externalSourceret, 'json');
+            $json = $this->serializer->serialize( $externalSourceRet, 'json');
             return $this->respondWithJson( $response, $json );
         }
         catch( \Exception $e ){

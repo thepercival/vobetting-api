@@ -23,6 +23,8 @@ use Voetbal\Association;
 
 use Voetbal\Attacher\Association\Repository as AssociationAttacherRepository;
 use Voetbal\Attacher\Association as AssociationAttacher;
+use Voetbal\Attacher\Season\Repository as SeasonAttacherRepository;
+use Voetbal\Attacher\Season as SeasonAttacher;
 
 use Voetbal\Planning\Config\Repository as PlanningConfigRepository;
 use Voetbal\Planning\Config as PlanningConfig;
@@ -79,6 +81,14 @@ return [
     AssociationAttacherRepository::class => function (ContainerInterface $container) {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new AssociationAttacherRepository($entityManager, $entityManager->getClassMetaData(AssociationAttacher::class));
+    },
+    SeasonRepository::class => function (ContainerInterface $container) {
+        $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
+        return new SeasonRepository($entityManager, $entityManager->getClassMetaData(Season::class));
+    },
+    SeasonAttacherRepository::class => function (ContainerInterface $container) {
+        $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
+        return new SeasonAttacherRepository($entityManager, $entityManager->getClassMetaData(SeasonAttacher::class));
     },
     ExternalSourceRepository::class => function (ContainerInterface $container) {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);

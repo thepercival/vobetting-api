@@ -12,6 +12,8 @@ use App\Commands\Import as ImportCommand;
 use Voetbal\Association\Repository as AssociationRepository;
 use Voetbal\Attacher\Association\Repository as AssociationAttacherRepository;
 use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
+use Voetbal\Season\Repository as SeasonRepository;
+use Voetbal\Attacher\Season\Repository as SeasonAttacherRepository;
 
 class Voetbal extends ImportCommand
 {
@@ -33,7 +35,7 @@ class Voetbal extends ImportCommand
         ;
 
         $this->addOption('associations', null, InputOption::VALUE_NONE, 'associations');
-        // $this->addOption('associations', null, InputOption::VALUE_NONE, 'associations');
+        $this->addOption('seasons', null, InputOption::VALUE_NONE, 'seasons');
 
         parent::configure();
     }
@@ -45,10 +47,16 @@ class Voetbal extends ImportCommand
         $externalSources = $this->externalSourceRepos->findAll();
         $cacheItemRepos = $this->container->get( CacheItemDbRepository::class );
         $importService = new VoetbalImportService( $externalSources, $cacheItemRepos, $this->logger );
-        if(  $input->hasOption("associations") ) {
+        if(  $input->getOption("associations") ) {
             $associationRepos = $this->container->get( AssociationRepository::class );
             $associationAttacherRepos = $this->container->get( AssociationAttacherRepository::class );
             $importService->importAssociations( $associationRepos , $associationAttacherRepos);
+        }
+
+        if(  $input->getOption("seasons") ) {
+            $seasonRepos = $this->container->get( SeasonRepository::class );
+            $seasonAttacherRepos = $this->container->get( SeasonAttacherRepository::class );
+            $importService->importSeasons( $seasonRepos , $seasonAttacherRepos);
         }
         return 0;
     }
