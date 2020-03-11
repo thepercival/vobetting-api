@@ -87,11 +87,6 @@ final class AssociationAction extends Action
                 throw new \Exception("de bond met de naam ".$associationSer->getName()." bestaat al", E_ERROR );
             }
 
-            $associationWithSameName = $this->associationRepos->findOneBy(array('name' => $associationSer->getName()));
-            if ($associationWithSameName !== null) {
-                throw new \Exception("de bond met de naam " . $associationSer->getName() . " bestaat al", E_ERROR);
-            }
-
             $newAssociation = new Association($associationSer->getName());
             $newAssociation->setDescription($associationSer->getDescription());
             $associationService = new Association\Service();

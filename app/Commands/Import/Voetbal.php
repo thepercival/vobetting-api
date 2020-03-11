@@ -16,6 +16,8 @@ use Voetbal\Season\Repository as SeasonRepository;
 use Voetbal\Attacher\Season\Repository as SeasonAttacherRepository;
 use Voetbal\League\Repository as LeagueRepository;
 use Voetbal\Attacher\League\Repository as LeagueAttacherRepository;
+use Voetbal\Competition\Repository as CompetitionRepository;
+use Voetbal\Attacher\Competition\Repository as CompetitionAttacherRepository;
 
 class Voetbal extends ImportCommand
 {
@@ -33,12 +35,12 @@ class Voetbal extends ImportCommand
             ->setDescription('imports the associations')
             // the full command description shown when running the command with
             // the "--help" option
-            ->setHelp('import the associations')
-        ;
+            ->setHelp('import the associations');
 
         $this->addOption('associations', null, InputOption::VALUE_NONE, 'associations');
         $this->addOption('seasons', null, InputOption::VALUE_NONE, 'seasons');
         $this->addOption('leagues', null, InputOption::VALUE_NONE, 'leagues');
+        $this->addOption('competitions', null, InputOption::VALUE_NONE, 'competitions');
 
         parent::configure();
     }
@@ -48,27 +50,40 @@ class Voetbal extends ImportCommand
         $this->init($input, 'cron-import-voetbal');
 
         $externalSources = $this->externalSourceRepos->findAll();
-        $cacheItemRepos = $this->container->get( CacheItemDbRepository::class );
-        $importService = new VoetbalImportService( $externalSources, $cacheItemRepos, $this->logger );
-        if(  $input->getOption("associations") ) {
-            $associationRepos = $this->container->get( AssociationRepository::class );
-            $associationAttacherRepos = $this->container->get( AssociationAttacherRepository::class );
-            $importService->importAssociations( $associationRepos , $associationAttacherRepos);
+        $cacheItemRepos = $this->container->get(CacheItemDbRepository::class);
+        $importService = new VoetbalImportService($externalSources, $cacheItemRepos, $this->logger);
+        if ($input->getOption("associations")) {
+            $associationRepos = $this->container->get(AssociationRepository::class);
+            $associationAttacherRepos = $this->container->get(AssociationAttacherRepository::class);
+            $importService->importAssociations($associationRepos, $associationAttacherRepos);
         }
 
-        if(  $input->getOption("seasons") ) {
-            $seasonRepos = $this->container->get( SeasonRepository::class );
-            $seasonAttacherRepos = $this->container->get( SeasonAttacherRepository::class );
-            $importService->importSeasons( $seasonRepos , $seasonAttacherRepos);
+        if ($input->getOption("seasons")) {
+            $seasonRepos = $this->container->get(SeasonRepository::class);
+            $seasonAttacherRepos = $this->container->get(SeasonAttacherRepository::class);
+            $importService->importSeasons($seasonRepos, $seasonAttacherRepos);
         }
 
-        if(  $input->getOption("leagues") ) {
-            $leagueRepos = $this->container->get( LeagueRepository::class );
-            $leagueAttacherRepos = $this->container->get( LeagueAttacherRepository::class );
-            $associationAttacherRepos = $this->container->get( AssociationAttacherRepository::class );
-            $importService->importLeagues( $leagueRepos, $leagueAttacherRepos, $associationAttacherRepos);
+        if ($input->getOption("leagues")) {
+            $leagueRepos = $this->container->get(LeagueRepository::class);
+            $leagueAttacherRepos = $this->container->get(LeagueAttacherRepository::class);
+            $associationAttacherRepos = $this->container->get(AssociationAttacherRepository::class);
+            $importService->importLeagues($leagueRepos, $leagueAttacherRepos, $associationAttacherRepos);
         }
-        
+
+        if ($input->getOption("competitions")) {
+            $competitionRepos = $this->container->get(CompetitionRepository::class);
+            $competitionAttacherRepos = $this->container->get(CompetitionAttacherRepository::class);
+            $leagueAttacherRepos = $this->container->get(LeagueAttacherRepository::class);
+            $seasonAttacherRepos = $this->container->get(SeasonAttacherRepository::class);
+            $importService->importCompetitions(
+                $competitionRepos,
+                $competitionAttacherRepos,
+                $leagueAttacherRepos,
+                $seasonAttacherRepos
+            );
+        }
+
         return 0;
     }
 }

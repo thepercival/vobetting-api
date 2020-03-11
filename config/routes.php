@@ -9,6 +9,7 @@ use App\Actions\BookmakerAction;
 use Slim\App;
 use Slim\Interfaces\RouteCollectorProxyInterface as Group;
 use App\Actions\Voetbal\AssociationAction;
+use App\Actions\Voetbal\SeasonAction;
 use App\Actions\Voetbal\ExternalSourceAction;
 
 return function (App $app) {
@@ -48,6 +49,15 @@ return function (App $app) {
             $group->get('/{id}', AssociationAction::class . ':fetchOne');
             $group->put('/{id}', AssociationAction::class . ':edit');
             $group->delete('/{id}', AssociationAction::class . ':remove');
+        });
+        $group->group('/seasons', function ( Group $group ) {
+            $group->options('', SeasonAction::class . ':options');
+            $group->post('', SeasonAction::class . ':add');
+            $group->get('', SeasonAction::class . ':fetch');
+            $group->options('/{id}', SeasonAction::class . ':options');
+            $group->get('/{id}', SeasonAction::class . ':fetchOne');
+            $group->put('/{id}', SeasonAction::class . ':edit');
+            $group->delete('/{id}', SeasonAction::class . ':remove');
         });
         $group->group('/externalsources', function ( Group $group ) {
             $group->options('', ExternalSourceAction::class . ':options');
