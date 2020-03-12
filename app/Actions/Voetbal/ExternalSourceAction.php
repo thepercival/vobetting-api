@@ -72,7 +72,7 @@ final class ExternalSourceAction extends Action
             if ( $externalSource === null ) {
                 throw new \Exception("geen extern systeem met het opgegeven id gevonden", E_ERROR);
             }
-            $this->externalSourceFactory->setImplementations( $externalSource );
+            $this->externalSourceFactory->setImplementations( [$externalSource] );
             $json = $this->serializer->serialize( $externalSource, 'json');
             return $this->respondWithJson( $response, $json );
         }
@@ -93,7 +93,7 @@ final class ExternalSourceAction extends Action
             }
 
             $newExternalSource = $this->externalSourceRepos->save( $externalSourceSer );
-            $this->externalSourceFactory->setImplementations( $newExternalSource );
+            $this->externalSourceFactory->setImplementations( [$newExternalSource] );
 
             $json = $this->serializer->serialize( $newExternalSource, 'json');
             return $this->respondWithJson( $response, $json );
@@ -126,7 +126,7 @@ final class ExternalSourceAction extends Action
             $externalSource->setApiurl( $externalSourceSer->getApiurl() );
             $externalSource->setApikey( $externalSourceSer->getApikey() );
             $externalSourceRet = $this->externalSourceRepos->save( $externalSource );
-            $this->externalSourceFactory->setImplementations( $externalSourceRet );
+            $this->externalSourceFactory->setImplementations( [$externalSourceRet] );
 
             $json = $this->serializer->serialize( $externalSourceRet, 'json');
             return $this->respondWithJson( $response, $json );

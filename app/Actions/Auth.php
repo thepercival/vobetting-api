@@ -78,7 +78,6 @@ final class Auth extends Action
             "exp" => $future->getTimeStamp(),
             "jti" => $jti
         ];
-
-        return JWT::encode($payload, "");
+        return JWT::encode($payload, $this->config->getString("auth.password"));
     }
 }
