@@ -82,11 +82,6 @@ final class SeasonAction extends Action
                 throw new \Exception("het seizoen met de naam ".$seasonSer->getName()." bestaat al", E_ERROR );
             }
 
-            $seasonWithSameName = $this->seasonRepos->findOneBy(array('name' => $seasonSer->getName()));
-            if ($seasonWithSameName !== null) {
-                throw new \Exception("het seizoen met de naam " . $seasonSer->getName() . " bestaat al", E_ERROR);
-            }
-
             $newSeason = new Season($seasonSer->getName(), $seasonSer->getPeriod() );
             // $newSeason->setDescription($seasonSer->getDescription());
             $this->seasonRepos->save( $newSeason );

@@ -18,9 +18,10 @@ use Voetbal\ExternalSource;
 use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
 use Voetbal\CacheItemDb;
 
-use Voetbal\Association\Repository as AssociationRepository;
-use Voetbal\Association;
 
+
+use Voetbal\Attacher\Sport\Repository as SportAttacherRepository;
+use Voetbal\Attacher\Sport as SportAttacher;
 use Voetbal\Attacher\Association\Repository as AssociationAttacherRepository;
 use Voetbal\Attacher\Association as AssociationAttacher;
 use Voetbal\Attacher\Season\Repository as SeasonAttacherRepository;
@@ -30,10 +31,10 @@ use Voetbal\Attacher\League as LeagueAttacher;
 use Voetbal\Attacher\Competition\Repository as CompetitionAttacherRepository;
 use Voetbal\Attacher\Competition as CompetitionAttacher;
 
-use Voetbal\Planning\Config\Repository as PlanningConfigRepository;
-use Voetbal\Planning\Config as PlanningConfig;
 use Voetbal\Sport\Repository as SportRepository;
 use Voetbal\Sport;
+use Voetbal\Association\Repository as AssociationRepository;
+use Voetbal\Association;
 use Voetbal\Season\Repository as SeasonRepository;
 use Voetbal\Season;
 use Voetbal\League\Repository as LeagueRepository;
@@ -46,6 +47,8 @@ use Voetbal\Planning\Repository as PlanningRepository;
 use Voetbal\Planning;
 use Voetbal\Planning\Input\Repository as PlanningInputRepository;
 use Voetbal\Planning\Input as PlanningInput;
+use Voetbal\Planning\Config\Repository as PlanningConfigRepository;
+use Voetbal\Planning\Config as PlanningConfig;
 use Voetbal\Game\Repository as GameRepository;
 use Voetbal\Game;
 use Voetbal\Field\Repository as FieldRepository;
@@ -77,6 +80,14 @@ return [
     LayBackRepository::class => function (ContainerInterface $container) {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new LayBackRepository($entityManager, $entityManager->getClassMetaData(LayBack::class));
+    },
+    SportRepository::class => function (ContainerInterface $container) {
+        $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
+        return new SportRepository($entityManager, $entityManager->getClassMetaData(Sport::class));
+    },
+    SportAttacherRepository::class => function (ContainerInterface $container) {
+        $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
+        return new SportAttacherRepository($entityManager, $entityManager->getClassMetaData(SportAttacher::class));
     },
     AssociationRepository::class => function (ContainerInterface $container) {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);

@@ -8,8 +8,11 @@ use App\Actions\Auth as AuthAction;
 use App\Actions\BookmakerAction;
 use Slim\App;
 use Slim\Interfaces\RouteCollectorProxyInterface as Group;
+use App\Actions\Voetbal\SportAction;
 use App\Actions\Voetbal\AssociationAction;
+use App\Actions\Voetbal\LeagueAction;
 use App\Actions\Voetbal\SeasonAction;
+use App\Actions\Voetbal\CompetitionAction;
 use App\Actions\Voetbal\ExternalSourceAction;
 
 return function (App $app) {
@@ -41,6 +44,15 @@ return function (App $app) {
     });
 
     $app->group('/voetbal', function ( Group $group ) {
+        $group->group('/sports', function ( Group $group ) {
+            $group->options('', SportAction::class . ':options');
+            $group->post('', SportAction::class . ':add');
+            $group->get('', SportAction::class . ':fetch');
+            $group->options('/{id}', SportAction::class . ':options');
+            $group->get('/{id}', SportAction::class . ':fetchOne');
+            $group->put('/{id}', SportAction::class . ':edit');
+            $group->delete('/{id}', SportAction::class . ':remove');
+        });
         $group->group('/associations', function ( Group $group ) {
             $group->options('', AssociationAction::class . ':options');
             $group->post('', AssociationAction::class . ':add');
@@ -58,6 +70,24 @@ return function (App $app) {
             $group->get('/{id}', SeasonAction::class . ':fetchOne');
             $group->put('/{id}', SeasonAction::class . ':edit');
             $group->delete('/{id}', SeasonAction::class . ':remove');
+        });
+        $group->group('/leagues', function ( Group $group ) {
+            $group->options('', LeagueAction::class . ':options');
+            $group->post('', LeagueAction::class . ':add');
+            $group->get('', LeagueAction::class . ':fetch');
+            $group->options('/{id}', LeagueAction::class . ':options');
+            $group->get('/{id}', LeagueAction::class . ':fetchOne');
+            $group->put('/{id}', LeagueAction::class . ':edit');
+            $group->delete('/{id}', LeagueAction::class . ':remove');
+        });
+        $group->group('/competitions', function ( Group $group ) {
+            $group->options('', CompetitionAction::class . ':options');
+            $group->post('', CompetitionAction::class . ':add');
+            $group->get('', CompetitionAction::class . ':fetch');
+            $group->options('/{id}', CompetitionAction::class . ':options');
+            $group->get('/{id}', CompetitionAction::class . ':fetchOne');
+            $group->put('/{id}', CompetitionAction::class . ':edit');
+            $group->delete('/{id}', CompetitionAction::class . ':remove');
         });
         $group->group('/externalsources', function ( Group $group ) {
             $group->options('', ExternalSourceAction::class . ':options');

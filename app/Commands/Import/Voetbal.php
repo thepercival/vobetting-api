@@ -9,9 +9,11 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Voetbal\Import\Service as VoetbalImportService;
 use App\Commands\Import as ImportCommand;
+use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
+use Voetbal\Sport\Repository as SportRepository;
+use Voetbal\Attacher\Sport\Repository as SportAttacherRepository;
 use Voetbal\Association\Repository as AssociationRepository;
 use Voetbal\Attacher\Association\Repository as AssociationAttacherRepository;
-use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
 use Voetbal\Season\Repository as SeasonRepository;
 use Voetbal\Attacher\Season\Repository as SeasonAttacherRepository;
 use Voetbal\League\Repository as LeagueRepository;
@@ -37,6 +39,7 @@ class Voetbal extends ImportCommand
             // the "--help" option
             ->setHelp('import the associations');
 
+        $this->addOption('sports', null, InputOption::VALUE_NONE, 'sports');
         $this->addOption('associations', null, InputOption::VALUE_NONE, 'associations');
         $this->addOption('seasons', null, InputOption::VALUE_NONE, 'seasons');
         $this->addOption('leagues', null, InputOption::VALUE_NONE, 'leagues');
@@ -52,6 +55,13 @@ class Voetbal extends ImportCommand
         $externalSources = $this->externalSourceRepos->findAll();
         $cacheItemRepos = $this->container->get(CacheItemDbRepository::class);
         $importService = new VoetbalImportService($externalSources, $cacheItemRepos, $this->logger);
+        
+        if ($input->getOption("sports")) {
+            $sportRepos = $this->container->get(SportRepository::class);
+            $sportAttacherRepos = $this->container->get(SportAttacherRepository::class);
+            $importService->importSports($sportRepos, $sportAttacherRepos);
+        }
+        
         if ($input->getOption("associations")) {
             $associationRepos = $this->container->get(AssociationRepository::class);
             $associationAttacherRepos = $this->container->get(AssociationAttacherRepository::class);
@@ -76,11 +86,13 @@ class Voetbal extends ImportCommand
             $competitionAttacherRepos = $this->container->get(CompetitionAttacherRepository::class);
             $leagueAttacherRepos = $this->container->get(LeagueAttacherRepository::class);
             $seasonAttacherRepos = $this->container->get(SeasonAttacherRepository::class);
+            $sportAttacherRepos = $this->container->get(SportAttacherRepository::class);
             $importService->importCompetitions(
                 $competitionRepos,
                 $competitionAttacherRepos,
                 $leagueAttacherRepos,
-                $seasonAttacherRepos
+                $seasonAttacherRepos,
+                $sportAttacherRepos
             );
         }
 

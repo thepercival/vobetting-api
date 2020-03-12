@@ -79,6 +79,6 @@ final class Auth extends Action
             "jti" => $jti
         ];
 
-        return JWT::encode($payload, $this->config->getString("auth.password"));
+        return JWT::encode($payload, "");
     }
 }

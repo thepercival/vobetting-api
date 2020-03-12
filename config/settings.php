@@ -53,8 +53,7 @@ return [
         ),
     ],
     'auth' => [
-        'password' => getenv('AUTH_PASSWORD'),
-        'salt' => getenv('AUTH_SALT'),
+        'password' => getenv('AUTH_PASSWORD')
     ],
     'www' => [
         'wwwurl' => getenv('WWW_URL'),
