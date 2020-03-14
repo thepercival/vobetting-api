@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Voetbal\ExternalSource\Repository as ExternalSourceRepository;
 use Voetbal\ExternalSource\Factory as ExternalSourceFactory;
 
-class Import extends Command
+class ExternalSource extends Command
 {
     /**
      * @var ExternalSourceRepository

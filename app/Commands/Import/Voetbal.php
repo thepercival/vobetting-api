@@ -2,13 +2,14 @@
 
 namespace App\Commands\Import;
 
+use App\Commands\ExternalSource;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Voetbal\Import\Service as VoetbalImportService;
-use App\Commands\Import as ImportCommand;
+use App\Commands\ExternalSource as ExternalSourceCommand;
 use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
 use Voetbal\Sport\Repository as SportRepository;
 use Voetbal\Attacher\Sport\Repository as SportAttacherRepository;
@@ -21,7 +22,7 @@ use Voetbal\Attacher\League\Repository as LeagueAttacherRepository;
 use Voetbal\Competition\Repository as CompetitionRepository;
 use Voetbal\Attacher\Competition\Repository as CompetitionAttacherRepository;
 
-class Voetbal extends ImportCommand
+class Voetbal extends ExternalSourceCommand
 {
     public function __construct(ContainerInterface $container)
     {
@@ -34,7 +35,7 @@ class Voetbal extends ImportCommand
             // the name of the command (the part after "bin/console")
             ->setName('app:import-voetbal')
             // the short description shown while running "php bin/console list"
-            ->setDescription('imports the associations')
+            ->setDescription('imports the sport objects')
             // the full command description shown when running the command with
             // the "--help" option
             ->setHelp('import the associations');
