@@ -73,7 +73,12 @@ class Voetbal extends ExternalSourceCommand
                 }
                 $betFair = new Betfair();
                 $betFair->login( $externalSource->getApikey(), $externalSource->getUsername(), $externalSource->getPassword() );
-                $test = $betFair->betting(['listCountries']);
+                $countries = $betFair->betting(['listCountries']);
+
+                $competitions = $betFair->betting(['listCompetitions']);
+
+                $text = "122";
+
             }
         }
 
