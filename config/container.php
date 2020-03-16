@@ -14,6 +14,9 @@ use Monolog\Processor\UidProcessor;
 use Psr\Log\LoggerInterface;
 
 use App\Mailer;
+use VOBetting\ExternalSource\Factory as ExternalSourceFactory;
+use Voetbal\Attacher\Association\Repository as AssociationAttacherRepository;
+use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
 use Voetbal\SerializationHandler\Round\NumberEvent as RoundNumberEventSubscriber;
 use Voetbal\SerializationHandler\Round\Number as RoundNumberSerializationHandler;
 use Voetbal\SerializationHandler\Structure as StructureSerializationHandler;
@@ -22,6 +25,7 @@ use JMS\Serializer\DeserializationContext;
 use Voetbal\SerializationHandler\Round as RoundSerializationHandler;
 use Selective\Config\Configuration;
 use Slim\App;
+use Voetbal\ExternalSource\Repository as ExternalSourceRepository;
 use Slim\Factory\AppFactory;
 
 return [
@@ -130,5 +134,13 @@ return [
             $config->getString('email.fromname'),
             $config->getString('email.admin'),
         );
+    },
+    ExternalSourceFactory::class => function( ContainerInterface $container ) {
+        return new ExternalSourceFactory(
+            $container->get(ExternalSourceRepository::class),
+            $container->get(CacheItemDbRepository::class),
+            $container->get(LoggerInterface::class )
+        );
     }
+
 ];

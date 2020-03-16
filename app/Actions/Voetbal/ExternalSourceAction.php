@@ -11,15 +11,12 @@ namespace App\Actions\Voetbal;
 namespace App\Actions\Voetbal;
 
 use App\Response\ErrorResponse;
-use App\Response\ForbiddenResponse as ForbiddenResponse;
-use Selective\Config\Configuration;
 use App\Actions\Action;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
 use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
-use Voetbal\ExternalSource\Association as ExternalSourceAssociation;
 use Voetbal\ExternalSource\Repository as ExternalSourceRepository;
 use Voetbal\ExternalSource;
 use Voetbal\ExternalSource\Factory as ExternalSourceFactory;
@@ -49,7 +46,7 @@ final class ExternalSourceAction extends Action
     {
         parent::__construct($logger,$serializer);
         $this->externalSourceRepos = $externalSourceRepos;
-        $this->externalSourceFactory = new ExternalSourceFactory( $cacheItemDbRepos, $this->logger );
+        $this->externalSourceFactory = new ExternalSourceFactory( $externalSourceRepos, $cacheItemDbRepos, $this->logger );
     }
 
     public function fetch( Request $request, Response $response, $args ): Response

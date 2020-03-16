@@ -8,34 +8,29 @@
 
 namespace VOBetting\ExternalSource\Betfair;
 
-
-use Voetbal\External\League as ExternalLeague;
-use PeterColes\Betfair\Api\Betting as BetfairBetting;
-use VOBetting\BetLine;
-//use Voetbal\External\System as ExternalSystem;
-//use Voetbal\External\Object as ExternalObject;
-//use Voetbal\Competition\Service as CompetitionService;
-//use Voetbal\Competition\Repository as CompetitionRepos;
-//use Voetbal\League;
-//use Voetbal\Season;
-//use Voetbal\Competition;
-//use JMS\Serializer\Serializer;
-//use Voetbal\External\System\Importable\Competition as CompetitionImportable;
-//use Voetbal\External\System\Importer\Competition as CompetitionImporter;
-//use Monolog\Logger;
+use PeterColes\Betfair\Betfair as BetfairClient;
+use Voetbal\ExternalSource;
 
 class ApiHelper
 {
-//    /**
-//     * @var array
-//     */
-//    private $headers;
-//
-//    /**
-//     * @var ExternalSystem
-//     */
-//    private $externalSystem;
-//
+    /**
+     * @var BetfairClient
+     */
+    private $client;
+
+    /**
+     * @var ExternalSource
+     */
+    private $externalSource;
+
+    public function __construct(
+        ExternalSource $externalSource
+    ) {
+        $this->externalSource = $externalSource;
+        $this->client = new BetfairClient();
+        $this->client->login();
+    }
+
 //
 //    public function __construct(
 //        ExternalSystem $externalSystem
@@ -56,6 +51,9 @@ class ApiHelper
 //
 //        return json_decode($response);
 //    }
+
+
+
 //
 //    public function getDateFormat() {
 //        return 'Y-m-d\TH:i:s\Z';

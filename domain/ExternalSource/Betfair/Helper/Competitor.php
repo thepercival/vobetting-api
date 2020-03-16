@@ -7,8 +7,9 @@
  * Time: 12:02
  */
 
-namespace VOBetting\ExternalSource\Betfair;
+namespace VOBetting\ExternalSource\Betfair\Helper;
 
+use VOBetting\ExternalSource\Betfair\ApiHelper;
 use Voetbal\ExternalSource;
 
 use Voetbal\External\League as ExternalLeague;

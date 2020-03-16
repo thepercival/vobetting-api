@@ -7,7 +7,7 @@
  * Time: 12:02
  */
 
-namespace VOBetting\ExternalSource\Betfair;
+namespace VOBetting\ExternalSource\Betfair\Helper;
 
 use VOBetting\External\System\Importer\BetLine as BetLineImporter;
 use Voetbal\ExternalSource;
