@@ -24,7 +24,7 @@ use Voetbal\League\Repository as LeagueRepository;
 use Voetbal\Season\Repository as SeasonRepository;
 use Voetbal\Sport\Repository as SportRepository;
 
-class Import extends Command
+class ExternalSource extends Command
 {
     /**
      * @var ExternalSourceFactory

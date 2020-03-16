@@ -43,7 +43,8 @@
   "autoload": {
     "psr-4": {
       "VOBetting\\": "domain/",
-      "App\\": "app/"
+      "App\\": "app/",
+      "PeterColes\\Betfair\\": "betfair/"
     }
   },
   "autoload-dev": {
