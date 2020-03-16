@@ -3,38 +3,51 @@
 namespace PeterColes\Betfair\Api;
 
 use Exception;
+use PeterColes\Betfair\Http\Client as BetfairHttpClient;
 
 class Auth extends BaseApi
 {
     /**
      * Betfair API endpoint for authentication requests
      */
-    const ENDPOINT = 'https://identitysso.betfair.com/api/';
+    private const ENDPOINT = 'https://identitysso.betfair.com/api/';
 
     /**
      * 4 hours, expressed in seconds
      */
     const SESSION_LENGTH = 4 * 60 * 60;
-
     /**
      * API fail status
      */
     const API_STATUS_FAIL = 'FAIL';
-
     /**
-     * Application key, provided by Betfair on registration
+     * @var string
      */
-    public static $appKey = null;
-
+    protected $appKey;
+    /**
+     * @var string
+     */
+    protected $username;
+    /**
+     * @var string
+     */
+    protected $password;
     /**
      * Session token, provided by Betfair at login
      */
-    public static $sessionToken = null;
-
+    public $sessionToken = null;
     /**
      * Time of last login, expressed in seconds since the Unix Epoch
      */
-    public static $lastLogin = null;
+    public $lastLogin = null;
+
+    public function __construct( string $appKey, string $username, string $password )
+    {
+        $this->appKey = $appKey;
+        $this->username = $username;
+        $this->password = $password;
+        parent::__construct( Auth::ENDPOINT );
+    }
 
     /**
      * Wrapper method for other methods to initiate and manage a Betfair session.
@@ -42,16 +55,13 @@ class Auth extends BaseApi
      * for a long running process and will only trigger the authentication overhead
      * when really needed.
      *
-     * @param  string $appKey
-     * @param  string $username
-     * @param  string $password
      */
-    public function init($appKey, $username, $password)
+    public function init()
     {
-        if ($appKey == self::$appKey && $this->sessionRemaining() > 5) {
+        if ($this->sessionRemaining() > 5) {
             $this->keepAlive();
         } else {
-            $this->login($appKey, $username, $password);
+            $this->login($this->appKey, $this->username, $this->password);
         }
     }
 
@@ -59,7 +69,7 @@ class Auth extends BaseApi
      * Accept app key and session token and extend session.
      *
      * @param  string $appKey
-     * @param  string $sessionToken
+     * @param  string|null $sessionToken
      * @return string
      */
     public function persist($appKey, $sessionToken)
@@ -68,8 +78,8 @@ class Auth extends BaseApi
             throw new Exception('Invalid session token');
         }
 
-        self::$appKey = $appKey;
-        self::$sessionToken = $sessionToken;
+        $this->appKey = $appKey;
+        $this->sessionToken = $sessionToken;
 
         return $this->keepAlive();
     }
@@ -86,7 +96,7 @@ class Auth extends BaseApi
      */
     public function login($appKey, $username, $password)
     {
-        self::$appKey = $appKey;
+        $this->appKey = $appKey;
 
         $request = $this->httpClient
             ->setMethod('post')
@@ -95,8 +105,8 @@ class Auth extends BaseApi
 
         $result = $this->execute($request);
 
-        self::$sessionToken = $result->token;
-        self::$lastLogin = time();
+        $this->sessionToken = $result->token;
+        $this->lastLogin = time();
 
         return $result->token;
     }
@@ -112,7 +122,7 @@ class Auth extends BaseApi
     {
         $result = $this->execute($this->httpClient->setEndPoint(self::ENDPOINT.'keepAlive/'));
 
-        self::$lastLogin = time();
+        $this->lastLogin = time();
 
         return $result->token;
     }
@@ -125,11 +135,9 @@ class Auth extends BaseApi
      */
     public function logout()
     {
-        $this->execute($this->httpClient->setEndPoint(self::ENDPOINT.'logout/'));
-
-        self::$appKey = null;
-        self::$sessionToken = null;
-        self::$lastLogin = null;
+        $this->execute($this->httpClient->setEndPoint($this->endpoint.'logout/'));
+        $this->sessionToken = null;
+        $this->lastLogin = null;
     }
 
     /**
@@ -139,28 +147,32 @@ class Auth extends BaseApi
      */
     public function sessionRemaining()
     {
-        if (self::$sessionToken === null) {
+        if ($this->sessionToken === null) {
             return 0;
         }
 
-        return self::$lastLogin + self::SESSION_LENGTH - time();
+        return $this->lastLogin + self::SESSION_LENGTH - time();
     }
 
     /**
      * Accept request, add auth headers and dispatch, then respond to any errors.
      *
-     * @param  \PeterColes\Betfair\Http\Client $request
+     * @param  BetfairHttpClient $client
      * @return Mixed
      * @throws Exception
      */
-    public function execute($request)
+    public function execute($client)
     {
-        $result = $request->authHeaders()->send();
+        $result = $client->authHeaders( $this->getHeaders() )->send();
 
         if ($result->status === self::API_STATUS_FAIL) {
             throw new Exception('Error: '.$result->error);
         }
 
         return $result;
+    }
+
+    public function getHeaders(): array {
+        return [ 'X-Application' => $this->appKey, 'X-Authentication' => $this->sessionToken ];
     }
 }

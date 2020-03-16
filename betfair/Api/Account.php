@@ -9,5 +9,10 @@ class Account extends BaseApi
     /**
      * Betfair API endpoint for account subsystem requests
      */
-    const ENDPOINT = 'https://api.betfair.com/exchange/account/rest/v1.0/';
+    private const ENDPOINT = 'https://api.betfair.com/exchange/account/rest/v1.0/';
+
+    public function __construct()
+    {
+        parent::__construct( Account::ENDPOINT );
+    }
 }

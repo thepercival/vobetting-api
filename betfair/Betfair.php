@@ -2,27 +2,22 @@
 
 namespace PeterColes\Betfair;
 
-use PeterColes\Betfair\Api\Auth;
-
 class Betfair
 {
+    /**
+     * @var Api\Auth
+     */
+    private $auth;
+
+    public function __construct( string $appKey, string $username, string $password )
+    {
+        $this->auth = new Api\Auth( $appKey, $username, $password );
+    }
+
     public function betting($params)
     {
-        return $this->action("betting", $params);
-    }
-
-    public function login( $appKey, $username, $password )
-    {
-        $auth = new Auth();
-        $auth->init( $appKey, $username, $password );
-    }
-
-    protected function action($method, $params)
-    {
-        // all other subsystems, currently Betting and Account
-        $class = 'PeterColes\\Betfair\\Api\\'.ucfirst($method);
-        if (class_exists($class)) {
-            return call_user_func([ new $class, 'execute' ], $params);
-        }
+        $this->auth->init();
+        $betting = new Api\Betting();
+        return $betting->executeWithParams(  $params, $this->auth->getHeaders() );
     }
 }

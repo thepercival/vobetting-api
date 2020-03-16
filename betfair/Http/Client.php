@@ -71,11 +71,8 @@ class Client
      * @param array $headers
      * @return Client
      */
-    public function authHeaders(array $headers = [ ])
+    public function authHeaders(array $headers)
     {
-        if (count($headers) == 0) {
-            $headers = [ 'X-Application' => Auth::$appKey, 'X-Authentication' => Auth::$sessionToken ];
-        }
         $this->options[ 'headers' ] = array_merge($this->options[ 'headers' ], $headers);
         return $this;
     }
@@ -111,10 +108,11 @@ class Client
     /**
      * Dispatch the request and provide hooks for error handling for the response.
      *
-     * @return mixed
+     * @return mixed|null
      */
     public function send()
     {
+        $response = null;
         try {
             $response = $this->guzzleClient->request($this->method, $this->uri, $this->options);
         } catch (ClientException $e) {

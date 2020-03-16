@@ -23,13 +23,19 @@ abstract class BaseApi
     protected $params;
 
     /**
+     * @var string
+     */
+    protected $endpoint;
+
+    /**
      * Ensure that we have an HTTP client with which to work
      *
      * @param HttpClient $httpClient
      */
-    public function __construct(HttpClient $httpClient = null)
+    public function __construct(string $endpoint, HttpClient $httpClient = null)
     {
         $this->httpClient = $httpClient ?: new HttpClient;
+        $this->endpoint = $endpoint;
     }
 
     /**
@@ -38,15 +44,15 @@ abstract class BaseApi
      * @param  array $params
      * @return mixed
      */
-    public function execute($params)
+    public function executeWithParams($params, $authHeaders)
     {
         $this->method = array_shift($params);
         $this->prepare($params);
 
         return $this->httpClient
             ->setMethod('post')
-            ->setEndPoint(static::ENDPOINT.$this->method.'/')
-            ->authHeaders()
+            ->setEndPoint($this->endpoint.$this->method.'/')
+            ->authHeaders( $authHeaders )
             ->addHeader([ 'Content-Type' => 'application/json' ])
             ->setParams($this->params)
             ->send();
@@ -57,7 +63,6 @@ abstract class BaseApi
      * Minimum activity is to remove a layer of array.
      *
      * @param  array $params
-     * @return array|null
      */
     protected function prepare($params)
     {

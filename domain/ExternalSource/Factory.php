@@ -16,18 +16,6 @@ use Voetbal\ExternalSource\Repository;
 
 class Factory extends ExternalSourceFactory
 {
-    /**
-     * @var Repository
-     */
-    private $externalSourceRepos;
-    /**
-     * @var CacheItemDbRepository
-     */
-    private $cacheItemDbRepos;
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
 
     public function __construct(
         Repository $externalSourceRepos,
@@ -38,13 +26,23 @@ class Factory extends ExternalSourceFactory
         parent::__construct( $externalSourceRepos, $cacheItemDbRepos, $logger );
     }
 
-    public function create( ExternalSource $externalSource ) {
-        if( $externalSource->getName() === "betfair" ) {
-            return new Betfair($externalSource);
+    public function createByName( string $name)
+    {
+        if ( $name === Betfair::NAME ) {
+            $externalSource = $this->externalSourceRepos->findOneBy( ["name" => Betfair::NAME ] );
+            if( $externalSource === null ) {
+                return null;
+            }
+            return $this->create( $externalSource );
         }
-//        if( $externalSystem->getName() === "API Football" ) {
-//            return new APIFootball($externalSystem);
-//        }
-        return parent::create($externalSource);
+        return parent::createByName( $name );
+    }
+
+    private function create( ExternalSource $externalSource )
+    {
+        if ( $externalSource->getName() === Betfair::NAME ) {
+            return new Betfair($externalSource, $this->logger);
+        }
+        return null;
     }
 }

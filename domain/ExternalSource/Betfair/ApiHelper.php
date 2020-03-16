@@ -27,32 +27,17 @@ class ApiHelper
         ExternalSource $externalSource
     ) {
         $this->externalSource = $externalSource;
-        $this->client = new BetfairClient();
-        $this->client->login();
+        $this->client = new BetfairClient(
+            $externalSource->getApikey(),
+            $externalSource->getUsername(),
+            $externalSource->getPassword() );
     }
 
-//
-//    public function __construct(
-//        ExternalSystem $externalSystem
-//    )
-//    {
-//        $this->externalSystem = $externalSystem;
-//        $this->headers['http']['method'] = 'GET';
-//        $this->headers['http']['header'] = 'X-Auth-Token: ' . $this->externalSystem->getApikey();
-//    }
-//
-//    protected function getHeaders() {
-//        return $this->headers;
-//    }
-//
-//    public function getData( $postUrl ) {
-//        $response = file_get_contents($this->externalSystem->getApiurl() . $postUrl, false,
-//            stream_context_create( $this->getHeaders()));
-//
-//        return json_decode($response);
-//    }
+    public function listCountries( array $params ): array {
+        return $this->client->betting(['listCountries']);
+    }
 
-
+//$competitions = $this->client->betting(['listCompetitions']);
 
 //
 //    public function getDateFormat() {
@@ -66,12 +51,7 @@ class ApiHelper
 //        }
 //        throw new \Exception("unknown bettype", E_ERROR);
 //    }
-//
-//    private function requestHelper( string $method, array $params )
-//    {
-//        $betfairBetting = new BetfairBetting();
-//        return $betfairBetting->execute([$method,$params]);
-//    }
+
 //
 //    public function getEvents( ExternalLeague $externalLeague, $importPeriod )
 //    {

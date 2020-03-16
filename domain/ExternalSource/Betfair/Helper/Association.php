@@ -53,7 +53,7 @@ class Association extends BetfairHelper implements ExternalSourceAssociation
 //                ImportService::ASSOCIATION_CACHE_MINUTES );
 //            $associationData = array_merge( $associationData, $apiData->sportItem->tournaments );
 
-        $this->setAssociations( $associationData );
+        $this->setAssociations( $this->apiHelper->listCountries( [] ) );
         return $this->associations;
     }
 
@@ -67,33 +67,34 @@ class Association extends BetfairHelper implements ExternalSourceAssociation
     }
 
     /**
-     * {"name":"England","slug":"england","priority":10,"id":1,"flag":"england"}
      *
-     * @param array $competitions |stdClass[]
+     *
+     * @param array $countries |stdClass[]
      */
-    protected function setAssociations(array $competitions)
+    protected function setAssociations(array $countries)
     {
         $defaultAssociation = $this->getDefaultAssociation();
         $this->associations = [ $defaultAssociation->getId() => $defaultAssociation ];
 
-        foreach ($competitions as $competition) {
-            if( $competition->category === null ) {
+        /** @var \stClass $country */
+        foreach ($countries as $country) {
+            if( $country->countryCode === null ) {
                 continue;
             }
-            $name = $competition->category->name;
+            $name = $country->countryCode;
             if( $this->hasName( $this->associations, $name ) ) {
                 continue;
             }
-            $association = $this->createAssociation( $competition->category ) ;
+            $association = $this->createAssociation( $country ) ;
             $this->associations[$association->getId()] = $association;
         }
     }
 
-    protected function createAssociation( \stdClass $category ): AssociationBase
+    protected function createAssociation( \stdClass $country ): AssociationBase
     {
-        $association = new AssociationBase($category->name);
+        $association = new AssociationBase($country->countryCode);
         $association->setParent( $this->getDefaultAssociation() );
-        $association->setId($category->id);
+        $association->setId($country->countryCode);
         return $association;
     }
 

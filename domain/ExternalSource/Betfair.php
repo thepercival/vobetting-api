@@ -63,7 +63,7 @@ class Betfair implements ExternalSourceImplementation, ExternalSourceAssociation
         $this->helpers[Betfair\ApiHelper::class] = new Betfair\ApiHelper(
             $this->getExternalSource()
         );
-        return $this->helpers[Betfair::class];
+        return $this->helpers[Betfair\ApiHelper::class];
     }
 
 //    public function init() {

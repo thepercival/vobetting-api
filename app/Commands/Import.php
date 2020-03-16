@@ -16,7 +16,7 @@ use Voetbal\Attacher\League\Repository as LeagueAttacherRepository;
 use Voetbal\Attacher\Season\Repository as SeasonAttacherRepository;
 use Voetbal\Attacher\Sport\Repository as SportAttacherRepository;
 use Voetbal\Competition\Repository as CompetitionRepository;
-use Voetbal\ExternalSource\Factory as ExternalSourceFactory;
+use VOBetting\ExternalSource\Factory as ExternalSourceFactory;
 use Voetbal\ExternalSource\SofaScore;
 use VOBetting\ExternalSource\Betfair;
 use Voetbal\Import\Service as VoetbalImportService;
@@ -24,7 +24,7 @@ use Voetbal\League\Repository as LeagueRepository;
 use Voetbal\Season\Repository as SeasonRepository;
 use Voetbal\Sport\Repository as SportRepository;
 
-class ExternalSource extends Command
+class Import extends Command
 {
     /**
      * @var ExternalSourceFactory

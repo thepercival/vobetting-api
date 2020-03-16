@@ -6,10 +6,13 @@ use PeterColes\Betfair\Api\BaseApi;
 
 class Betting extends BaseApi
 {
-    /**
-     * Betfair API endpoint for betting subsystem requests
-     */
-    const ENDPOINT = 'https://api.betfair.com/exchange/betting/rest/v1.0/';
+
+    private const ENDPOINT = 'https://api.betfair.com/exchange/betting/rest/v1.0/';
+
+    public function __construct()
+    {
+        parent::__construct( Betting::ENDPOINT );
+    }
 
     /**
      * Prepare parameters for API requests, ensuring the mandatory requirments are satisfied

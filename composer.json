@@ -57,7 +57,7 @@
     "test": [
       "vendor/bin/phpunit --bootstrap vendor/autoload.php tests/cases/"
     ],
-    "stan": "vendor/bin/phpstan analyse --level=5 app config domain tests",
+    "stan": "vendor/bin/phpstan analyse --level=5 app config domain tests betfair",
     "doctrine-try": "vendor/bin/doctrine orm:schema-tool:update --dump-sql",
     "doctrine-update": "vendor/bin/doctrine orm:schema-tool:update --force"
   },
