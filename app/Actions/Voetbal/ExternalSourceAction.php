@@ -19,7 +19,7 @@ use JMS\Serializer\SerializerInterface;
 use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
 use Voetbal\ExternalSource\Repository as ExternalSourceRepository;
 use Voetbal\ExternalSource;
-use Voetbal\ExternalSource\Factory as ExternalSourceFactory;
+use VOBetting\ExternalSource\Factory as ExternalSourceFactory;
 
 final class ExternalSourceAction extends Action
 {

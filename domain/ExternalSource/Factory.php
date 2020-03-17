@@ -26,23 +26,11 @@ class Factory extends ExternalSourceFactory
         parent::__construct( $externalSourceRepos, $cacheItemDbRepos, $logger );
     }
 
-    public function createByName( string $name)
-    {
-        if ( $name === Betfair::NAME ) {
-            $externalSource = $this->externalSourceRepos->findOneBy( ["name" => Betfair::NAME ] );
-            if( $externalSource === null ) {
-                return null;
-            }
-            return $this->create( $externalSource );
-        }
-        return parent::createByName( $name );
-    }
-
-    private function create( ExternalSource $externalSource )
+    protected function create( ExternalSource $externalSource )
     {
         if ( $externalSource->getName() === Betfair::NAME ) {
             return new Betfair($externalSource, $this->logger);
         }
-        return null;
+        return parent::create( $externalSource );
     }
 }

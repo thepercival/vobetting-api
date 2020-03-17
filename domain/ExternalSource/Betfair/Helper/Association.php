@@ -76,7 +76,7 @@ class Association extends BetfairHelper implements ExternalSourceAssociation
         $defaultAssociation = $this->getDefaultAssociation();
         $this->associations = [ $defaultAssociation->getId() => $defaultAssociation ];
 
-        /** @var \stClass $country */
+        /** @var \stdClass $country */
         foreach ($countries as $country) {
             if( $country->countryCode === null ) {
                 continue;
