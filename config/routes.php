@@ -13,7 +13,8 @@ use App\Actions\Voetbal\AssociationAction;
 use App\Actions\Voetbal\LeagueAction;
 use App\Actions\Voetbal\SeasonAction;
 use App\Actions\Voetbal\CompetitionAction;
-use App\Actions\Voetbal\ExternalSourceAction;
+use App\Actions\ExternalSourceAction;
+use App\Actions\AttacherAction;
 
 return function (App $app) {
 
@@ -41,6 +42,34 @@ return function (App $app) {
         $group->get('/{id}', BookmakerAction::class . ':fetchOne');
         $group->put('/{id}', BookmakerAction::class . ':edit');
         $group->delete('/{id}', BookmakerAction::class . ':remove');
+    });
+
+    $app->group('/externalsources', function ( Group $group ) {
+        $group->options('', ExternalSourceAction::class . ':options');
+        $group->post('', ExternalSourceAction::class . ':add');
+        $group->get('', ExternalSourceAction::class . ':fetch');
+        $group->options('/{id}', ExternalSourceAction::class . ':options');
+        $group->get('/{id}', ExternalSourceAction::class . ':fetchOne');
+        $group->put('/{id}', ExternalSourceAction::class . ':edit');
+        $group->delete('/{id}', ExternalSourceAction::class . ':remove');
+        $group->group('/{id}/', function ( Group $group ) {
+            $group->options('associations', ExternalSourceAction::class . ':options');
+            $group->get('associations', ExternalSourceAction::class . ':fetchAssociations');
+        });
+    });
+
+    $app->group('/attachers', function ( Group $group ) {
+        $group->group('/{externalSourceId}/', function ( Group $group ) {
+            $group->group('associations', function ( Group $group ) {
+                $group->options('', AttacherAction::class . ':options');
+                $group->post('', AttacherAction::class . ':addAssociation');
+                $group->get('', AttacherAction::class . ':fetchAssociations');
+                $group->options('/{id}', AttacherAction::class . ':options');
+//            $group->get('/{id}', AttacherAction::class . ':fetchOne');
+//            $group->put('/{id}', AttacherAction::class . ':edit');
+                $group->delete('/{id}', AttacherAction::class . ':removeAssociation');
+            });
+        });
     });
 
     $app->group('/voetbal', function ( Group $group ) {
@@ -88,15 +117,6 @@ return function (App $app) {
             $group->get('/{id}', CompetitionAction::class . ':fetchOne');
             $group->put('/{id}', CompetitionAction::class . ':edit');
             $group->delete('/{id}', CompetitionAction::class . ':remove');
-        });
-        $group->group('/externalsources', function ( Group $group ) {
-            $group->options('', ExternalSourceAction::class . ':options');
-            $group->post('', ExternalSourceAction::class . ':add');
-            $group->get('', ExternalSourceAction::class . ':fetch');
-            $group->options('/{id}', ExternalSourceAction::class . ':options');
-            $group->get('/{id}', ExternalSourceAction::class . ':fetchOne');
-            $group->put('/{id}', ExternalSourceAction::class . ':edit');
-            $group->delete('/{id}', ExternalSourceAction::class . ':remove');
         });
     });
 };

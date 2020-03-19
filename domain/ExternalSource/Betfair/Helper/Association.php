@@ -46,14 +46,8 @@ class Association extends BetfairHelper implements ExternalSourceAssociation
         }
         $this->associations = [];
 
-        $associationData = [];
-
-//        $apiData = $this->apiHelper->getData(
-//                "//" . $this->apiHelper->getCurrentDateAsString() . "/json",
-//                ImportService::ASSOCIATION_CACHE_MINUTES );
-//            $associationData = array_merge( $associationData, $apiData->sportItem->tournaments );
-
         $this->setAssociations( $this->apiHelper->listCountries( [] ) );
+        $this->associations = array_values( $this->associations );
         return $this->associations;
     }
 
