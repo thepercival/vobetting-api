@@ -22,6 +22,7 @@ use Voetbal\Attacher\Repository as AttacherRepos;
 use Voetbal\Association\Repository as AssociationRepository;
 use Voetbal\Attacher\Association\Repository as AssociationAttacherRepository;
 use Voetbal\Attacher\Association as AssociationAttacher;
+use Voetbal\Sport\Repository as SportRepository;
 use Voetbal\Attacher\Sport\Repository as SportAttacherRepository;
 use Voetbal\Attacher\Sport as SportAttacher;
 use Voetbal\Import\Idable as Importable;
@@ -34,6 +35,10 @@ final class AttacherAction extends Action
      * @var ExternalSourceRepository
      */
     private $externalSourceRepos;
+    /**
+     * @var SportRepository
+     */
+    private $sportRepos;
     /**
      * @var SportAttacherRepository
      */
@@ -56,12 +61,14 @@ final class AttacherAction extends Action
         SerializerInterface $serializer,
         ExternalSourceRepository $externalSourceRepos,
         SportAttacherRepository $sportAttacherRepos,
+        SportRepository $sportRepos,
         AssociationAttacherRepository $associationAttacherRepos,
         AssociationRepository $associationRepos
     ) {
         parent::__construct($logger, $serializer);
         $this->externalSourceRepos = $externalSourceRepos;
         $this->sportAttacherRepos = $sportAttacherRepos;
+        $this->sportRepos = $sportRepos;
         $this->associationAttacherRepos = $associationAttacherRepos;
         $this->associationRepos = $associationRepos;
         $this->attacherFactory = new AttacherFactory();
@@ -114,6 +121,11 @@ final class AttacherAction extends Action
         return $this->add($this->associationRepos, $this->associationAttacherRepos, $request, $response, $args);
     }
 
+    public function addSport(Request $request, Response $response, $args): Response
+    {
+        return $this->add($this->sportRepos, $this->sportAttacherRepos, $request, $response, $args);
+    }
+
     protected function add(
         VoetbalRepository $importableRepos,
         AttacherRepos $attacherRepos,
@@ -134,7 +146,7 @@ final class AttacherAction extends Action
             if ($importable === null) {
                 throw new \Exception("er kan geen importable worden gevonden", E_ERROR);
             }
-            $newAttacher = $this->attacherFactory->createAssociation(
+            $newAttacher = $this->attacherFactory->createObject(
                 $importable,
                 $externalSource,
                 $attacherSer->getExternalId()
@@ -148,47 +160,14 @@ final class AttacherAction extends Action
         }
     }
 
-
-//
-//    public function edit( Request $request, Response $response, $args ): Response
-//    {
-//        try {
-//            /** @var \Voetbal\Association $associationSer */
-//            $associationSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Association', 'json');
-//
-//            $association = $this->associationRepos->find($args['id']);
-//            if ( $association === null ) {
-//                throw new \Exception("de bond kon niet gevonden worden o.b.v. de invoer", E_ERROR);
-//            }
-//            $parentAssociation = null;
-//            if( $associationSer->getParent() !== null ) {
-//                $parentAssociation = $this->associationRepos->find($associationSer->getParent()->getId());
-//            }
-//
-//            $associationWithSameName = $this->associationRepos->findOneBy( array('name' => $associationSer->getName() ) );
-//            if ( $associationWithSameName !== null and $associationWithSameName !== $association ){
-//                throw new \Exception("de bond met de naam ".$associationSer->getName()." bestaat al", E_ERROR );
-//            }
-//
-//            $association->setName($associationSer->getName());
-//            $association->setDescription($associationSer->getDescription());
-//            $associationService = new Association\Service();
-//            $association = $associationService->changeParent( $association, $parentAssociation );
-//            $this->associationRepos->save( $association );
-//
-//            $json = $this->serializer->serialize( $association, 'json');
-//            return $this->respondWithJson( $response, $json );
-//        }
-//        catch( \Exception $e ){
-//            return new ErrorResponse($e->getMessage(), 422);
-//        }
-//    }
-//
-
-
     public function removeAssociation(Request $request, Response $response, $args): Response
     {
         return $this->remove($this->associationAttacherRepos, $request, $response, $args);
+    }
+
+    public function removeSport(Request $request, Response $response, $args): Response
+    {
+        return $this->remove($this->sportAttacherRepos, $request, $response, $args);
     }
 
     protected function remove(AttacherRepos $attacherRepos, Request $request, Response $response, $args): Response

@@ -56,6 +56,10 @@ return function (App $app) {
             $group->options('associations', ExternalSourceAction::class . ':options');
             $group->get('associations', ExternalSourceAction::class . ':fetchAssociations');
         });
+        $group->group('/{id}/', function ( Group $group ) {
+            $group->options('sports', ExternalSourceAction::class . ':options');
+            $group->get('sports', ExternalSourceAction::class . ':fetchSports');
+        });
     });
 
     $app->group('/attachers', function ( Group $group ) {
@@ -65,9 +69,14 @@ return function (App $app) {
                 $group->post('', AttacherAction::class . ':addAssociation');
                 $group->get('', AttacherAction::class . ':fetchAssociations');
                 $group->options('/{id}', AttacherAction::class . ':options');
-//            $group->get('/{id}', AttacherAction::class . ':fetchOne');
-//            $group->put('/{id}', AttacherAction::class . ':edit');
                 $group->delete('/{id}', AttacherAction::class . ':removeAssociation');
+            });
+            $group->group('sports', function ( Group $group ) {
+                $group->options('', AttacherAction::class . ':options');
+                $group->post('', AttacherAction::class . ':addSport');
+                $group->get('', AttacherAction::class . ':fetchSports');
+                $group->options('/{id}', AttacherAction::class . ':options');
+                $group->delete('/{id}', AttacherAction::class . ':removeSport');
             });
         });
     });

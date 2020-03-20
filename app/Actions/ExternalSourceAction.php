@@ -23,6 +23,7 @@ use Voetbal\ExternalSource\Repository as ExternalSourceRepository;
 use Voetbal\ExternalSource;
 use VOBetting\ExternalSource\Factory as ExternalSourceFactory;
 use Voetbal\ExternalSource\Association as ExternalSourceAssociation;
+use Voetbal\ExternalSource\Sport as ExternalSourceSport;
 
 final class ExternalSourceAction extends Action
 {
@@ -80,6 +81,28 @@ final class ExternalSourceAction extends Action
             $associations = $externalSourceImpl->getAssociations();
 
             $json = $this->serializer->serialize( $associations, 'json');
+            return $this->respondWithJson( $response, $json );
+        }
+        catch( \Exception $e ){
+            return new ErrorResponse($e->getMessage(), 400);
+        }
+    }
+
+    public function fetchSports( Request $request, Response $response, $args ): Response
+    {
+        try {
+            $externalSource = $this->externalSourceRepos->find((int) $args['id']);
+            if ( $externalSource === null ) {
+                throw new \Exception("geen extern systeem met het opgegeven id gevonden", E_ERROR);
+            }
+
+            $externalSourceImpl = $this->externalSourceFactory->createByName( $externalSource->getName()  );
+            if (!($externalSourceImpl !== null && $externalSourceImpl instanceof ExternalSourceSport)) {
+                throw new \Exception("het extern systeem kan geen sporten ophalen", E_ERROR);
+            }
+            $sports = $externalSourceImpl->getSports();
+
+            $json = $this->serializer->serialize( $sports, 'json');
             return $this->respondWithJson( $response, $json );
         }
         catch( \Exception $e ){
