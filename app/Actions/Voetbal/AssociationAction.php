@@ -77,14 +77,14 @@ final class AssociationAction extends Action
             /** @var \Voetbal\Association $associationSer */
             $associationSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Association', 'json');
 
-            $parentAssociation = null;
-            if ($associationSer->getParent() !== null) {
-                $parentAssociation = $this->associationRepos->find($associationSer->getParent()->getId());
-            }
-
             $associationWithSameName = $this->associationRepos->findOneBy( array('name' => $associationSer->getName() ) );
             if ( $associationWithSameName !== null ){
                 throw new \Exception("de bond met de naam ".$associationSer->getName()." bestaat al", E_ERROR );
+            }
+
+            $parentAssociation = null;
+            if ($associationSer->getParent() !== null) {
+                $parentAssociation = $this->associationRepos->findOneBy(["name" => $associationSer->getParent()->getName()]);
             }
 
             $newAssociation = new Association($associationSer->getName());
@@ -113,7 +113,7 @@ final class AssociationAction extends Action
             }
             $parentAssociation = null;
             if( $associationSer->getParent() !== null ) {
-                $parentAssociation = $this->associationRepos->find($associationSer->getParent()->getId());
+                $parentAssociation = $this->associationRepos->findOneBy(["name" => $associationSer->getParent()->getName()]);
             }
 
             $associationWithSameName = $this->associationRepos->findOneBy( array('name' => $associationSer->getName() ) );
