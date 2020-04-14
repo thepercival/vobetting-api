@@ -27,6 +27,7 @@ use Voetbal\League\Repository as LeagueRepository;
 use Voetbal\Season\Repository as SeasonRepository;
 use Voetbal\Competition\Repository as CompetitionRepository;
 use Voetbal\Competitor\Repository as CompetitorRepository;
+use Voetbal\Structure\Repository as StructureRepository;
 
 class Import extends Command
 {
@@ -63,6 +64,7 @@ class Import extends Command
         $this->addOption('leagues', null, InputOption::VALUE_NONE, 'leagues');
         $this->addOption('competitions', null, InputOption::VALUE_NONE, 'competitions');
         $this->addOption('competitors', null, InputOption::VALUE_NONE, 'competitors');
+        $this->addOption('structures', null, InputOption::VALUE_NONE, 'structure');
 
         parent::configure();
     }
@@ -132,6 +134,19 @@ class Import extends Command
                 $competitorRepos,
                 $competitorAttacherRepos,
                 $associationAttacherRepos,
+                $competitionAttacherRepos
+            );
+        }
+
+        if ($input->getOption("structures")) {
+            $sofaScore = $this->externalSourceFactory->createByName( SofaScore::NAME );
+            $structureRepos = $this->container->get(StructureRepository::class);
+            $competitorAttacherRepos = $this->container->get(CompetitorAttacherRepository::class);
+            $competitionAttacherRepos = $this->container->get(CompetitionAttacherRepository::class);
+            $importService->importStructures(
+                $sofaScore,
+                $structureRepos,
+                $competitorAttacherRepos,
                 $competitionAttacherRepos
             );
         }

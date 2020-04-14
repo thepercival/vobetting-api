@@ -29,6 +29,8 @@ use Voetbal\League\Repository as LeagueRepository;
 use Voetbal\Attacher\League\Repository as LeagueAttacherRepository;
 use Voetbal\Competition\Repository as CompetitionRepository;
 use Voetbal\Attacher\Competition\Repository as CompetitionAttacherRepository;
+use Voetbal\Competitor\Repository as CompetitorRepository;
+use Voetbal\Attacher\Competitor\Repository as CompetitorAttacherRepository;
 use Voetbal\Repository as VoetbalRepository;
 use Voetbal\Attacher\Factory as AttacherFactory;
 
@@ -79,6 +81,14 @@ final class AttacherAction extends Action
      */
     private $competitionRepos;
     /**
+     * @var CompetitorAttacherRepository
+     */
+    private $competitorAttacherRepos;
+    /**
+     * @var CompetitorRepository
+     */
+    private $competitorRepos;
+    /**
      * @var AttacherFactory
      */
     private $attacherFactory;
@@ -96,7 +106,9 @@ final class AttacherAction extends Action
         LeagueAttacherRepository $leagueAttacherRepos,
         LeagueRepository $leagueRepos,
         CompetitionAttacherRepository $competitionAttacherRepos,
-        CompetitionRepository $competitionRepos
+        CompetitionRepository $competitionRepos,
+        CompetitorAttacherRepository $competitorAttacherRepos,
+        CompetitorRepository $competitorRepos
     ) {
         parent::__construct($logger, $serializer);
         $this->externalSourceRepos = $externalSourceRepos;
@@ -110,6 +122,8 @@ final class AttacherAction extends Action
         $this->leagueRepos = $leagueRepos;
         $this->competitionAttacherRepos = $competitionAttacherRepos;
         $this->competitionRepos = $competitionRepos;
+        $this->competitorAttacherRepos = $competitorAttacherRepos;
+        $this->competitorRepos = $competitorRepos;
         $this->attacherFactory = new AttacherFactory();
     }
 
@@ -136,6 +150,11 @@ final class AttacherAction extends Action
     public function fetchCompetitions(Request $request, Response $response, $args): Response
     {
         return $this->fetch($this->competitionAttacherRepos, $request, $response, $args);
+    }
+
+    public function fetchCompetitors(Request $request, Response $response, $args): Response
+    {
+        return $this->fetch($this->competitorAttacherRepos, $request, $response, $args);
     }
 
     protected function fetch(AttacherRepos $attacherRepos, Request $request, Response $response, $args): Response
@@ -196,6 +215,11 @@ final class AttacherAction extends Action
         return $this->add($this->competitionRepos, $this->competitionAttacherRepos, $request, $response, $args);
     }
 
+    public function addCompetitor(Request $request, Response $response, $args): Response
+    {
+        return $this->add($this->competitorRepos, $this->competitorAttacherRepos, $request, $response, $args);
+    }
+
     protected function add(
         VoetbalRepository $importableRepos,
         AttacherRepos $attacherRepos,
@@ -253,6 +277,11 @@ final class AttacherAction extends Action
     public function removeCompetition(Request $request, Response $response, $args): Response
     {
         return $this->remove($this->competitionAttacherRepos, $request, $response, $args);
+    }
+
+    public function removeCompetitor(Request $request, Response $response, $args): Response
+    {
+        return $this->remove($this->competitorAttacherRepos, $request, $response, $args);
     }
 
     protected function remove(AttacherRepos $attacherRepos, Request $request, Response $response, $args): Response
