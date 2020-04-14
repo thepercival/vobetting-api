@@ -9,21 +9,20 @@
 namespace App\Actions;
 
 use App\Response\ErrorResponse;
-use App\Actions\Action;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
 use VOBetting\ExternalSource\Betfair;
-use Voetbal\Association\Repository as AssociationRepository;
-use Voetbal\Attacher\Association\Repository as AssociationAttacherRepository;
 use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
-use Voetbal\ExternalSource\League as ExternalSourceLeague;
 use Voetbal\ExternalSource\Repository as ExternalSourceRepository;
 use Voetbal\ExternalSource;
 use VOBetting\ExternalSource\Factory as ExternalSourceFactory;
 use Voetbal\ExternalSource\Association as ExternalSourceAssociation;
 use Voetbal\ExternalSource\Sport as ExternalSourceSport;
+use Voetbal\ExternalSource\Season as ExternalSourceSeason;
+use Voetbal\ExternalSource\League as ExternalSourceLeague;
+use Voetbal\ExternalSource\Competition as ExternalSourceCompetition;
 
 final class ExternalSourceAction extends Action
 {
@@ -66,6 +65,28 @@ final class ExternalSourceAction extends Action
         }
     }
 
+    public function fetchSports( Request $request, Response $response, $args ): Response
+    {
+        try {
+            $externalSource = $this->externalSourceRepos->find((int) $args['id']);
+            if ( $externalSource === null ) {
+                throw new \Exception("geen extern systeem met het opgegeven id gevonden", E_ERROR);
+            }
+
+            $externalSourceImpl = $this->externalSourceFactory->createByName( $externalSource->getName()  );
+            if (!($externalSourceImpl !== null && $externalSourceImpl instanceof ExternalSourceSport)) {
+                throw new \Exception("het extern systeem kan geen sporten ophalen", E_ERROR);
+            }
+            $sports = $externalSourceImpl->getSports();
+
+            $json = $this->serializer->serialize( $sports, 'json');
+            return $this->respondWithJson( $response, $json );
+        }
+        catch( \Exception $e ){
+            return new ErrorResponse($e->getMessage(), 400);
+        }
+    }
+
     public function fetchAssociations( Request $request, Response $response, $args ): Response
     {
         try {
@@ -88,7 +109,7 @@ final class ExternalSourceAction extends Action
         }
     }
 
-    public function fetchSports( Request $request, Response $response, $args ): Response
+    public function fetchSeasons( Request $request, Response $response, $args ): Response
     {
         try {
             $externalSource = $this->externalSourceRepos->find((int) $args['id']);
@@ -97,18 +118,63 @@ final class ExternalSourceAction extends Action
             }
 
             $externalSourceImpl = $this->externalSourceFactory->createByName( $externalSource->getName()  );
-            if (!($externalSourceImpl !== null && $externalSourceImpl instanceof ExternalSourceSport)) {
-                throw new \Exception("het extern systeem kan geen sporten ophalen", E_ERROR);
+            if (!($externalSourceImpl !== null && $externalSourceImpl instanceof ExternalSourceSeason)) {
+                throw new \Exception("het extern systeem kan geen seizoenen ophalen", E_ERROR);
             }
-            $sports = $externalSourceImpl->getSports();
+            $seasons = $externalSourceImpl->getSeasons();
 
-            $json = $this->serializer->serialize( $sports, 'json');
+            $json = $this->serializer->serialize( $seasons, 'json');
             return $this->respondWithJson( $response, $json );
         }
         catch( \Exception $e ){
             return new ErrorResponse($e->getMessage(), 400);
         }
     }
+
+    public function fetchLeagues( Request $request, Response $response, $args ): Response
+    {
+        try {
+            $externalSource = $this->externalSourceRepos->find((int) $args['id']);
+            if ( $externalSource === null ) {
+                throw new \Exception("geen extern systeem met het opgegeven id gevonden", E_ERROR);
+            }
+
+            $externalSourceImpl = $this->externalSourceFactory->createByName( $externalSource->getName()  );
+            if (!($externalSourceImpl !== null && $externalSourceImpl instanceof ExternalSourceLeague)) {
+                throw new \Exception("het extern systeem kan geen leagues ophalen", E_ERROR);
+            }
+            $leagues = $externalSourceImpl->getLeagues();
+
+            $json = $this->serializer->serialize( $leagues, 'json');
+            return $this->respondWithJson( $response, $json );
+        }
+        catch( \Exception $e ){
+            return new ErrorResponse($e->getMessage(), 400);
+        }
+    }
+
+    public function fetchCompetitions( Request $request, Response $response, $args ): Response
+    {
+        try {
+            $externalSource = $this->externalSourceRepos->find((int) $args['id']);
+            if ( $externalSource === null ) {
+                throw new \Exception("geen extern systeem met het opgegeven id gevonden", E_ERROR);
+            }
+
+            $externalSourceImpl = $this->externalSourceFactory->createByName( $externalSource->getName()  );
+            if (!($externalSourceImpl !== null && $externalSourceImpl instanceof ExternalSourceCompetition)) {
+                throw new \Exception("het extern systeem kan geen leagues ophalen", E_ERROR);
+            }
+            $competitions = $externalSourceImpl->getCompetitions();
+
+            $json = $this->serializer->serialize( $competitions, 'json');
+            return $this->respondWithJson( $response, $json );
+        }
+        catch( \Exception $e ){
+            return new ErrorResponse($e->getMessage(), 400);
+        }
+    }
+
 
     public function fetchOne( Request $request, Response $response, $args ): Response
     {

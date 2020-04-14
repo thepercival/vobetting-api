@@ -119,27 +119,15 @@ final class CompetitionAction extends Action
             $competitionSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Competition', 'json');
 
             $queryParams = $request->getQueryParams();
-            $sportId = null;
-            if (array_key_exists("sportId", $queryParams) && strlen($queryParams["sportId"]) > 0) {
-                $sportId = $queryParams["sportId"];
-            }
-            $sport = $this->sportRepos->find( $sportId );
+            $sport = $this->sportRepos->findOneBy( ["name" => $competitionSer->getFirstSportConfig()->getSport()->getName()] );
             if ( $sport === null ) {
                 throw new \Exception("de sport kon niet gevonden worden o.b.v. de invoer", E_ERROR);
             }
-            $leagueId = null;
-            if (array_key_exists("leagueId", $queryParams) && strlen($queryParams["leagueId"]) > 0) {
-                $leagueId = $queryParams["leagueId"];
-            }
-            $league = $this->leagueRepos->find( $leagueId );
-            if ( $league === null ) {
+            $league = $this->leagueRepos->findOneBy( ["name" => $competitionSer->getLeague()->getName()] );
+            if ($league === null) {
                 throw new \Exception("de competitie kon niet gevonden worden o.b.v. de invoer", E_ERROR);
             }
-            $seasonId = null;
-            if (array_key_exists("seasonId", $queryParams) && strlen($queryParams["seasonId"]) > 0) {
-                $seasonId = $queryParams["seasonId"];
-            }
-            $season = $this->seasonRepos->find( $seasonId );
+            $season = $this->seasonRepos->findOneBy( ["name" => $competitionSer->getSeason()->getName()] );
             if ( $season === null ) {
                 throw new \Exception("het seizoen kon niet gevonden worden o.b.v. de invoer", E_ERROR);
             }

@@ -11,14 +11,16 @@ namespace App\Actions;
 use App\Exceptions\DomainRecordNotFoundException;
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
+use DateTimeImmutable;
 use JMS\Serializer\SerializerInterface;
 use \Firebase\JWT\JWT;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Selective\Config\Configuration;
+use stdClass;
 use Tuupola\Base62;
 
-final class Auth extends Action
+final class AuthAction extends Action
 {
     /**
      * @var Configuration
@@ -45,6 +47,7 @@ final class Auth extends Action
     public function login( Request $request, Response $response, $args): Response
 	{
        try{
+           /** @var stdClass $authData */
            $authData = $this->getFormData( $request );
            if( !property_exists( $authData, "password") || strlen($authData->password) === 0 ) {
                throw new \Exception( "het wachtwoord is niet opgegeven");
@@ -70,8 +73,8 @@ final class Auth extends Action
     {
         $jti = (new Base62)->encode(random_bytes(16));
 
-        $now = new \DateTimeImmutable();
-        $future = new \DateTimeImmutable("now +3 months");
+        $now = new DateTimeImmutable();
+        $future = new DateTimeImmutable("now +3 months");
 
         $payload = [
             "iat" => $now->getTimeStamp(),

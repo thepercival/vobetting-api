@@ -93,12 +93,7 @@ final class LeagueAction extends Action
             /** @var \Voetbal\League $leagueSer */
             $leagueSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\League', 'json');
 
-            $queryParams = $request->getQueryParams();
-            $associationId = null;
-            if (array_key_exists("associationId", $queryParams) && strlen($queryParams["associationId"]) > 0) {
-                $associationId = $queryParams["associationId"];
-            }
-            $association = $this->associationRepos->find( $associationId );
+            $association = $this->associationRepos->findOneBy( [ "name" => $leagueSer->getAssociation()->getName()] );
             if ( $association === null ) {
                 throw new \Exception("de bond kon niet gevonden worden o.b.v. de invoer", E_ERROR);
             }
@@ -132,6 +127,12 @@ final class LeagueAction extends Action
                 throw new \Exception("de competitie kon niet gevonden worden o.b.v. de invoer", E_ERROR);
             }
 
+            // can association be updated
+//            $association = $this->associationRepos->findOneBy( [ "name" => $leagueSer->getAssociation()->getName()] );
+//            if ( $association === null ) {
+//                throw new \Exception("de bond kon niet gevonden worden o.b.v. de invoer", E_ERROR);
+//            }
+
             $leagueWithSameName = $this->leagueRepos->findOneBy( array('name' => $leagueSer->getName() ) );
             if ( $leagueWithSameName !== null and $leagueWithSameName !== $league ){
                 throw new \Exception("de competitie met de naam ".$leagueSer->getName()." bestaat al", E_ERROR );
@@ -139,6 +140,7 @@ final class LeagueAction extends Action
 
             $league->setName( $leagueSer->getName() );
             $league->setAbbreviation( $leagueSer->getAbbreviation() );
+            // $league->setAssociation( $association );
             $this->leagueRepos->save( $league );
 
             $json = $this->serializer->serialize( $league, 'json');

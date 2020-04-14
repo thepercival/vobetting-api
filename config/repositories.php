@@ -30,6 +30,8 @@ use Voetbal\Attacher\League\Repository as LeagueAttacherRepository;
 use Voetbal\Attacher\League as LeagueAttacher;
 use Voetbal\Attacher\Competition\Repository as CompetitionAttacherRepository;
 use Voetbal\Attacher\Competition as CompetitionAttacher;
+use Voetbal\Attacher\Competitor\Repository as CompetitorAttacherRepository;
+use Voetbal\Attacher\Competitor as CompetitorAttacher;
 
 use Voetbal\Sport\Repository as SportRepository;
 use Voetbal\Sport;
@@ -41,6 +43,8 @@ use Voetbal\League\Repository as LeagueRepository;
 use Voetbal\League;
 use Voetbal\Competition\Repository as CompetitionRepository;
 use Voetbal\Competition;
+use Voetbal\Competitor\Repository as CompetitorRepository;
+use Voetbal\Competitor;
 
 use Voetbal\Structure\Repository as StructureRepository;
 use Voetbal\Planning\Repository as PlanningRepository;
@@ -57,8 +61,6 @@ use Voetbal\Referee\Repository as RefereeRepository;
 use Voetbal\Referee;
 use Voetbal\Sport\Config\Repository as SportConfigRepository;
 use Voetbal\Sport\Config as SportConfig;
-use Voetbal\Competitor\Repository as CompetitorRepository;
-use Voetbal\Competitor;
 use Voetbal\Sport\ScoreConfig\Repository as SportScoreConfigRepository;
 use Voetbal\Sport\ScoreConfig as SportScoreConfig;
 use Voetbal\Place\Repository as PlaceRepository;
@@ -120,6 +122,14 @@ return [
     CompetitionAttacherRepository::class => function (ContainerInterface $container) {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new CompetitionAttacherRepository($entityManager, $entityManager->getClassMetaData(CompetitionAttacher::class));
+    },
+    CompetitorRepository::class => function (ContainerInterface $container) {
+        $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
+        return new CompetitorRepository($entityManager, $entityManager->getClassMetaData(Competitor::class));
+    },
+    CompetitorAttacherRepository::class => function (ContainerInterface $container) {
+        $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
+        return new CompetitorAttacherRepository($entityManager, $entityManager->getClassMetaData(CompetitorAttacher::class));
     },
     ExternalSourceRepository::class => function (ContainerInterface $container) {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);

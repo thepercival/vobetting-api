@@ -19,13 +19,16 @@ use JMS\Serializer\SerializerInterface;
 use Voetbal\ExternalSource;
 use Voetbal\ExternalSource\Repository as ExternalSourceRepository;
 use Voetbal\Attacher\Repository as AttacherRepos;
-use Voetbal\Association\Repository as AssociationRepository;
-use Voetbal\Attacher\Association\Repository as AssociationAttacherRepository;
-use Voetbal\Attacher\Association as AssociationAttacher;
 use Voetbal\Sport\Repository as SportRepository;
 use Voetbal\Attacher\Sport\Repository as SportAttacherRepository;
-use Voetbal\Attacher\Sport as SportAttacher;
-use Voetbal\Import\Idable as Importable;
+use Voetbal\Association\Repository as AssociationRepository;
+use Voetbal\Attacher\Association\Repository as AssociationAttacherRepository;
+use Voetbal\Season\Repository as SeasonRepository;
+use Voetbal\Attacher\Season\Repository as SeasonAttacherRepository;
+use Voetbal\League\Repository as LeagueRepository;
+use Voetbal\Attacher\League\Repository as LeagueAttacherRepository;
+use Voetbal\Competition\Repository as CompetitionRepository;
+use Voetbal\Attacher\Competition\Repository as CompetitionAttacherRepository;
 use Voetbal\Repository as VoetbalRepository;
 use Voetbal\Attacher\Factory as AttacherFactory;
 
@@ -52,6 +55,30 @@ final class AttacherAction extends Action
      */
     private $associationRepos;
     /**
+     * @var SeasonAttacherRepository
+     */
+    private $seasonAttacherRepos;
+    /**
+     * @var SeasonRepository
+     */
+    private $seasonRepos;
+    /**
+     * @var LeagueAttacherRepository
+     */
+    private $leagueAttacherRepos;
+    /**
+     * @var LeagueRepository
+     */
+    private $leagueRepos;
+    /**
+     * @var CompetitionAttacherRepository
+     */
+    private $competitionAttacherRepos;
+    /**
+     * @var CompetitionRepository
+     */
+    private $competitionRepos;
+    /**
      * @var AttacherFactory
      */
     private $attacherFactory;
@@ -63,7 +90,13 @@ final class AttacherAction extends Action
         SportAttacherRepository $sportAttacherRepos,
         SportRepository $sportRepos,
         AssociationAttacherRepository $associationAttacherRepos,
-        AssociationRepository $associationRepos
+        AssociationRepository $associationRepos,
+        SeasonAttacherRepository $seasonAttacherRepos,
+        SeasonRepository $seasonRepos,
+        LeagueAttacherRepository $leagueAttacherRepos,
+        LeagueRepository $leagueRepos,
+        CompetitionAttacherRepository $competitionAttacherRepos,
+        CompetitionRepository $competitionRepos
     ) {
         parent::__construct($logger, $serializer);
         $this->externalSourceRepos = $externalSourceRepos;
@@ -71,6 +104,12 @@ final class AttacherAction extends Action
         $this->sportRepos = $sportRepos;
         $this->associationAttacherRepos = $associationAttacherRepos;
         $this->associationRepos = $associationRepos;
+        $this->seasonAttacherRepos = $seasonAttacherRepos;
+        $this->seasonRepos = $seasonRepos;
+        $this->leagueAttacherRepos = $leagueAttacherRepos;
+        $this->leagueRepos = $leagueRepos;
+        $this->competitionAttacherRepos = $competitionAttacherRepos;
+        $this->competitionRepos = $competitionRepos;
         $this->attacherFactory = new AttacherFactory();
     }
 
@@ -82,6 +121,21 @@ final class AttacherAction extends Action
     public function fetchAssociations(Request $request, Response $response, $args): Response
     {
         return $this->fetch($this->associationAttacherRepos, $request, $response, $args);
+    }
+
+    public function fetchSeasons(Request $request, Response $response, $args): Response
+    {
+        return $this->fetch($this->seasonAttacherRepos, $request, $response, $args);
+    }
+
+    public function fetchLeagues(Request $request, Response $response, $args): Response
+    {
+        return $this->fetch($this->leagueAttacherRepos, $request, $response, $args);
+    }
+
+    public function fetchCompetitions(Request $request, Response $response, $args): Response
+    {
+        return $this->fetch($this->competitionAttacherRepos, $request, $response, $args);
     }
 
     protected function fetch(AttacherRepos $attacherRepos, Request $request, Response $response, $args): Response
@@ -116,14 +170,30 @@ final class AttacherAction extends Action
 //        }
 //    }
 //
+
+    public function addSport(Request $request, Response $response, $args): Response
+    {
+        return $this->add($this->sportRepos, $this->sportAttacherRepos, $request, $response, $args);
+    }
+
     public function addAssociation(Request $request, Response $response, $args): Response
     {
         return $this->add($this->associationRepos, $this->associationAttacherRepos, $request, $response, $args);
     }
 
-    public function addSport(Request $request, Response $response, $args): Response
+    public function addSeason(Request $request, Response $response, $args): Response
     {
-        return $this->add($this->sportRepos, $this->sportAttacherRepos, $request, $response, $args);
+        return $this->add($this->seasonRepos, $this->seasonAttacherRepos, $request, $response, $args);
+    }
+
+    public function addLeague(Request $request, Response $response, $args): Response
+    {
+        return $this->add($this->leagueRepos, $this->leagueAttacherRepos, $request, $response, $args);
+    }
+
+    public function addCompetition(Request $request, Response $response, $args): Response
+    {
+        return $this->add($this->competitionRepos, $this->competitionAttacherRepos, $request, $response, $args);
     }
 
     protected function add(
@@ -160,14 +230,29 @@ final class AttacherAction extends Action
         }
     }
 
+    public function removeSport(Request $request, Response $response, $args): Response
+    {
+        return $this->remove($this->sportAttacherRepos, $request, $response, $args);
+    }
+
     public function removeAssociation(Request $request, Response $response, $args): Response
     {
         return $this->remove($this->associationAttacherRepos, $request, $response, $args);
     }
 
-    public function removeSport(Request $request, Response $response, $args): Response
+    public function removeSeason(Request $request, Response $response, $args): Response
     {
-        return $this->remove($this->sportAttacherRepos, $request, $response, $args);
+        return $this->remove($this->seasonAttacherRepos, $request, $response, $args);
+    }
+
+    public function removeLeague(Request $request, Response $response, $args): Response
+    {
+        return $this->remove($this->leagueAttacherRepos, $request, $response, $args);
+    }
+
+    public function removeCompetition(Request $request, Response $response, $args): Response
+    {
+        return $this->remove($this->competitionAttacherRepos, $request, $response, $args);
     }
 
     protected function remove(AttacherRepos $attacherRepos, Request $request, Response $response, $args): Response

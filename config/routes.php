@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\BetLineAction;
 use App\Actions\LayBackAction;
-use App\Actions\Auth as AuthAction;
+use App\Actions\AuthAction;
 use App\Actions\BookmakerAction;
 use Slim\App;
 use Slim\Interfaces\RouteCollectorProxyInterface as Group;
@@ -53,17 +53,36 @@ return function (App $app) {
         $group->put('/{id}', ExternalSourceAction::class . ':edit');
         $group->delete('/{id}', ExternalSourceAction::class . ':remove');
         $group->group('/{id}/', function ( Group $group ) {
+            $group->options('sports', ExternalSourceAction::class . ':options');
+            $group->get('sports', ExternalSourceAction::class . ':fetchSports');
+        });
+        $group->group('/{id}/', function ( Group $group ) {
             $group->options('associations', ExternalSourceAction::class . ':options');
             $group->get('associations', ExternalSourceAction::class . ':fetchAssociations');
         });
         $group->group('/{id}/', function ( Group $group ) {
-            $group->options('sports', ExternalSourceAction::class . ':options');
-            $group->get('sports', ExternalSourceAction::class . ':fetchSports');
+            $group->options('seasons', ExternalSourceAction::class . ':options');
+            $group->get('seasons', ExternalSourceAction::class . ':fetchSeasons');
+        });
+        $group->group('/{id}/', function ( Group $group ) {
+            $group->options('leagues', ExternalSourceAction::class . ':options');
+            $group->get('leagues', ExternalSourceAction::class . ':fetchLeagues');
+        });
+        $group->group('/{id}/', function ( Group $group ) {
+            $group->options('competitions', ExternalSourceAction::class . ':options');
+            $group->get('competitions', ExternalSourceAction::class . ':fetchCompetitions');
         });
     });
 
     $app->group('/attachers', function ( Group $group ) {
-        $group->group('/{externalSourceId}/', function ( Group $group ) {
+        $group->group('/{externalSourceId}/', function ( Group $group ) {            
+            $group->group('sports', function ( Group $group ) {
+                $group->options('', AttacherAction::class . ':options');
+                $group->post('', AttacherAction::class . ':addSport');
+                $group->get('', AttacherAction::class . ':fetchSports');
+                $group->options('/{id}', AttacherAction::class . ':options');
+                $group->delete('/{id}', AttacherAction::class . ':removeSport');
+            });
             $group->group('associations', function ( Group $group ) {
                 $group->options('', AttacherAction::class . ':options');
                 $group->post('', AttacherAction::class . ':addAssociation');
@@ -71,12 +90,26 @@ return function (App $app) {
                 $group->options('/{id}', AttacherAction::class . ':options');
                 $group->delete('/{id}', AttacherAction::class . ':removeAssociation');
             });
-            $group->group('sports', function ( Group $group ) {
+            $group->group('seasons', function ( Group $group ) {
                 $group->options('', AttacherAction::class . ':options');
-                $group->post('', AttacherAction::class . ':addSport');
-                $group->get('', AttacherAction::class . ':fetchSports');
+                $group->post('', AttacherAction::class . ':addSeason');
+                $group->get('', AttacherAction::class . ':fetchSeasons');
                 $group->options('/{id}', AttacherAction::class . ':options');
-                $group->delete('/{id}', AttacherAction::class . ':removeSport');
+                $group->delete('/{id}', AttacherAction::class . ':removeSeason');
+            });
+            $group->group('leagues', function ( Group $group ) {
+                $group->options('', AttacherAction::class . ':options');
+                $group->post('', AttacherAction::class . ':addLeague');
+                $group->get('', AttacherAction::class . ':fetchLeagues');
+                $group->options('/{id}', AttacherAction::class . ':options');
+                $group->delete('/{id}', AttacherAction::class . ':removeLeague');
+            });
+            $group->group('competitions', function ( Group $group ) {
+                $group->options('', AttacherAction::class . ':options');
+                $group->post('', AttacherAction::class . ':addCompetition');
+                $group->get('', AttacherAction::class . ':fetchCompetitions');
+                $group->options('/{id}', AttacherAction::class . ':options');
+                $group->delete('/{id}', AttacherAction::class . ':removeCompetition');
             });
         });
     });
