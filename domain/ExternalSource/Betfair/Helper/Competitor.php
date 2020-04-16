@@ -1,106 +1,145 @@
 <?php
-
 /**
  * Created by PhpStorm.
  * User: coen
- * Date: 14-3-18
- * Time: 12:02
+ * Date: 6-3-18
+ * Time: 19:55
  */
 
 namespace VOBetting\ExternalSource\Betfair\Helper;
 
-use VOBetting\ExternalSource\Betfair\ApiHelper;
-use Voetbal\ExternalSource;
-
-use Voetbal\External\League as ExternalLeague;
-use VOBetting\BetLine;
+use DateTimeImmutable;
 use League\Period\Period;
-use VOBetting\External\System\Betfair as ExternalSystemBetfair;
+use stdClass;
+use VOBetting\BetLine;
+use VOBetting\ExternalSource\Betfair\Helper as BetfairHelper;
+use VOBetting\ExternalSource\Betfair\ApiHelper as BetfairApiHelper;
+use Voetbal\Competitor as CompetitorBase;
+use Psr\Log\LoggerInterface;
+use VOBetting\ExternalSource\Betfair;
+use Voetbal\Competition;
+use Voetbal\ExternalSource\Competitor as ExternalSourceCompetitor;
 
-//use Voetbal\External\System\Importer\Competitor as CompetitorImporter;
-//use Voetbal\External\Importable as ImportableObject;
-//use Voetbal\Competitor\Service as CompetitorService;
-//use Voetbal\Competitor\Repository as CompetitorRepos;
-//use Voetbal\External\Object\Service as ExternalObjectService;
-//use Voetbal\External\Competitor\Repository as ExternalCompetitorRepos;
-//use Voetbal\Association;
-//use Voetbal\Competitor as CompetitorBase;
-//use Voetbal\External\Competition as ExternalCompetition;
-
-class Competitor
+class Competitor extends BetfairHelper implements ExternalSourceCompetitor
 {
     /**
-     * @var ExternalSource
+     * @var array|CompetitorBase[]|null
      */
-    private $externalSource;
-
-    /**
-     * @var ApiHelper
-     */
-    private $apiHelper;
-
-//    /**
-//     * @var CompetitorService
-//     */
-//    private $service;
-//
-//    /**
-//     * @var CompetitorRepos
-//     */
-//    private $repos;
-//
-//    /**
-//     * @var ExternalObjectService
-//     */
-//    private $externalObjectService;
-//
-//    /**
-//     * @var ExternalCompetitorRepos
-//     */
-//    private $externalObjectRepos;
+    protected $competitors = [];
 
     public function __construct(
-        ExternalSource $externalSource,
-        ApiHelper $apiHelper/*,
-        CompetitorService $service,
-        CompetitorRepos $repos,
-        ExternalCompetitorRepos $externalRepos*/
+        Betfair $parent,
+        BetfairApiHelper $apiHelper,
+        LoggerInterface $logger
     ) {
-        $this->externalSource = $externalSource;
-        $this->apiHelper = $apiHelper;
-        /*$this->service = $service;
-        $this->repos = $repos;
-        $this->externalObjectRepos = $externalRepos;
-        $this->externalObjectService = new ExternalObjectService(
-            $this->externalObjectRepos
-        );*/
+        parent::__construct(
+            $parent,
+            $apiHelper,
+            $logger
+        );
     }
 
-//    public function getCompetitors(ExternalLeague $externalLeague) {
-//        $competitors = [];
-//        $betType = BetLine::_MATCH_ODDS;
-//        $events = $this->apiHelper->getEvents( $externalLeague, $this->getImportPeriod() );
-//        foreach( $events as $event  )
-//        {
-//            $markets = $this->apiHelper->getMarkets( $event->event->id, $betType );
-//            foreach ($markets as $market) {
-//                foreach( $market->runners as $runner ) {
-//                    if( $runner->metadata->runnerId == ExternalSystemBetfair::THE_DRAW ) {
-//                        continue;
-//                    }
-//                    $competitor = ["id" => $runner->metadata->runnerId, "name" => $runner->runnerName ];
-//                    if( in_array ( $competitor, $competitors ) ) {
-//                        continue;
-//                    }
-//                    $competitors[] = $competitor;
-//                }
-//            }
-//        }
-//        return $competitors;
-//    }
+    public function getCompetitors( Competition $competition ): array
+    {
+        return array_values( $this->getCompetitorsHelper( $competition ) );
+    }
+
+    public function getCompetitor( Competition $competition, $id ): ?CompetitorBase
+    {
+        $competitionCompetitors = $this->getCompetitorsHelper( $competition );
+        if( array_key_exists( $id, $competitionCompetitors ) ) {
+            return $this->competitors[$id];
+        }
+        return null;
+    }
+
+    protected function getCompetitorsHelper( Competition $competition ): array
+    {
+        $competitionCompetitors = [];
+        $betType = BetLine::_MATCH_ODDS;
+        $events = $this->apiHelper->getEvents( $competition->getLeague(), $this->getImportPeriod() );
+        foreach( $events as $event  )
+        {
+            $markets = $this->apiHelper->getMarkets( $event->event->id, $betType );
+            foreach ($markets as $market) {
+                foreach( $market->runners as $runner ) {
+                    if( $runner->metadata->runnerId == $this->parent::THE_DRAW ) {
+                        continue;
+                    }
+                    $competitor = ["id" => $runner->metadata->runnerId, "name" => $runner->runnerName ];
+                    if( in_array ( $competitor, $competitionCompetitors ) ) {
+                        continue;
+                    }
+                    $competitors[] = $competitor;
+                }
+            }
+        }
+        return $competitionCompetitors;
+    }
+
+    /**
+     * @param Competition $competition
+     * @return array|CompetitorBase[]
+     */
+//    protected function getCompetitorsHelper( Competition $competition ): array
+//    {
+//        $competitionCompetitors = [];
+//        $association = $competition->getLeague()->getAssociation();
 //
-//    protected function getImportPeriod() {
-//        $now = new \DateTimeImmutable();
-//        return new Period( $now, $now->modify("+14 days") );
+//        $apiData = $this->apiHelper->getData(
+//            "u-tournament/". $competition->getLeague()->getId() .
+//            "/season/". $competition->getId() ."/json",
+//            ImportService::COMPETITOR_CACHE_MINUTES
+//        );
+//
+//        $apiDataTeams = $this->convertExternalSourceCompetitors( $apiData );
+//
+//        /** @var stdClass $externalSourceCompetitor */
+//        foreach ($apiDataTeams as $externalSourceCompetitor) {
+//
+////            if( $externalSourceCompetitor->tournament === null || !property_exists($externalSourceCompetitor->tournament, "uniqueId") ) {
+////                continue;
+////            }
+//            if( array_key_exists( $externalSourceCompetitor->id, $this->competitors ) ) {
+//                $competitor = $this->competitors[$externalSourceCompetitor->id];
+//                $competitionCompetitors[$competitor->getId()] = $competitor;
+//                continue;
+//            }
+//
+//            $newCompetitor = new CompetitorBase( $association, $externalSourceCompetitor->name );
+//            $abbreviation = substr( $externalSourceCompetitor->shortName, 0, CompetitorBase::MAX_LENGTH_ABBREVIATION );
+//            $newCompetitor->setAbbreviation( $abbreviation );
+//            $newCompetitor->setId( $externalSourceCompetitor->id );
+//            $this->competitors[$newCompetitor->getId()] = $newCompetitor;
+//            $competitionCompetitors[$newCompetitor->getId()] = $newCompetitor;
+//        }
+//        return $competitionCompetitors;
 //    }
+
+    protected function getImportPeriod(): Period {
+        $now = new DateTimeImmutable();
+        return new Period( $now, $now->modify("+14 days") );
+    }
+
+    protected function convertExternalSourceCompetitors( $apiData ) {
+        if( property_exists( $apiData, 'teams') ) {
+            return $apiData->teams;
+        }
+        $apiDataTeams = [];
+
+        if( !property_exists( $apiData, 'standingsTables') || count($apiData->standingsTables) === 0 ) {
+            return $apiDataTeams;
+        }
+        $standingsTables = $apiData->standingsTables[0];
+        if( !property_exists( $standingsTables, 'tableRows') ) {
+            return $apiDataTeams;
+        }
+        foreach( $standingsTables->tableRows as $tableRow ) {
+            if( !property_exists( $tableRow, 'team') ) {
+                continue;
+            }
+            $apiDataTeams[] = $tableRow->team;
+        }
+        return $apiDataTeams;
+    }
 }

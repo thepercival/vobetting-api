@@ -152,6 +152,11 @@ final class AttacherAction extends Action
         return $this->fetch($this->competitionAttacherRepos, $request, $response, $args);
     }
 
+    public function fetchCompetition(Request $request, Response $response, $args): Response
+    {
+        return $this->fetchOne($this->competitionAttacherRepos, $request, $response, $args);
+    }
+
     public function fetchCompetitors(Request $request, Response $response, $args): Response
     {
         return $this->fetch($this->competitorAttacherRepos, $request, $response, $args);
@@ -167,6 +172,27 @@ final class AttacherAction extends Action
             $associations = $attacherRepos->findBy(["externalSource" => $externalSource]);
 
             $json = $this->serializer->serialize($associations, 'json');
+            return $this->respondWithJson($response, $json);
+        } catch (\Exception $e) {
+            return new ErrorResponse($e->getMessage(), 400);
+        }
+    }
+
+    protected function fetchOne(AttacherRepos $attacherRepos, Request $request, Response $response, $args): Response
+    {
+        try {
+            $externalSource = $this->externalSourceRepos->find((int)$args['externalSourceId']);
+            if ($externalSource === null) {
+                throw new \Exception("er is geen externe bron meegegeven", E_ERROR);
+            }
+            $attacher = $attacherRepos->findOneBy([
+                "externalSource" => $externalSource, "importable" => (int)$args['importableId']
+                ]);
+            if ($attacher === null) {
+                throw new \Exception("het gekoppelde item kon niet gevonden worden", E_ERROR);
+            }
+
+            $json = $this->serializer->serialize($attacher, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 400);

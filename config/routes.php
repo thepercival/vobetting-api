@@ -14,6 +14,7 @@ use App\Actions\Voetbal\LeagueAction;
 use App\Actions\Voetbal\SeasonAction;
 use App\Actions\Voetbal\CompetitionAction;
 use App\Actions\Voetbal\CompetitorAction;
+use App\Actions\Voetbal\StructureAction;
 use App\Actions\ExternalSourceAction;
 use App\Actions\AttacherAction;
 
@@ -72,8 +73,10 @@ return function (App $app) {
         $group->group('/{id}/', function ( Group $group ) {
             $group->options('competitions', ExternalSourceAction::class . ':options');
             $group->get('competitions', ExternalSourceAction::class . ':fetchCompetitions');
+            $group->options('competitions/{competitionId}', ExternalSourceAction::class . ':options');
+            $group->get('competitions/{competitionId}', ExternalSourceAction::class . ':fetchCompetition');
         });
-        $group->group('/{id}/', function ( Group $group ) {
+        $group->group('/{id}/{competitionId}/', function ( Group $group ) {
             $group->options('competitors', ExternalSourceAction::class . ':options');
             $group->get('competitors', ExternalSourceAction::class . ':fetchCompetitors');
         });
@@ -114,12 +117,14 @@ return function (App $app) {
                 $group->post('', AttacherAction::class . ':addCompetition');
                 $group->get('', AttacherAction::class . ':fetchCompetitions');
                 $group->options('/{id}', AttacherAction::class . ':options');
+                $group->get('/{importableId}', AttacherAction::class . ':fetchCompetition');
                 $group->delete('/{id}', AttacherAction::class . ':removeCompetition');
             });
             $group->group('competitors', function ( Group $group ) {
                 $group->options('', AttacherAction::class . ':options');
                 $group->post('', AttacherAction::class . ':addCompetitor');
-                $group->get('', AttacherAction::class . ':fetchCompetitors');
+                // $group->options('/{competitionId}', AttacherAction::class . ':options');
+                $group->get('/{competitionId}', AttacherAction::class . ':fetchCompetitors');
                 $group->options('/{id}', AttacherAction::class . ':options');
                 $group->delete('/{id}', AttacherAction::class . ':removeCompetitor');
             });
@@ -171,6 +176,11 @@ return function (App $app) {
             $group->get('/{id}', CompetitionAction::class . ':fetchOne');
             $group->put('/{id}', CompetitionAction::class . ':edit');
             $group->delete('/{id}', CompetitionAction::class . ':remove');
+
+            $group->group('/{id}/', function ( Group $group ) {
+                $group->options('structure', StructureAction::class . ':options');
+                $group->get('structure', StructureAction::class . ':fetchOne');
+            });
         });
         $group->group('/competitors', function ( Group $group ) {
             $group->options('', CompetitorAction::class . ':options');

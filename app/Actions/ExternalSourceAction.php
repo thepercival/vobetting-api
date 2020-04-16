@@ -154,51 +154,81 @@ final class ExternalSourceAction extends Action
         }
     }
 
-//    public function fetchCompetitions( Request $request, Response $response, $args ): Response
-//    {
-//        try {
-//            $externalSource = $this->externalSourceRepos->find((int) $args['id']);
-//            if ( $externalSource === null ) {
-//                throw new \Exception("geen extern systeem met het opgegeven id gevonden", E_ERROR);
-//            }
-//
-//            $externalSourceImpl = $this->externalSourceFactory->createByName( $externalSource->getName()  );
-//            if (!($externalSourceImpl !== null && $externalSourceImpl instanceof ExternalSourceCompetition)) {
-//                throw new \Exception("het extern systeem kan geen competitieseizoenen ophalen", E_ERROR);
-//            }
-//            $competitions = $externalSourceImpl->getCompetitions();
-//
-//            $json = $this->serializer->serialize( $competitions, 'json');
-//            return $this->respondWithJson( $response, $json );
-//        }
-//        catch( \Exception $e ){
-//            return new ErrorResponse($e->getMessage(), 400);
-//        }
-//    }
+    public function fetchCompetitions( Request $request, Response $response, $args ): Response
+    {
+        try {
+            $externalSource = $this->externalSourceRepos->find((int) $args['id']);
+            if ( $externalSource === null ) {
+                throw new \Exception("geen extern systeem met het opgegeven id gevonden", E_ERROR);
+            }
 
-//    public function fetchCompetitors( Request $request, Response $response, $args ): Response
-//    {
-//        try {
-//            $externalSource = $this->externalSourceRepos->find((int) $args['id']);
-//            if ( $externalSource === null ) {
-//                throw new \Exception("geen extern systeem met het opgegeven id gevonden", E_ERROR);
-//            }
-//
-//            $competition
-//
-//            $externalSourceImpl = $this->externalSourceFactory->createByName( $externalSource->getName()  );
-//            if (!($externalSourceImpl !== null && $externalSourceImpl instanceof ExternalSourceCompetitor)) {
-//                throw new \Exception("het extern systeem kan geen deelnemers ophalen", E_ERROR);
-//            }
-//            $competitors = $externalSourceImpl->getCompetitors( $competition );
-//
-//            $json = $this->serializer->serialize( $competitors, 'json');
-//            return $this->respondWithJson( $response, $json );
-//        }
-//        catch( \Exception $e ){
-//            return new ErrorResponse($e->getMessage(), 400);
-//        }
-//    }
+            $externalSourceImpl = $this->externalSourceFactory->createByName( $externalSource->getName()  );
+            if (!($externalSourceImpl !== null && $externalSourceImpl instanceof ExternalSourceCompetition)) {
+                throw new \Exception("het extern systeem kan geen competitieseizoenen ophalen", E_ERROR);
+            }
+            $competitions = $externalSourceImpl->getCompetitions();
+
+            $json = $this->serializer->serialize( $competitions, 'json');
+            return $this->respondWithJson( $response, $json );
+        }
+        catch( \Exception $e ){
+            return new ErrorResponse($e->getMessage(), 400);
+        }
+    }
+
+    public function fetchCompetition( Request $request, Response $response, $args ): Response
+    {
+        try {
+            $externalSource = $this->externalSourceRepos->find((int) $args['id']);
+            if ( $externalSource === null ) {
+                throw new \Exception("geen extern systeem met het opgegeven id gevonden", E_ERROR);
+            }
+
+            $externalSourceImpl = $this->externalSourceFactory->createByName( $externalSource->getName()  );
+            if (!($externalSourceImpl !== null && $externalSourceImpl instanceof ExternalSourceCompetition)) {
+                throw new \Exception("het extern systeem kan geen competitieseizoen ophalen", E_ERROR);
+            }
+            $competition = $externalSourceImpl->getCompetition($args['competitionId']);
+            if ( $competition === null ) {
+                throw new \Exception("het externe competitieseizoen kon niet gevonden worden", E_ERROR);
+            }
+
+            $json = $this->serializer->serialize( $competition, 'json');
+            return $this->respondWithJson( $response, $json );
+        }
+        catch( \Exception $e ){
+            return new ErrorResponse($e->getMessage(), 400);
+        }
+    }
+
+    public function fetchCompetitors( Request $request, Response $response, $args ): Response
+    {
+        try {
+            $externalSource = $this->externalSourceRepos->find((int) $args['id']);
+            if ( $externalSource === null ) {
+                throw new \Exception("geen extern systeem met het opgegeven id gevonden", E_ERROR);
+            }
+
+            $externalSourceImpl = $this->externalSourceFactory->createByName( $externalSource->getName()  );
+            if (!($externalSourceImpl !== null && $externalSourceImpl instanceof ExternalSourceCompetition
+                && $externalSourceImpl instanceof ExternalSourceCompetitor)) {
+                throw new \Exception("het extern systeem kan geen deelnemers ophalen", E_ERROR);
+            }
+
+            $competition = $externalSourceImpl->getCompetition( $args['competitionId'] );
+            if ( $competition === null ) {
+                throw new \Exception("geen extern competitieseizoen met het opgegeven id gevonden", E_ERROR);
+            }
+
+            $competitors = $externalSourceImpl->getCompetitors( $competition );
+
+            $json = $this->serializer->serialize( $competitors, 'json');
+            return $this->respondWithJson( $response, $json );
+        }
+        catch( \Exception $e ){
+            return new ErrorResponse($e->getMessage(), 400);
+        }
+    }
 
 
     public function fetchOne( Request $request, Response $response, $args ): Response

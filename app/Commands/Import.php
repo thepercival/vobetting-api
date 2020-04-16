@@ -82,7 +82,7 @@ class Import extends Command
         $importService = new VoetbalImportService($this->logger);
 
         if ($input->getOption("sports")) {
-            $sofaScore = $this->externalSourceFactory->createByName( SofaScore::NAME );
+            $sofaScore = $this->externalSourceFactory->createByName( Betfair::NAME );
             $sportRepos = $this->container->get(SportRepository::class);
             $sportAttacherRepos = $this->container->get(SportAttacherRepository::class);
             $importService->importSports($sofaScore, $sportRepos, $sportAttacherRepos);
@@ -94,21 +94,21 @@ class Import extends Command
             $importService->importAssociations($betFair, $associationRepos, $associationAttacherRepos);
         }
         // so season input manual
-//        if ($input->getOption("seasons")) {
-//            $sofaScore = $this->externalSourceFactory->createByName( SofaScore::NAME );
-//            $seasonRepos = $this->container->get(SeasonRepository::class);
-//            $seasonAttacherRepos = $this->container->get(SeasonAttacherRepository::class);
-//            $importService->importSeasons($sofaScore, $seasonRepos, $seasonAttacherRepos);
-//        }
+        if ($input->getOption("seasons")) {
+            $sofaScore = $this->externalSourceFactory->createByName( Betfair::NAME );
+            $seasonRepos = $this->container->get(SeasonRepository::class);
+            $seasonAttacherRepos = $this->container->get(SeasonAttacherRepository::class);
+            $importService->importSeasons($sofaScore, $seasonRepos, $seasonAttacherRepos);
+        }
         if ($input->getOption("leagues")) {
-            $sofaScore = $this->externalSourceFactory->createByName( SofaScore::NAME );
+            $sofaScore = $this->externalSourceFactory->createByName( Betfair::NAME );
             $leagueRepos = $this->container->get(LeagueRepository::class);
             $leagueAttacherRepos = $this->container->get(LeagueAttacherRepository::class);
             $associationAttacherRepos = $this->container->get(AssociationAttacherRepository::class);
             $importService->importLeagues($sofaScore, $leagueRepos, $leagueAttacherRepos, $associationAttacherRepos);
         }
         if ($input->getOption("competitions")) {
-            $sofaScore = $this->externalSourceFactory->createByName( SofaScore::NAME );
+            $sofaScore = $this->externalSourceFactory->createByName( Betfair::NAME );
             $competitionRepos = $this->container->get(CompetitionRepository::class);
             $competitionAttacherRepos = $this->container->get(CompetitionAttacherRepository::class);
             $leagueAttacherRepos = $this->container->get(LeagueAttacherRepository::class);
@@ -124,7 +124,7 @@ class Import extends Command
             );
         }
         if ($input->getOption("competitors")) {
-            $sofaScore = $this->externalSourceFactory->createByName( SofaScore::NAME );
+            $sofaScore = $this->externalSourceFactory->createByName( BetFair::NAME );
             $competitorRepos = $this->container->get(CompetitorRepository::class);
             $competitorAttacherRepos = $this->container->get(CompetitorAttacherRepository::class);
             $associationAttacherRepos = $this->container->get(AssociationAttacherRepository::class);
