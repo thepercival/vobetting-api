@@ -31,7 +31,7 @@ class BetLine
     /**
      * @var Place
      */
-    private $poulePlace;
+    private $place;
 
     const _MATCH_ODDS = 1;
 
@@ -97,20 +97,18 @@ class BetLine
     }
 
     /**
-     * Get pouleplace
-     *
      * @return Place
      */
-    public function getPoulePlace()
+    public function getPlace()
     {
-        return $this->poulePlace;
+        return $this->place;
     }
 
     /**
-     * @param Place $poulePlace
+     * @param Place $place
      */
-    public function setPoulePlace(Place $poulePlace = null)
+    public function setPlace(Place $place = null)
     {
-        $this->poulePlace = $poulePlace;
+        $this->place = $place;
     }
 }

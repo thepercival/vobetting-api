@@ -15,7 +15,7 @@ return [
         'cache_dir' => __DIR__ . '/../cache/serializer',
         'yml_dir' => [
             "Voetbal" => __DIR__ . '/../vendor/thepercival/voetbal/serialization/yml',
-            "FCToernooi" => __DIR__ . '/../serialization/yml'
+            "VOBetting" => __DIR__ . '/../serialization/yml'
         ],
     ],
     // Monolog settings

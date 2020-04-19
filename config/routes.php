@@ -52,6 +52,7 @@ return function (App $app) {
         $group->get('/{id}', ExternalSourceAction::class . ':fetchOne');
         $group->put('/{id}', ExternalSourceAction::class . ':edit');
         $group->delete('/{id}', ExternalSourceAction::class . ':remove');
+
         $group->group('/{id}/', function (Group $group) {
             $group->options('sports', ExternalSourceAction::class . ':options');
             $group->get('sports', ExternalSourceAction::class . ':fetchSports');
@@ -77,6 +78,10 @@ return function (App $app) {
         $group->group('/{id}/{competitionId}/', function (Group $group) {
             $group->options('competitors', ExternalSourceAction::class . ':options');
             $group->get('competitors', ExternalSourceAction::class . ':fetchCompetitors');
+        });
+        $group->group('/{id}/', function (Group $group) {
+            $group->options('bookmakers', ExternalSourceAction::class . ':options');
+            $group->get('bookmakers', ExternalSourceAction::class . ':fetchBookmakers');
         });
     });
 
@@ -125,6 +130,13 @@ return function (App $app) {
                 $group->get('/{competitionId}', AttacherAction::class . ':fetchCompetitors');
                 $group->options('/{id}', AttacherAction::class . ':options');
                 $group->delete('/{id}', AttacherAction::class . ':removeCompetitor');
+            });
+            $group->group('bookmakers', function (Group $group) {
+                $group->options('', AttacherAction::class . ':options');
+                $group->post('', AttacherAction::class . ':addBookmaker');
+                $group->get('', AttacherAction::class . ':fetchBookmakers');
+                $group->options('/{id}', AttacherAction::class . ':options');
+                $group->delete('/{id}', AttacherAction::class . ':removeBookmaker');
             });
         });
     });

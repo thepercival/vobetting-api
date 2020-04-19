@@ -18,8 +18,9 @@ use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
 use Voetbal\ExternalSource\Repository as ExternalSourceRepository;
 use Voetbal\ExternalSource;
 use VOBetting\ExternalSource\Factory as ExternalSourceFactory;
-use Voetbal\ExternalSource\Association as ExternalSourceAssociation;
+use VOBetting\ExternalSource\Bookmaker as ExternalSourceBookmaker;
 use Voetbal\ExternalSource\Sport as ExternalSourceSport;
+use Voetbal\ExternalSource\Association as ExternalSourceAssociation;
 use Voetbal\ExternalSource\Season as ExternalSourceSeason;
 use Voetbal\ExternalSource\League as ExternalSourceLeague;
 use Voetbal\ExternalSource\Competition as ExternalSourceCompetition;
@@ -221,6 +222,26 @@ final class ExternalSourceAction extends Action
         }
     }
 
+    public function fetchBookmakers(Request $request, Response $response, $args): Response
+    {
+        try {
+            $externalSource = $this->externalSourceRepos->find((int) $args['id']);
+            if ($externalSource === null) {
+                throw new \Exception("geen extern systeem met het opgegeven id gevonden", E_ERROR);
+            }
+
+            $externalSourceImpl = $this->externalSourceFactory->createByName($externalSource->getName());
+            if (!($externalSourceImpl !== null && $externalSourceImpl instanceof ExternalSourceBookmaker)) {
+                throw new \Exception("het extern systeem kan geen sporten ophalen", E_ERROR);
+            }
+            $bookmakers = $externalSourceImpl->getBookmakers();
+
+            $json = $this->serializer->serialize($bookmakers, 'json');
+            return $this->respondWithJson($response, $json);
+        } catch (\Exception $e) {
+            return new ErrorResponse($e->getMessage(), 400);
+        }
+    }
 
     public function fetchOne(Request $request, Response $response, $args): Response
     {

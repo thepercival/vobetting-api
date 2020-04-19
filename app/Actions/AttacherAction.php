@@ -9,16 +9,14 @@
 namespace App\Actions;
 
 use App\Response\ErrorResponse;
-use App\Response\ForbiddenResponse as ForbiddenResponse;
-use Selective\Config\Configuration;
-use App\Actions\Action;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
-use Voetbal\ExternalSource;
 use Voetbal\ExternalSource\Repository as ExternalSourceRepository;
 use Voetbal\Attacher\Repository as AttacherRepos;
+use VOBetting\Attacher\Factory as AttacherFactory;
+use Voetbal\Repository as VoetbalRepository;
 use Voetbal\Sport\Repository as SportRepository;
 use Voetbal\Attacher\Sport\Repository as SportAttacherRepository;
 use Voetbal\Association\Repository as AssociationRepository;
@@ -31,11 +29,15 @@ use Voetbal\Competition\Repository as CompetitionRepository;
 use Voetbal\Attacher\Competition\Repository as CompetitionAttacherRepository;
 use Voetbal\Competitor\Repository as CompetitorRepository;
 use Voetbal\Attacher\Competitor\Repository as CompetitorAttacherRepository;
-use Voetbal\Repository as VoetbalRepository;
-use Voetbal\Attacher\Factory as AttacherFactory;
+use VOBetting\Bookmaker\Repository as BookmakerRepository;
+use VOBetting\Attacher\Bookmaker\Repository as BookmakerAttacherRepository;
 
 final class AttacherAction extends Action
 {
+    /**
+     * @var AttacherFactory
+     */
+    private $attacherFactory;
     /**
      * @var ExternalSourceRepository
      */
@@ -89,9 +91,13 @@ final class AttacherAction extends Action
      */
     private $competitorRepos;
     /**
-     * @var AttacherFactory
+     * @var BookmakerAttacherRepository
      */
-    private $attacherFactory;
+    private $bookmakerAttacherRepos;
+    /**
+     * @var BookmakerRepository
+     */
+    private $bookmakerRepos;
 
     public function __construct(
         LoggerInterface $logger,
@@ -108,9 +114,12 @@ final class AttacherAction extends Action
         CompetitionAttacherRepository $competitionAttacherRepos,
         CompetitionRepository $competitionRepos,
         CompetitorAttacherRepository $competitorAttacherRepos,
-        CompetitorRepository $competitorRepos
+        CompetitorRepository $competitorRepos,
+        BookmakerAttacherRepository $bookmakerAttacherRepos,
+        BookmakerRepository $bookmakerRepos
     ) {
         parent::__construct($logger, $serializer);
+        $this->attacherFactory = new AttacherFactory();
         $this->externalSourceRepos = $externalSourceRepos;
         $this->sportAttacherRepos = $sportAttacherRepos;
         $this->sportRepos = $sportRepos;
@@ -124,7 +133,8 @@ final class AttacherAction extends Action
         $this->competitionRepos = $competitionRepos;
         $this->competitorAttacherRepos = $competitorAttacherRepos;
         $this->competitorRepos = $competitorRepos;
-        $this->attacherFactory = new AttacherFactory();
+        $this->bookmakerAttacherRepos = $bookmakerAttacherRepos;
+        $this->bookmakerRepos = $bookmakerRepos;
     }
 
     public function fetchSports(Request $request, Response $response, $args): Response
@@ -160,6 +170,11 @@ final class AttacherAction extends Action
     public function fetchCompetitors(Request $request, Response $response, $args): Response
     {
         return $this->fetch($this->competitorAttacherRepos, $request, $response, $args);
+    }
+
+    public function fetchBookmakers(Request $request, Response $response, $args): Response
+    {
+        return $this->fetch($this->bookmakerAttacherRepos, $request, $response, $args);
     }
 
     protected function fetch(AttacherRepos $attacherRepos, Request $request, Response $response, $args): Response
@@ -246,6 +261,11 @@ final class AttacherAction extends Action
         return $this->add($this->competitorRepos, $this->competitorAttacherRepos, $request, $response, $args);
     }
 
+    public function addBookmaker(Request $request, Response $response, $args): Response
+    {
+        return $this->add($this->bookmakerRepos, $this->bookmakerAttacherRepos, $request, $response, $args);
+    }
+
     protected function add(
         VoetbalRepository $importableRepos,
         AttacherRepos $attacherRepos,
@@ -308,6 +328,11 @@ final class AttacherAction extends Action
     public function removeCompetitor(Request $request, Response $response, $args): Response
     {
         return $this->remove($this->competitorAttacherRepos, $request, $response, $args);
+    }
+
+    public function removeBookmaker(Request $request, Response $response, $args): Response
+    {
+        return $this->remove($this->bookmakerAttacherRepos, $request, $response, $args);
     }
 
     protected function remove(AttacherRepos $attacherRepos, Request $request, Response $response, $args): Response

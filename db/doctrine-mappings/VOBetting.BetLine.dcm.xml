@@ -10,7 +10,7 @@
         <join-column name="gameid" referenced-column-name="id" nullable="false" on-delete="CASCADE"/>
       </join-columns>
     </many-to-one>
-    <many-to-one field="poulePlace" target-entity="Voetbal\Place">
+    <many-to-one field="place" target-entity="Voetbal\Place">
       <join-columns>
         <join-column name="pouleplaceid" referenced-column-name="id" nullable="true" on-delete="CASCADE"/>
       </join-columns>

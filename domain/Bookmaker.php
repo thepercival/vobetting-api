@@ -8,10 +8,12 @@
 
 namespace VOBetting;
 
-class Bookmaker
+use Voetbal\Import\Idable as Importable;
+
+class Bookmaker implements Importable
 {
     /**
-     * @var int
+     * @var int|string
      */
     private $id;
     /**
@@ -19,7 +21,7 @@ class Bookmaker
      */
     private $name;
     /**
-     * @var boolean
+     * @var bool
      */
     private $exchange;
 
@@ -33,9 +35,7 @@ class Bookmaker
     }
 
     /**
-     * Get id
-     *
-     * @return int
+     * @return int|string
      */
     public function getId()
     {
@@ -43,25 +43,20 @@ class Bookmaker
     }
 
     /**
-     * @param int $id
+     * @param int|string $id
+     * @return void
      */
     public function setId($id)
     {
         $this->id = $id;
     }
 
-    /**
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @param string $name
-     */
-    public function setName($name)
+    public function setName(string $name): void
     {
         if (strlen($name) < static::MIN_LENGTH_NAME or strlen($name) > static::MAX_LENGTH_NAME) {
             throw new \InvalidArgumentException("de naam moet minimaal ".static::MIN_LENGTH_NAME." karakters bevatten en mag maximaal ".static::MAX_LENGTH_NAME." karakters bevatten", E_ERROR);
@@ -72,7 +67,7 @@ class Bookmaker
     /**
      * Get exchange
      *
-     * @return boolean
+     * @return bool
      */
     public function getExchange()
     {

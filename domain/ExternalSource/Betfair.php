@@ -31,6 +31,10 @@ use VOBetting\ExternalSource\Betfair\Helper\Competition as BetfairHelperCompetit
 use Voetbal\Competitor;
 use Voetbal\ExternalSource\Competitor as ExternalSourceCompetitor;
 use VOBetting\ExternalSource\Betfair\Helper\Competitor as BetfairHelperCompetitor;
+use VOBetting\Bookmaker;
+use VOBetting\ExternalSource\Bookmaker as ExternalSourceBookmaker;
+use VOBetting\ExternalSource\Betfair\Helper\Bookmaker as BetfairHelperBookmaker;
+
 use PeterColes\Betfair\Api\Auth as BetfairAuth;
 use VOBetting\BetLine\Repository as BetLineRepos;
 use VOBetting\ExternalSource\Importable\BetLine as BetLineImportable;
@@ -47,12 +51,13 @@ use Voetbal\External\League as ExternalLeague;
 
 class Betfair implements
     ExternalSourceImplementation,
-                         ExternalSourceSport,
+    ExternalSourceSport,
     ExternalSourceAssociation,
     ExternalSourceLeague,
     ExternalSourceSeason,
-                         ExternalSourceCompetition,
-    ExternalSourceCompetitor
+    ExternalSourceCompetition,
+    ExternalSourceCompetitor,
+    ExternalSourceBookmaker
 {
     public const NAME = "betfair";
 
@@ -81,8 +86,7 @@ class Betfair implements
         ExternalSource $externalSource,
         CacheItemDbRepository $cacheItemDbRepos,
         LoggerInterface $logger = null
-    )
-    {
+    ) {
         $this->logger = $logger;
         $this->helpers = [];
         $this->setExternalSource($externalSource);
@@ -306,5 +310,31 @@ class Betfair implements
             $this->logger
         );
         return $this->helpers[BetfairHelperCompetitor::class];
+    }
+
+    /**
+     * @return array|Bookmaker[]
+     */
+    public function getBookmakers(): array
+    {
+        return $this->getBookmakerHelper()->getBookmakers();
+    }
+    
+    public function getBookmaker($id = null): ?Bookmaker
+    {
+        return $this->getBookmakerHelper()->getBookmaker($id);
+    }
+    
+    protected function getBookmakerHelper(): BetfairHelperBookmaker
+    {
+        if (array_key_exists(BetfairHelperBookmaker::class, $this->helpers)) {
+            return $this->helpers[BetfairHelperBookmaker::class];
+        }
+        $this->helpers[BetfairHelperBookmaker::class] = new BetfairHelperBookmaker(
+            $this,
+            $this->getApiHelper(),
+            $this->logger
+        );
+        return $this->helpers[BetfairHelperBookmaker::class];
     }
 }

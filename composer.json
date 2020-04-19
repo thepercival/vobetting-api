@@ -50,7 +50,10 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "VOBettingTest\\": "tests/cases"
+      "VOBetting\\Tests\\": "tests/cases"
+    },
+    "psr-0": {
+      "": "tests/"
     }
   },
   "scripts": {

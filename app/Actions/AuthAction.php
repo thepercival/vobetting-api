@@ -34,8 +34,7 @@ final class AuthAction extends Action
     public function __construct(
         SerializerInterface $serializer,
         Configuration $config
-    )
-    {
+    ) {
         $this->serializer = $serializer;
         $this->config = $config;
     }

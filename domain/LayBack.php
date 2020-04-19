@@ -18,7 +18,7 @@ class LayBack
     private $id;
 
     /**
-     * @var boolean
+     * @var bool
      */
     private $back;
 

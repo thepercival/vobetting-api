@@ -17,6 +17,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
 use VOBetting\Bookmaker\Repository as BookmakerRepository;
+use VOBetting\Bookmaker;
 
 final class BookmakerAction extends Action
 {
@@ -70,7 +71,7 @@ final class BookmakerAction extends Action
     public function add(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \VOBetting\Bookmaker $bookmakerSer */
+            /** @var Bookmaker $bookmakerSer */
             $bookmakerSer = $this->serializer->deserialize($this->getRawData(), 'VOBetting\Bookmaker', 'json');
 
             $bookmakerWithSameName = $this->bookmakerRepos->findOneBy(array('name' => $bookmakerSer->getName() ));
