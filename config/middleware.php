@@ -92,8 +92,3 @@ return function (App $app) {
         }
     );
 };
-
-
-
-
-

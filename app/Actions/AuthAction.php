@@ -31,43 +31,43 @@ final class AuthAction extends Action
      */
     protected $serializer;
 
-	public function __construct(
+    public function __construct(
         SerializerInterface $serializer,
-        Configuration $config )
-	{
-		$this->serializer = $serializer;
+        Configuration $config
+    )
+    {
+        $this->serializer = $serializer;
         $this->config = $config;
-	}
+    }
 
-    public function validateToken( Request $request, Response $response, $args ): Response
+    public function validateToken(Request $request, Response $response, $args): Response
     {
         return $response->withStatus(200);
     }
 
-    public function login( Request $request, Response $response, $args): Response
-	{
-       try{
-           /** @var stdClass $authData */
-           $authData = $this->getFormData( $request );
-           if( !property_exists( $authData, "password") || strlen($authData->password) === 0 ) {
-               throw new \Exception( "het wachtwoord is niet opgegeven");
-           }
-           if ( !password_verify( $authData->password, $this->config->getString("auth.password") ) ) {
-               throw new \Exception( "ongeldig wachtwoord");
-           }
+    public function login(Request $request, Response $response, $args): Response
+    {
+        try {
+            /** @var stdClass $authData */
+            $authData = $this->getFormData($request);
+            if (!property_exists($authData, "password") || strlen($authData->password) === 0) {
+                throw new \Exception("het wachtwoord is niet opgegeven");
+            }
+            if (!password_verify($authData->password, $this->config->getString("auth.password"))) {
+                throw new \Exception("ongeldig wachtwoord");
+            }
 
-           /*if ( !$user->getActive() ) {
-		    throw new \Exception( "activeer eerst je account met behulp van de link in je ontvangen email", E_ERROR );
-		    }*/
+            /*if ( !$user->getActive() ) {
+             throw new \Exception( "activeer eerst je account met behulp van de link in je ontvangen email", E_ERROR );
+             }*/
 
-           $data = ["token" => $this->getToken() ];
+            $data = ["token" => $this->getToken() ];
 
-           return $this->respondWithJson( $response, $this->serializer->serialize( $data, 'json') );
-		}
-		catch( \Exception $e ){
+            return $this->respondWithJson($response, $this->serializer->serialize($data, 'json'));
+        } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
-		}
-	}
+        }
+    }
 
     public function getToken()
     {

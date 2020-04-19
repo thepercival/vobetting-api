@@ -13,6 +13,6 @@ class Account extends BaseApi
 
     public function __construct()
     {
-        parent::__construct( Account::ENDPOINT );
+        parent::__construct(Account::ENDPOINT);
     }
 }

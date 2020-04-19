@@ -47,9 +47,9 @@ class StructureCopier
             /** @var RoundNumber|null $previousRoundNumber */
             $previousRoundNumber = null;
             foreach ($structure->getRoundNumbers() as $roundNumber) {
-                $newRoundNumber = $previousRoundNumber ? $previousRoundNumber->createNext() : new RoundNumber($this->competition, $previousRoundNumber );
-                if( $roundNumber->getPlanningConfig() !== null ) {
-                    $planningConfigService->copy( $roundNumber->getPlanningConfig(), $newRoundNumber );
+                $newRoundNumber = $previousRoundNumber ? $previousRoundNumber->createNext() : new RoundNumber($this->competition, $previousRoundNumber);
+                if ($roundNumber->getPlanningConfig() !== null) {
+                    $planningConfigService->copy($roundNumber->getPlanningConfig(), $newRoundNumber);
                 }
                 foreach ($roundNumber->getFirstSportScoreConfigs() as $sportScoreConfig) {
                     $sport = $this->getSportFromCompetition($sportScoreConfig->getSport(), $this->competition);
@@ -67,12 +67,13 @@ class StructureCopier
         return new Structure($firstRoundNumber, $rootRound);
     }
 
-    protected function copyRound( RoundNumber $roundNumber, Round $round, QualifyGroup $parentQualifyGroup = null ): Round {
-        $newRound = $this->copyRoundHelper( $roundNumber, $round->getPoules()->toArray(), $parentQualifyGroup );
+    protected function copyRound(RoundNumber $roundNumber, Round $round, QualifyGroup $parentQualifyGroup = null): Round
+    {
+        $newRound = $this->copyRoundHelper($roundNumber, $round->getPoules()->toArray(), $parentQualifyGroup);
 
         foreach ($round->getQualifyGroups() as $qualifyGroup) {
-            $newQualifyGroup = new QualifyGroup($newRound, $qualifyGroup->getWinnersOrLosers() );
-            $newQualifyGroup->setNumber( $qualifyGroup->getNumber() );
+            $newQualifyGroup = new QualifyGroup($newRound, $qualifyGroup->getWinnersOrLosers());
+            $newQualifyGroup->setNumber($qualifyGroup->getNumber());
             // $qualifyGroup->setNrOfHorizontalPoules( $qualifyGroupSerialized->getNrOfHorizontalPoules() );
             $this->copyRound($roundNumber->getNext(), $qualifyGroup->getChildRound(), $newQualifyGroup);
         }
@@ -85,11 +86,11 @@ class StructureCopier
      * @param QualifyGroup|null $parentQualifyGroup
      * @return Round
      */
-    protected function copyRoundHelper( RoundNumber $roundNumber, array $poules, QualifyGroup $parentQualifyGroup = null ): Round
+    protected function copyRoundHelper(RoundNumber $roundNumber, array $poules, QualifyGroup $parentQualifyGroup = null): Round
     {
         $round = new Round($roundNumber, $parentQualifyGroup);
-        foreach($poules as $poule ) {
-            $this->copyPoule( $round, $poule->getNumber(), $poule->getPlaces()->toArray() );
+        foreach ($poules as $poule) {
+            $this->copyPoule($round, $poule->getNumber(), $poule->getPlaces()->toArray());
         }
         return $round;
     }
@@ -99,11 +100,11 @@ class StructureCopier
      * @param int $number
      * @param array|Place[] $places
      */
-    protected function copyPoule( Round $round, int $number, array $places )
+    protected function copyPoule(Round $round, int $number, array $places)
     {
-        $poule = new Poule( $round, $number );
-        foreach($places as $place ) {
-            $newPlace = new Place($poule, $place->getNumber() );
+        $poule = new Poule($round, $number);
+        foreach ($places as $place) {
+            $newPlace = new Place($poule, $place->getNumber());
             if ($place->getCompetitor() === null) {
                 continue;
             }

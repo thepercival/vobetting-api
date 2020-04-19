@@ -41,21 +41,21 @@ class Season extends BetfairHelper implements ExternalSourceSeason
     public function getSeasons(): array
     {
         $this->initSeasons();
-        return array_values( $this->seasons );
+        return array_values($this->seasons);
     }
 
     protected function initSeasons()
     {
-        if( $this->seasons !== null ) {
+        if ($this->seasons !== null) {
             return;
         }
-        $this->setSeasons( $this->getSeasonData() );
+        $this->setSeasons($this->getSeasonData());
     }
 
-    public function getSeason( $id = null ): ?SeasonBase
+    public function getSeason($id = null): ?SeasonBase
     {
         $this->initSeasons();
-        if( array_key_exists( $id, $this->seasons ) ) {
+        if (array_key_exists($id, $this->seasons)) {
             return $this->seasons[$id];
         }
         return null;
@@ -82,21 +82,20 @@ class Season extends BetfairHelper implements ExternalSourceSeason
 
         /** @var stdClass $externalSeason */
         foreach ($externalSeasons as $externalSeason) {
-
             $name = $externalSeason->id;
-            if( $this->hasName( $this->seasons, $name ) ) {
+            if ($this->hasName($this->seasons, $name)) {
                 continue;
             }
-            $season = $this->createSeason( $externalSeason ) ;
+            $season = $this->createSeason($externalSeason) ;
             $this->seasons[$season->getId()] = $season;
         }
     }
 
-    protected function createSeason( stdClass $externalSeason ): SeasonBase
+    protected function createSeason(stdClass $externalSeason): SeasonBase
     {
         $start = DateTime::createFromFormat('Y-m-d H:i:s', '2000-01-01 00:00:00');
         $end = DateTime::createFromFormat('Y-m-d H:i:s', '2100-01-01 00:00:00');
-        $season = new SeasonBase( $externalSeason->id, new Period( $start, $end ));
+        $season = new SeasonBase($externalSeason->id, new Period($start, $end));
         $season->setId($externalSeason->id);
         return $season;
     }

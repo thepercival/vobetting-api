@@ -35,10 +35,10 @@ class BetLine
 
     const _MATCH_ODDS = 1;
 
-    public function __construct( Game $game, $betType )
+    public function __construct(Game $game, $betType)
     {
-        $this->setGame( $game );
-        $this->setBetType( $betType );
+        $this->setGame($game);
+        $this->setBetType($betType);
     }
 
     /**
@@ -54,7 +54,7 @@ class BetLine
     /**
      * @param int $id
      */
-    public function setId( $id )
+    public function setId($id)
     {
         $this->id = $id;
     }
@@ -73,7 +73,7 @@ class BetLine
     /**
      * @param int $betType
      */
-    public function setBetType( $betType )
+    public function setBetType($betType)
     {
         $this->betType = $betType;
     }
@@ -91,7 +91,7 @@ class BetLine
     /**
      * @param Game $game
      */
-    public function setGame( $game )
+    public function setGame($game)
     {
         $this->game = $game;
     }
@@ -109,11 +109,8 @@ class BetLine
     /**
      * @param Place $poulePlace
      */
-    public function setPoulePlace( Place $poulePlace = null )
+    public function setPoulePlace(Place $poulePlace = null)
     {
         $this->poulePlace = $poulePlace;
     }
-
-
-
 }

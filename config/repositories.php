@@ -18,8 +18,6 @@ use Voetbal\ExternalSource;
 use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
 use Voetbal\CacheItemDb;
 
-
-
 use Voetbal\Attacher\Sport\Repository as SportAttacherRepository;
 use Voetbal\Attacher\Sport as SportAttacher;
 use Voetbal\Attacher\Association\Repository as AssociationAttacherRepository;
@@ -32,6 +30,8 @@ use Voetbal\Attacher\Competition\Repository as CompetitionAttacherRepository;
 use Voetbal\Attacher\Competition as CompetitionAttacher;
 use Voetbal\Attacher\Competitor\Repository as CompetitorAttacherRepository;
 use Voetbal\Attacher\Competitor as CompetitorAttacher;
+use Voetbal\Attacher\Game\Repository as GameAttacherRepository;
+use Voetbal\Attacher\Game as GameAttacher;
 
 use Voetbal\Sport\Repository as SportRepository;
 use Voetbal\Sport;
@@ -175,11 +175,15 @@ return [
     GameRepository::class => function (ContainerInterface $container) {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new GameRepository($entityManager, $entityManager->getClassMetaData(Game::class));
-    }/*,
+    },
+    GameAttacherRepository::class => function (ContainerInterface $container) {
+        $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
+        return new GameAttacherRepository($entityManager, $entityManager->getClassMetaData(GameAttacher::class));
+    },
     GameScoreRepository::class => function (ContainerInterface $container) {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new GameScoreRepository($entityManager, $entityManager->getClassMetaData(GameScore::class));
-    },
+    }/*,
     FieldRepository::class => function (ContainerInterface $container) {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new FieldRepository($entityManager, $entityManager->getClassMetaData(Field::class));

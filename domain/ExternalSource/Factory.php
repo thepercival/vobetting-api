@@ -16,21 +16,19 @@ use Voetbal\ExternalSource\Repository;
 
 class Factory extends ExternalSourceFactory
 {
-
     public function __construct(
         Repository $externalSourceRepos,
         CacheItemDbRepository $cacheItemDbRepos,
         LoggerInterface $logger
-    )
-    {
-        parent::__construct( $externalSourceRepos, $cacheItemDbRepos, $logger );
+    ) {
+        parent::__construct($externalSourceRepos, $cacheItemDbRepos, $logger);
     }
 
-    protected function create( ExternalSource $externalSource )
+    protected function create(ExternalSource $externalSource)
     {
-        if ( $externalSource->getName() === Betfair::NAME ) {
-            return new Betfair($externalSource, $this->logger);
+        if ($externalSource->getName() === Betfair::NAME) {
+            return new Betfair($externalSource, $this->cacheItemDbRepos, $this->logger);
         }
-        return parent::create( $externalSource );
+        return parent::create($externalSource);
     }
 }

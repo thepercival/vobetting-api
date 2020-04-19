@@ -59,12 +59,11 @@ class LayBack
         BetLine $betLine,
         Bookmaker $bookmaker,
         ExternalSource $externalSource
-    )
-    {
-        $this->setDateTime( $dateTime );
-        $this->setBetLine( $betLine );
-        $this->setBookmaker( $bookmaker );
-        $this->setExternalSource( $externalSource );
+    ) {
+        $this->setDateTime($dateTime);
+        $this->setBetLine($betLine);
+        $this->setBookmaker($bookmaker);
+        $this->setExternalSource($externalSource);
     }
 
     /**
@@ -80,7 +79,7 @@ class LayBack
     /**
      * @param int $id
      */
-    public function setId( $id )
+    public function setId($id)
     {
         $this->id = $id;
     }
@@ -99,7 +98,7 @@ class LayBack
     /**
      * @param bool $back
      */
-    public function setBack( $back )
+    public function setBack($back)
     {
         $this->back = $back;
     }
@@ -117,7 +116,7 @@ class LayBack
     /**
      * @param double $price
      */
-    public function setPrice( $price )
+    public function setPrice($price)
     {
         $this->price = $price;
     }
@@ -135,7 +134,7 @@ class LayBack
     /**
      * @param double $size
      */
-    public function setSize( $size )
+    public function setSize($size)
     {
         $this->size = $size;
     }
@@ -148,7 +147,7 @@ class LayBack
         return $this->dateTime;
     }
 
-    public function setDateTime( \DateTimeImmutable $dateTime )
+    public function setDateTime(\DateTimeImmutable $dateTime)
     {
         $this->dateTime = $dateTime;
     }
@@ -167,7 +166,7 @@ class LayBack
     /**
      * @param BetLine $betLine
      */
-    public function setBetLine( $betLine )
+    public function setBetLine($betLine)
     {
         $this->betLine = $betLine;
     }
@@ -185,7 +184,7 @@ class LayBack
     /**
      * @param Bookmaker $bookmaker
      */
-    public function setBookmaker( $bookmaker )
+    public function setBookmaker($bookmaker)
     {
         $this->bookmaker = $bookmaker;
     }
@@ -203,11 +202,8 @@ class LayBack
     /**
      * @param ExternalSource $externalSource
      */
-    public function setExternalSource( ExternalSource $externalSource )
+    public function setExternalSource(ExternalSource $externalSource)
     {
         $this->externalSource = $externalSource;
     }
-
-
-
 }

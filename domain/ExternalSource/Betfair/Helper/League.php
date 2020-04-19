@@ -43,21 +43,21 @@ class League extends BetfairHelper implements ExternalSourceLeague
     public function getLeagues(): array
     {
         $this->initLeagues();
-        return array_values( $this->leagues );
+        return array_values($this->leagues);
     }
 
     protected function initLeagues()
     {
-        if( $this->leagues !== null ) {
+        if ($this->leagues !== null) {
             return;
         }
-        $this->setLeagues( $this->getLeagueData() );
+        $this->setLeagues($this->getLeagueData());
     }
 
-    public function getLeague( $id = null ): ?LeagueBase
+    public function getLeague($id = null): ?LeagueBase
     {
         $this->initLeagues();
-        if( array_key_exists( $id, $this->leagues ) ) {
+        if (array_key_exists($id, $this->leagues)) {
             return $this->leagues[$id];
         }
         return null;
@@ -68,7 +68,7 @@ class League extends BetfairHelper implements ExternalSourceLeague
      */
     protected function getLeagueData(): array
     {
-        return $this->apiHelper->listLeagues( [] );
+        return $this->apiHelper->listLeagues([]);
     }
 
     /**
@@ -82,22 +82,22 @@ class League extends BetfairHelper implements ExternalSourceLeague
 
         /** @var stdClass $externalLeague */
         foreach ($externalLeagues as $externalLeague) {
-            if( !property_exists($externalLeague,"competition") ) {
+            if (!property_exists($externalLeague, "competition")) {
                 continue;
             }
             $name = $externalLeague->competition->name;
-            if( $this->hasName( $this->leagues, $name ) ) {
+            if ($this->hasName($this->leagues, $name)) {
                 continue;
             }
-            $league = $this->createLeague( $externalLeague ) ;
+            $league = $this->createLeague($externalLeague) ;
             $this->leagues[$league->getId()] = $league;
         }
     }
 
-    protected function createLeague( stdClass $externalLeague ): LeagueBase
+    protected function createLeague(stdClass $externalLeague): LeagueBase
     {
         $association = $this->parent->getAssociation($externalLeague->competitionRegion);
-        $league = new LeagueBase( $association, $externalLeague->competition->name);
+        $league = new LeagueBase($association, $externalLeague->competition->name);
         $league->setId($externalLeague->competition->id);
         return $league;
     }

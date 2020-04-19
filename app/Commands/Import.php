@@ -10,6 +10,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Voetbal\Attacher\Game\Repository as GameAttacherRepository;
+use Voetbal\Attacher\Place\Repository as PlaceAttacherRepository;
+use Voetbal\Attacher\Poule\Repository as PouleAttacherRepository;
 use Voetbal\Attacher\Sport\Repository as SportAttacherRepository;
 use Voetbal\Attacher\Association\Repository as AssociationAttacherRepository;
 use Voetbal\Attacher\League\Repository as LeagueAttacherRepository;
@@ -20,6 +23,8 @@ use Voetbal\Attacher\Competitor\Repository as CompetitorAttacherRepository;
 use VOBetting\ExternalSource\Factory as ExternalSourceFactory;
 use Voetbal\ExternalSource\SofaScore;
 use VOBetting\ExternalSource\Betfair;
+use Voetbal\Game\Repository as GameRepository;
+use Voetbal\Game\Score\Repository as GameScoreRepository;
 use Voetbal\Import\Service as VoetbalImportService;
 use Voetbal\Sport\Repository as SportRepository;
 use Voetbal\Association\Repository as AssociationRepository;
@@ -65,14 +70,16 @@ class Import extends Command
         $this->addOption('competitions', null, InputOption::VALUE_NONE, 'competitions');
         $this->addOption('competitors', null, InputOption::VALUE_NONE, 'competitors');
         $this->addOption('structures', null, InputOption::VALUE_NONE, 'structure');
+        $this->addOption('games', null, InputOption::VALUE_NONE, 'games');
 
         parent::configure();
     }
 
 
 
-    protected function init( InputInterface $input, string $name ) {
-        $this->initLogger( $input, $name );
+    protected function init(InputInterface $input, string $name)
+    {
+        $this->initLogger($input, $name);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -82,13 +89,13 @@ class Import extends Command
         $importService = new VoetbalImportService($this->logger);
 
         if ($input->getOption("sports")) {
-            $sofaScore = $this->externalSourceFactory->createByName( SofaScore::NAME );
+            $sofaScore = $this->externalSourceFactory->createByName(SofaScore::NAME);
             $sportRepos = $this->container->get(SportRepository::class);
             $sportAttacherRepos = $this->container->get(SportAttacherRepository::class);
             $importService->importSports($sofaScore, $sportRepos, $sportAttacherRepos);
         }
         if ($input->getOption("associations")) {
-            $betFair = $this->externalSourceFactory->createByName( Betfair::NAME );
+            $betFair = $this->externalSourceFactory->createByName(Betfair::NAME);
             $associationRepos = $this->container->get(AssociationRepository::class);
             $associationAttacherRepos = $this->container->get(AssociationAttacherRepository::class);
             $importService->importAssociations($betFair, $associationRepos, $associationAttacherRepos);
@@ -101,14 +108,14 @@ class Import extends Command
 //            $importService->importSeasons($sofaScore, $seasonRepos, $seasonAttacherRepos);
         }
         if ($input->getOption("leagues")) {
-            $sofaScore = $this->externalSourceFactory->createByName( SofaScore::NAME );
+            $sofaScore = $this->externalSourceFactory->createByName(SofaScore::NAME);
             $leagueRepos = $this->container->get(LeagueRepository::class);
             $leagueAttacherRepos = $this->container->get(LeagueAttacherRepository::class);
             $associationAttacherRepos = $this->container->get(AssociationAttacherRepository::class);
             $importService->importLeagues($sofaScore, $leagueRepos, $leagueAttacherRepos, $associationAttacherRepos);
         }
         if ($input->getOption("competitions")) {
-            $sofaScore = $this->externalSourceFactory->createByName( SofaScore::NAME );
+            $sofaScore = $this->externalSourceFactory->createByName(SofaScore::NAME);
             $competitionRepos = $this->container->get(CompetitionRepository::class);
             $competitionAttacherRepos = $this->container->get(CompetitionAttacherRepository::class);
             $leagueAttacherRepos = $this->container->get(LeagueAttacherRepository::class);
@@ -124,7 +131,7 @@ class Import extends Command
             );
         }
         if ($input->getOption("competitors")) {
-            $sofaScore = $this->externalSourceFactory->createByName( SofaScore::NAME );
+            $sofaScore = $this->externalSourceFactory->createByName(SofaScore::NAME);
             $competitorRepos = $this->container->get(CompetitorRepository::class);
             $competitorAttacherRepos = $this->container->get(CompetitorAttacherRepository::class);
             $associationAttacherRepos = $this->container->get(AssociationAttacherRepository::class);
@@ -139,7 +146,7 @@ class Import extends Command
         }
 
         if ($input->getOption("structures")) {
-            $sofaScore = $this->externalSourceFactory->createByName( SofaScore::NAME );
+            $sofaScore = $this->externalSourceFactory->createByName(SofaScore::NAME);
             $structureRepos = $this->container->get(StructureRepository::class);
             $competitorAttacherRepos = $this->container->get(CompetitorAttacherRepository::class);
             $competitionAttacherRepos = $this->container->get(CompetitionAttacherRepository::class);
@@ -151,14 +158,27 @@ class Import extends Command
             );
         }
 
-        // testen competitors
+        if ($input->getOption("games")) {
+            $sofaScore = $this->externalSourceFactory->createByName(SofaScore::NAME);
+            $gameRepos = $this->container->get(GameRepository::class);
+            $gameScoreRepos = $this->container->get(GameScoreRepository::class);
+            $competitorRepos = $this->container->get(CompetitorRepository::class);
+            $structureRepos = $this->container->get(StructureRepository::class);
+            $gameAttacherRepos = $this->container->get(GameAttacherRepository::class);
+            $competitionAttacherRepos = $this->container->get(CompetitionAttacherRepository::class);
+            $competitorAttacherRepos = $this->container->get(CompetitorAttacherRepository::class);
 
-        // structuur moet geimporteerd worden vanuit sofascore, omdat bij bv. het wk dezelfde wedstrijd binnen het toernooi kan plaats vinden
-
-
-        // wedstrijden
-        // events->weekMatches, events->roundMatches hebben wedstrijden, deze wedstrijden dan per wedstrijd opnemen
-        // binnen de structuur
+            $importService->importGames(
+                $sofaScore,
+                $gameRepos,
+                $gameScoreRepos,
+                $competitorRepos,
+                $structureRepos,
+                $gameAttacherRepos,
+                $competitionAttacherRepos,
+                $competitorAttacherRepos
+            );
+        }
 
         return 0;
     }

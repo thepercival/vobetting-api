@@ -39,38 +39,37 @@ class Competitor extends BetfairHelper implements ExternalSourceCompetitor
         );
     }
 
-    public function getCompetitors( Competition $competition ): array
+    public function getCompetitors(Competition $competition): array
     {
-        return array_values( $this->getCompetitorsHelper( $competition ) );
+        return array_values($this->getCompetitorsHelper($competition));
     }
 
-    public function getCompetitor( Competition $competition, $id ): ?CompetitorBase
+    public function getCompetitor(Competition $competition, $id): ?CompetitorBase
     {
-        $competitionCompetitors = $this->getCompetitorsHelper( $competition );
-        if( array_key_exists( $id, $competitionCompetitors ) ) {
+        $competitionCompetitors = $this->getCompetitorsHelper($competition);
+        if (array_key_exists($id, $competitionCompetitors)) {
             return $this->competitors[$id];
         }
         return null;
     }
 
-    protected function getCompetitorsHelper( Competition $competition ): array
+    protected function getCompetitorsHelper(Competition $competition): array
     {
         $competitionCompetitors = [];
         $betType = BetLine::_MATCH_ODDS;
-        $events = $this->apiHelper->getEvents( $competition->getLeague(), $this->getImportPeriod() );
-        foreach( $events as $event  )
-        {
-            $markets = $this->apiHelper->getMarkets( $event->event->id, $betType );
+        $events = $this->apiHelper->getEvents($competition->getLeague(), $this->getImportPeriod());
+        foreach ($events as $event) {
+            $markets = $this->apiHelper->getMarkets($event->event->id, $betType);
             foreach ($markets as $market) {
-                foreach( $market->runners as $runner ) {
-                    if( $runner->metadata->runnerId == $this->parent::THE_DRAW ) {
+                foreach ($market->runners as $runner) {
+                    if ($runner->metadata->runnerId == $this->parent::THE_DRAW) {
                         continue;
                     }
                     $competitor = ["id" => $runner->metadata->runnerId, "name" => $runner->runnerName ];
-                    if( in_array ( $competitor, $competitionCompetitors ) ) {
+                    if (in_array($competitor, $competitionCompetitors)) {
                         continue;
                     }
-                    $competitors[] = $competitor;
+                    $competitionCompetitors[] = $competitor;
                 }
             }
         }
@@ -97,9 +96,9 @@ class Competitor extends BetfairHelper implements ExternalSourceCompetitor
 //        /** @var stdClass $externalSourceCompetitor */
 //        foreach ($apiDataTeams as $externalSourceCompetitor) {
 //
-////            if( $externalSourceCompetitor->tournament === null || !property_exists($externalSourceCompetitor->tournament, "uniqueId") ) {
-////                continue;
-////            }
+    ////            if( $externalSourceCompetitor->tournament === null || !property_exists($externalSourceCompetitor->tournament, "uniqueId") ) {
+    ////                continue;
+    ////            }
 //            if( array_key_exists( $externalSourceCompetitor->id, $this->competitors ) ) {
 //                $competitor = $this->competitors[$externalSourceCompetitor->id];
 //                $competitionCompetitors[$competitor->getId()] = $competitor;
@@ -116,26 +115,28 @@ class Competitor extends BetfairHelper implements ExternalSourceCompetitor
 //        return $competitionCompetitors;
 //    }
 
-    protected function getImportPeriod(): Period {
-        $now = new DateTimeImmutable();
-        return new Period( $now, $now->modify("+14 days") );
+    protected function getImportPeriod(): Period
+    {
+        $today = (new DateTimeImmutable())->setTime(0, 0);
+        return new Period($today, $today->modify("+15 days"));
     }
 
-    protected function convertExternalSourceCompetitors( $apiData ) {
-        if( property_exists( $apiData, 'teams') ) {
+    protected function convertExternalSourceCompetitors($apiData)
+    {
+        if (property_exists($apiData, 'teams')) {
             return $apiData->teams;
         }
         $apiDataTeams = [];
 
-        if( !property_exists( $apiData, 'standingsTables') || count($apiData->standingsTables) === 0 ) {
+        if (!property_exists($apiData, 'standingsTables') || count($apiData->standingsTables) === 0) {
             return $apiDataTeams;
         }
         $standingsTables = $apiData->standingsTables[0];
-        if( !property_exists( $standingsTables, 'tableRows') ) {
+        if (!property_exists($standingsTables, 'tableRows')) {
             return $apiDataTeams;
         }
-        foreach( $standingsTables->tableRows as $tableRow ) {
-            if( !property_exists( $tableRow, 'team') ) {
+        foreach ($standingsTables->tableRows as $tableRow) {
+            if (!property_exists($tableRow, 'team')) {
                 continue;
             }
             $apiDataTeams[] = $tableRow->team;

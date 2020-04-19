@@ -9,9 +9,11 @@
 namespace VOBetting\ExternalSource\Betfair;
 
 use DateTimeImmutable;
+use League\Period\Period;
 use PeterColes\Betfair\Betfair as BetfairClient;
 use stdClass;
 use VOBetting\BetLine;
+use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
 use Voetbal\League;
 use Voetbal\ExternalSource;
 
@@ -21,20 +23,21 @@ class ApiHelper
      * @var BetfairClient
      */
     private $client;
-
+    /**
+     * @var CacheItemDbRepository
+     */
+    private $cacheItemDbRepos;
     /**
      * @var ExternalSource
      */
     private $externalSource;
-    /**
-     * @var array|stdClass[] |null
-     */
-    private $listLeagues = null;
 
     public function __construct(
-        ExternalSource $externalSource
+        ExternalSource $externalSource,
+        CacheItemDbRepository $cacheItemDbRepos
     ) {
         $this->externalSource = $externalSource;
+        $this->cacheItemDbRepos = $cacheItemDbRepos;
         $this->client = new BetfairClient(
             $externalSource->getApikey(),
             $externalSource->getUsername(),
@@ -42,12 +45,22 @@ class ApiHelper
         );
     }
 
+    /**
+     * @param array $params
+     * @return array|stdClass[]
+     */
     public function listLeagues(array $params): array
     {
-        if ($this->listLeagues === null) {
-            $this->listLeagues = $this->client->betting(['listCompetitions']);
+        $action = 'listCompetitions';
+        $prefix = $this->externalSource->getName() . '-';
+
+        $data = $this->cacheItemDbRepos->getItem($prefix . $action);
+        if ($data !== null) {
+            return unserialize($data);
         }
-        return $this->listLeagues;
+        $data = $this->client->betting([$action]);
+        $this->cacheItemDbRepos->saveItem($prefix . $action, serialize($data), 60 * 24);
+        return $data;
     }
 
     public function getDateFormat()
@@ -63,29 +76,60 @@ class ApiHelper
         throw new \Exception("unknown bettype", E_ERROR);
     }
 
-    public function getEvents(League $league, $importPeriod)
+    //
+
+    /**
+     * @param League $league
+     * @param Period $importPeriod
+     * @return array|stdClass[]
+     */
+    public function getEvents(League $league, Period $importPeriod): array
     {
-        return $this->client->betting(
+        $start = $importPeriod->getStartDate()->format($this->getDateFormat());
+        $end = $importPeriod->getEndDate()->format($this->getDateFormat());
+        $action = 'listEvents';
+        $cacheId = $this->externalSource->getName() . '-' . $action  . '-' . $league->getId() . '-' . $start . '-' . $end;
+
+        $data = $this->cacheItemDbRepos->getItem($cacheId);
+        if ($data !== null) {
+            return unserialize($data);
+        }
+        $data = $this->client->betting(
             [
-                'listEvents',
+                $action,
                 [
                     'filter' => [
                         'competitionIds' => [$league->getId()],
                         "marketStartTime" => [
-                            "from" => $importPeriod->getStartDate()->format($this->getDateFormat()),
-                            "to" => $importPeriod->getEndDate()->format($this->getDateFormat())
+                            "from" => $start,
+                            "to" => $end
                         ]
                     ]
                 ]
             ]
         );
+        $this->cacheItemDbRepos->saveItem($cacheId, serialize($data), 60 * 24);
+        return $data;
     }
 
-    public function getMarkets($eventId, $betType)
+    /**
+     * @param string|int $eventId
+     * @param int $betType
+     * @return array|stdClass[]
+     * @throws \Exception
+     */
+    public function getMarkets($eventId, int $betType): array
     {
-        return $this->client->betting(
+        $action = 'listMarketCatalogue';
+        $cacheId = $this->externalSource->getName() . '-' . $action . '-' . $eventId . '-' . $betType;
+
+        $data = $this->cacheItemDbRepos->getItem($cacheId);
+        if ($data !== null) {
+            return unserialize($data);
+        }
+        $data = $this->client->betting(
             [
-                'listMarketCatalogue',
+                $action,
                 [
                     'filter' => [
                         'eventIds' => [$eventId],
@@ -96,9 +140,12 @@ class ApiHelper
                 ]
             ]
         );
+        $this->cacheItemDbRepos->saveItem($cacheId, serialize($data), 60);
+        return $data;
     }
 //
 //    public function getMarketBooks( $marketId ) {
+//          GEEN CACHING!!!
 //        return $this->requestHelper(
 //            'listMarketBook',
 //            [

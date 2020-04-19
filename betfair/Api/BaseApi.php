@@ -52,7 +52,7 @@ abstract class BaseApi
         return $this->httpClient
             ->setMethod('post')
             ->setEndPoint($this->endpoint.$this->method.'/')
-            ->authHeaders( $authHeaders )
+            ->authHeaders($authHeaders)
             ->addHeader([ 'Content-Type' => 'application/json' ])
             ->setParams($this->params)
             ->send();

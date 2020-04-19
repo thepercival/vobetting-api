@@ -31,14 +31,13 @@ class APIFootball implements ExternalSourceImplementation // SystemDef, BetLineI
      */
     private $externalSource;
 
-    public function __construct( ExternalSource $externalSource )
+    public function __construct(ExternalSource $externalSource)
     {
-        $this->setExternalSource( $externalSource );
+        $this->setExternalSource($externalSource);
     }
 
-    public function init() {
-
-
+    public function init()
+    {
     }
 //
 //    protected function getApiHelper()
@@ -79,7 +78,7 @@ class APIFootball implements ExternalSourceImplementation // SystemDef, BetLineI
     /**
      * @param ExternalSource $externalSource
      */
-    public function setExternalSource( ExternalSource $externalSource )
+    public function setExternalSource(ExternalSource $externalSource)
     {
         $this->externalSource = $externalSource;
     }

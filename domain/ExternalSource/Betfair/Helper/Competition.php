@@ -43,21 +43,21 @@ class Competition extends BetfairHelper implements ExternalSourceCompetition
     public function getCompetitions(): array
     {
         $this->initCompetitions();
-        return array_values( $this->competitions );
+        return array_values($this->competitions);
     }
 
     protected function initCompetitions()
     {
-        if( $this->competitions !== null ) {
+        if ($this->competitions !== null) {
             return;
         }
-        $this->setCompetitions( $this->getCompetitionData() );
+        $this->setCompetitions($this->getCompetitionData());
     }
 
-    public function getCompetition( $id = null ): ?CompetitionBase
+    public function getCompetition($id = null): ?CompetitionBase
     {
         $this->initCompetitions();
-        if( array_key_exists( $id, $this->competitions ) ) {
+        if (array_key_exists($id, $this->competitions)) {
             return $this->competitions[$id];
         }
         return null;
@@ -68,7 +68,7 @@ class Competition extends BetfairHelper implements ExternalSourceCompetition
      */
     protected function getCompetitionData(): array
     {
-        return $this->apiHelper->listLeagues( [] );
+        return $this->apiHelper->listLeagues([]);
     }
 
     /**
@@ -79,44 +79,44 @@ class Competition extends BetfairHelper implements ExternalSourceCompetition
     protected function setCompetitions(array $externalCompetitions)
     {
         $this->competitions = [];
-        $sport = $this->parent->getSport($this->parent::DEFAULTSPORTID );
+        $sport = $this->parent->getSport($this->parent::DEFAULTSPORTID);
 
         /** @var stdClass $externalCompetition */
         foreach ($externalCompetitions as $externalCompetition) {
-            if( !property_exists($externalCompetition,"competition") ) {
+            if (!property_exists($externalCompetition, "competition")) {
                 continue;
             }
             $name = $externalCompetition->competition->name;
-            if( $this->hasName( $this->competitions, $name ) ) {
+            if ($this->hasName($this->competitions, $name)) {
                 continue;
             }
-            $competition = $this->createCompetition( $sport, $externalCompetition ) ;
-            if( $competition === null ) {
+            $competition = $this->createCompetition($sport, $externalCompetition) ;
+            if ($competition === null) {
                 continue;
             }
             $this->competitions[$competition->getId()] = $competition;
         }
     }
 
-    protected function createCompetition( Sport $sport, stdClass $externalSourceCompetition): ?CompetitionBase
+    protected function createCompetition(Sport $sport, stdClass $externalSourceCompetition): ?CompetitionBase
     {
-        if( !property_exists($externalSourceCompetition,"competition") ) {
+        if (!property_exists($externalSourceCompetition, "competition")) {
             return null;
         }
-        $league = $this->parent->getLeague( $externalSourceCompetition->competition->id );
-        if( $league === null ) {
+        $league = $this->parent->getLeague($externalSourceCompetition->competition->id);
+        if ($league === null) {
             return null;
         }
-        $season = $this->parent->getSeason( $this->parent::DEFAULTSEASONID );
-        if( $season === null ) {
+        $season = $this->parent->getSeason($this->parent::DEFAULTSEASONID);
+        if ($season === null) {
             return null;
         }
 
-        $newCompetition = new CompetitionBase( $league, $season );
-        $newCompetition->setStartDateTime( $season->getStartDateTime() );
+        $newCompetition = new CompetitionBase($league, $season);
+        $newCompetition->setStartDateTime($season->getStartDateTime());
         $id = $league->getId() . "-" . $season->getId();
-        $newCompetition->setId( $id );
-        $sportConfig = $this->sportConfigService->createDefault( $sport, $newCompetition );
+        $newCompetition->setId($id);
+        $sportConfig = $this->sportConfigService->createDefault($sport, $newCompetition);
         return $newCompetition;
     }
 }

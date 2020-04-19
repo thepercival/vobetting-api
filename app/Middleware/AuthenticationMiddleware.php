@@ -29,7 +29,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
         }
 
         $noAuthUrl = "/public";
-        if( substr( $request->getUri()->getPath(), 0, strlen($noAuthUrl) ) === $noAuthUrl ) {
+        if (substr($request->getUri()->getPath(), 0, strlen($noAuthUrl)) === $noAuthUrl) {
             return $handler->handle($request);
         }
 
@@ -41,5 +41,4 @@ class AuthenticationMiddleware implements MiddlewareInterface
 
         return $handler->handle($request);
     }
-
 }

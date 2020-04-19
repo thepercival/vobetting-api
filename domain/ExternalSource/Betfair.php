@@ -9,6 +9,7 @@
 namespace VOBetting\ExternalSource;
 
 use Psr\Log\LoggerInterface;
+use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
 use Voetbal\Competitor as CompetitorBase;
 use Voetbal\ExternalSource;
 use Voetbal\ExternalSource\Implementation as ExternalSourceImplementation;
@@ -44,9 +45,14 @@ use VOBetting\Bookmaker\Repository as BookmakerRepos;
 use Monolog\Logger;
 use Voetbal\External\League as ExternalLeague;
 
-class Betfair implements ExternalSourceImplementation,
-                         ExternalSourceSport, ExternalSourceAssociation, ExternalSourceLeague, ExternalSourceSeason,
-                         ExternalSourceCompetition, ExternalSourceCompetitor
+class Betfair implements
+    ExternalSourceImplementation,
+                         ExternalSourceSport,
+    ExternalSourceAssociation,
+    ExternalSourceLeague,
+    ExternalSourceSeason,
+                         ExternalSourceCompetition,
+    ExternalSourceCompetitor
 {
     public const NAME = "betfair";
 
@@ -54,6 +60,10 @@ class Betfair implements ExternalSourceImplementation,
      * @var ExternalSource
      */
     private $externalSource;
+    /**
+     * @var CacheItemDbRepository
+     */
+    private $cacheItemDbRepos;
     /**
      * @var LoggerInterface
      */
@@ -63,15 +73,20 @@ class Betfair implements ExternalSourceImplementation,
      */
     private $helpers;
 
-    CONST THE_DRAW = 58805;
+    const THE_DRAW = 58805;
     public const DEFAULTSPORTID = "AllSports";
-    public const DEFAULTSEASONID = "2000/2100";
+    public const DEFAULTSEASONID = "20002100";
 
-    public function __construct( ExternalSource $externalSource, LoggerInterface $logger = null )
+    public function __construct(
+        ExternalSource $externalSource,
+        CacheItemDbRepository $cacheItemDbRepos,
+        LoggerInterface $logger = null
+    )
     {
         $this->logger = $logger;
         $this->helpers = [];
-        $this->setExternalSource( $externalSource );
+        $this->setExternalSource($externalSource);
+        $this->cacheItemDbRepos = $cacheItemDbRepos;
     }
 
     protected function getApiHelper()
@@ -80,7 +95,8 @@ class Betfair implements ExternalSourceImplementation,
             return $this->helpers[Betfair\ApiHelper::class];
         }
         $this->helpers[Betfair\ApiHelper::class] = new Betfair\ApiHelper(
-            $this->getExternalSource()
+            $this->getExternalSource(),
+            $this->cacheItemDbRepos
         );
         return $this->helpers[Betfair\ApiHelper::class];
     }
@@ -133,7 +149,7 @@ class Betfair implements ExternalSourceImplementation,
     /**
      * @param ExternalSource $externalSource
      */
-    public function setExternalSource( ExternalSource $externalSource )
+    public function setExternalSource(ExternalSource $externalSource)
     {
         $this->externalSource = $externalSource;
     }
@@ -269,14 +285,14 @@ class Betfair implements ExternalSourceImplementation,
     }
 
 
-    public function getCompetitors( Competition $competition ): array
+    public function getCompetitors(Competition $competition): array
     {
         return $this->getCompetitorHelper()->getCompetitors($competition);
     }
 
-    public function getCompetitor( Competition $competition, $id ): ?CompetitorBase
+    public function getCompetitor(Competition $competition, $id): ?CompetitorBase
     {
-        return $this->getCompetitorHelper()->getCompetitor($competition,$id);
+        return $this->getCompetitorHelper()->getCompetitor($competition, $id);
     }
 
     protected function getCompetitorHelper(): BetfairHelperCompetitor

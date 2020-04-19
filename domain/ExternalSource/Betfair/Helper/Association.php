@@ -44,21 +44,21 @@ class Association extends BetfairHelper implements ExternalSourceAssociation
     public function getAssociations(): array
     {
         $this->initAssociations();
-        return array_values( $this->associations );
+        return array_values($this->associations);
     }
 
     protected function initAssociations()
     {
-        if( $this->associations !== null ) {
+        if ($this->associations !== null) {
             return;
         }
-        $this->setAssociations( $this->getAssociationData() );
+        $this->setAssociations($this->getAssociationData());
     }
 
-    public function getAssociation( $id = null ): ?AssociationBase
+    public function getAssociation($id = null): ?AssociationBase
     {
         $this->initAssociations();
-        if( array_key_exists( $id, $this->associations ) ) {
+        if (array_key_exists($id, $this->associations)) {
             return $this->associations[$id];
         }
         return null;
@@ -69,7 +69,7 @@ class Association extends BetfairHelper implements ExternalSourceAssociation
      */
     protected function getAssociationData(): array
     {
-        return $this->apiHelper->listLeagues( [] );
+        return $this->apiHelper->listLeagues([]);
     }
 
     /**
@@ -84,30 +84,31 @@ class Association extends BetfairHelper implements ExternalSourceAssociation
 
         /** @var stdClass $externalAssociation */
         foreach ($externalAssociations as $externalAssociation) {
-            if( !property_exists( $externalAssociation, "competitionRegion") ) {
+            if (!property_exists($externalAssociation, "competitionRegion")) {
                 continue;
             }
 
             $name = $externalAssociation->competitionRegion;
-            if( $this->hasName( $this->associations, $name ) ) {
+            if ($this->hasName($this->associations, $name)) {
                 continue;
             }
-            $association = $this->createAssociation( $externalAssociation ) ;
+            $association = $this->createAssociation($externalAssociation) ;
             $this->associations[$association->getId()] = $association;
         }
     }
 
-    protected function createAssociation( stdClass $externalAssociation ): AssociationBase
+    protected function createAssociation(stdClass $externalAssociation): AssociationBase
     {
         $association = new AssociationBase($externalAssociation->competitionRegion);
-        $association->setParent( $this->getDefaultAssociation() );
+        $association->setParent($this->getDefaultAssociation());
         $association->setId($externalAssociation->competitionRegion);
         return $association;
     }
 
-    protected function getDefaultAssociation(): AssociationBase {
-        if( $this->defaultAssociation === null ) {
-            $this->defaultAssociation = new AssociationBase("EARTH" );
+    protected function getDefaultAssociation(): AssociationBase
+    {
+        if ($this->defaultAssociation === null) {
+            $this->defaultAssociation = new AssociationBase("EARTH");
             $this->defaultAssociation->setId("EARTH");
         }
         return $this->defaultAssociation;

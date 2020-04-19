@@ -14,5 +14,4 @@ namespace VOBetting\BetLine;
  */
 class Repository extends \Voetbal\Repository
 {
-
 }

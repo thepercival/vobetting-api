@@ -41,15 +41,14 @@ final class LayBackAction extends Action
         LayBackRepository $layBackRepos,
         BetLineRepository $betLineRepos,
         Configuration $config
-    )
-    {
-        parent::__construct($logger,$serializer);
+    ) {
+        parent::__construct($logger, $serializer);
         $this->layBackRepos = $layBackRepos;
         $this->betLineRepos = $betLineRepos;
         $this->config = $config;
     }
 
-    public function fetch( Request $request, Response $response, $args ): Response
+    public function fetch(Request $request, Response $response, $args): Response
     {
         try {
             $queryParams = $request->getQueryParams();
@@ -58,31 +57,29 @@ final class LayBackAction extends Action
                 throw new \Exception("geen wedregelid opgegeven", E_ERROR);
             }
 
-            $betLine = $this->betLineRepos->find( (int)$queryParams["betlineid"] );
-            if ( $betLine === null ) {
+            $betLine = $this->betLineRepos->find((int)$queryParams["betlineid"]);
+            if ($betLine === null) {
                 throw new \Exception("er kan geen wedregel worden gevonden o.b.v. de invoergegevens", E_ERROR);
             }
-            $layBacks = $this->layBackRepos->findBy( array( "betLine" => $betLine ) );
+            $layBacks = $this->layBackRepos->findBy(array( "betLine" => $betLine ));
 
-            $json = $this->serializer->serialize( $layBacks, 'json');
-            return $this->respondWithJson( $response, $json );
-        }
-        catch( \Exception $e ){
+            $json = $this->serializer->serialize($layBacks, 'json');
+            return $this->respondWithJson($response, $json);
+        } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 400);
         }
     }
     
-    public function fetchOne( Request $request, Response $response, $args ): Response
+    public function fetchOne(Request $request, Response $response, $args): Response
     {
         try {
             $layBack = $this->layBackRepos->find((int) $args['id']);
-            if ( $layBack === null ) {
+            if ($layBack === null) {
                 throw new \Exception("geen layback met het opgegeven id gevonden", E_ERROR);
             }
-            $json = $this->serializer->serialize( $layBack, 'json');
-            return $this->respondWithJson( $response, $json );
-        }
-        catch( \Exception $e ){
+            $json = $this->serializer->serialize($layBack, 'json');
+            return $this->respondWithJson($response, $json);
+        } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 400);
         }
     }

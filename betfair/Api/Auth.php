@@ -41,12 +41,12 @@ class Auth extends BaseApi
      */
     public $lastLogin = null;
 
-    public function __construct( string $appKey, string $username, string $password )
+    public function __construct(string $appKey, string $username, string $password)
     {
         $this->appKey = $appKey;
         $this->username = $username;
         $this->password = $password;
-        parent::__construct( Auth::ENDPOINT );
+        parent::__construct(Auth::ENDPOINT);
     }
 
     /**
@@ -163,7 +163,7 @@ class Auth extends BaseApi
      */
     public function execute($client)
     {
-        $result = $client->authHeaders( $this->getHeaders() )->send();
+        $result = $client->authHeaders($this->getHeaders())->send();
 
         if ($result->status === self::API_STATUS_FAIL) {
             throw new Exception('Error: '.$result->error);
@@ -172,7 +172,8 @@ class Auth extends BaseApi
         return $result;
     }
 
-    public function getHeaders(): array {
+    public function getHeaders(): array
+    {
         return [ 'X-Application' => $this->appKey, 'X-Authentication' => $this->sessionToken ];
     }
 }

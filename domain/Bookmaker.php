@@ -26,10 +26,10 @@ class Bookmaker
     const MIN_LENGTH_NAME = 2;
     const MAX_LENGTH_NAME = 15;
 
-    public function __construct( string $name, bool $exchange )
+    public function __construct(string $name, bool $exchange)
     {
-        $this->setName( $name );
-        $this->setExchange( $exchange );
+        $this->setName($name);
+        $this->setExchange($exchange);
     }
 
     /**
@@ -45,7 +45,7 @@ class Bookmaker
     /**
      * @param int $id
      */
-    public function setId( $id )
+    public function setId($id)
     {
         $this->id = $id;
     }
@@ -61,10 +61,10 @@ class Bookmaker
     /**
      * @param string $name
      */
-    public function setName( $name )
+    public function setName($name)
     {
-        if ( strlen( $name ) < static::MIN_LENGTH_NAME or strlen( $name ) > static::MAX_LENGTH_NAME ){
-            throw new \InvalidArgumentException( "de naam moet minimaal ".static::MIN_LENGTH_NAME." karakters bevatten en mag maximaal ".static::MAX_LENGTH_NAME." karakters bevatten", E_ERROR );
+        if (strlen($name) < static::MIN_LENGTH_NAME or strlen($name) > static::MAX_LENGTH_NAME) {
+            throw new \InvalidArgumentException("de naam moet minimaal ".static::MIN_LENGTH_NAME." karakters bevatten en mag maximaal ".static::MAX_LENGTH_NAME." karakters bevatten", E_ERROR);
         }
         $this->name = $name;
     }
@@ -82,9 +82,8 @@ class Bookmaker
     /**
      * @param bool $exchange
      */
-    public function setExchange( $exchange )
+    public function setExchange($exchange)
     {
         $this->exchange = $exchange;
     }
 }
-

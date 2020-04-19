@@ -58,7 +58,8 @@ abstract class Action
 //    abstract protected function remove( Request $request, Response $response, $args ): Response;
 //
 
-    public function options( Request $request, Response $response, $args ): Response {
+    public function options(Request $request, Response $response, $args): Response
+    {
         return $response;
     }
 
@@ -66,10 +67,10 @@ abstract class Action
      * @return array|object
      * @throws HttpBadRequestException
      */
-    protected function getFormData( Request $request )
+    protected function getFormData(Request $request)
     {
-        $input = json_decode( $this->getRawData() );
-        if( $input === null ) {
+        $input = json_decode($this->getRawData());
+        if ($input === null) {
             return new \stdClass();
         }
 
@@ -90,7 +91,7 @@ abstract class Action
      * @return mixed
      * @throws HttpBadRequestException
      */
-    protected function resolveArg( Request $request, $args, string $name)
+    protected function resolveArg(Request $request, $args, string $name)
     {
         if (!isset($args[$name])) {
             throw new HttpBadRequestException($request, "Could not resolve argument `{$name}`.");

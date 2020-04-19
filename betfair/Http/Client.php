@@ -138,7 +138,8 @@ class Client
      *
      * @param String $exception
      */
-    protected function handleApiException($exception) {
+    protected function handleApiException($exception)
+    {
         throw new Exception('API request failure. API Exception Message: '.$exception);
     }
 }

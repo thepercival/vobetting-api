@@ -40,15 +40,14 @@ final class BetLineAction extends Action
         BetLineRepository $betLineRepos,
         GameRepository $gameRepos,
         Configuration $config
-    )
-    {
-        parent::__construct($logger,$serializer);
+    ) {
+        parent::__construct($logger, $serializer);
         $this->betLineRepos = $betLineRepos;
         $this->gameRepos = $gameRepos;
         $this->config = $config;
     }
 
-    public function fetch( Request $request, Response $response, $args ): Response
+    public function fetch(Request $request, Response $response, $args): Response
     {
         try {
             $queryParams = $request->getQueryParams();
@@ -57,35 +56,33 @@ final class BetLineAction extends Action
                 throw new \Exception("geen wedstrijdid opgegeven", E_ERROR);
             }
 
-            $game = $this->gameRepos->find( (int)$queryParams["gameid"] );
-            if ( $game === null ) {
+            $game = $this->gameRepos->find((int)$queryParams["gameid"]);
+            if ($game === null) {
                 throw new \Exception("er kan geen wedstrijd worden gevonden o.b.v. de invoergegevens", E_ERROR);
             }
             $filters = array( "game" => $game );
             if (array_key_exists("betType", $queryParams) && strlen($queryParams["betType"]) > 0) {
                 $filters["betType"] = (int)$queryParams["betType"];
             }
-            $betLines = $this->betLineRepos->findBy( $filters );
+            $betLines = $this->betLineRepos->findBy($filters);
 
-            $json = $this->serializer->serialize( $betLines, 'json');
-            return $this->respondWithJson( $response, $json );
-        }
-        catch( \Exception $e ){
+            $json = $this->serializer->serialize($betLines, 'json');
+            return $this->respondWithJson($response, $json);
+        } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 400);
         }
     }
 
-    public function fetchOne( Request $request, Response $response, $args ): Response
+    public function fetchOne(Request $request, Response $response, $args): Response
     {
         try {
             $betLine = $this->betLineRepos->find((int) $args['id']);
-            if ( $betLine === null ) {
+            if ($betLine === null) {
                 throw new \Exception("geen wedregel met het opgegeven id gevonden", E_ERROR);
             }
-            $json = $this->serializer->serialize( $betLine, 'json');
-            return $this->respondWithJson( $response, $json );
-        }
-        catch( \Exception $e ){
+            $json = $this->serializer->serialize($betLine, 'json');
+            return $this->respondWithJson($response, $json);
+        } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 400);
         }
     }

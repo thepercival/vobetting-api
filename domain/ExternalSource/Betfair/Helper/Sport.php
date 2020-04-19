@@ -38,21 +38,21 @@ class Sport extends BetfairHelper implements ExternalSourceSport
     public function getSports(): array
     {
         $this->initSports();
-        return array_values( $this->sports );
+        return array_values($this->sports);
     }
 
     protected function initSports()
     {
-        if( $this->sports !== null ) {
+        if ($this->sports !== null) {
             return;
         }
-        $this->setSports( $this->getSportData() );
+        $this->setSports($this->getSportData());
     }
 
-    public function getSport( $id = null ): ?SportBase
+    public function getSport($id = null): ?SportBase
     {
         $this->initSports();
-        if( array_key_exists( $id, $this->sports ) ) {
+        if (array_key_exists($id, $this->sports)) {
             return $this->sports[$id];
         }
         return null;
@@ -79,19 +79,18 @@ class Sport extends BetfairHelper implements ExternalSourceSport
 
         /** @var stdClass $externalSport */
         foreach ($externalSports as $externalSport) {
-
             $name = $externalSport->id;
-            if( $this->hasName( $this->sports, $name ) ) {
+            if ($this->hasName($this->sports, $name)) {
                 continue;
             }
-            $sport = $this->createSport( $externalSport ) ;
+            $sport = $this->createSport($externalSport) ;
             $this->sports[$sport->getId()] = $sport;
         }
     }
 
-    protected function createSport( stdClass $externalSport ): SportBase
+    protected function createSport(stdClass $externalSport): SportBase
     {
-        $sport = new SportBase( $externalSport->id );
+        $sport = new SportBase($externalSport->id);
         $sport->setId($externalSport->id);
         $sport->setTeam(false);
         return $sport;

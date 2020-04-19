@@ -40,31 +40,29 @@ final class StructureAction extends Action
         StructureRepository $structureRepos,
         CompetitionRepository $competitionRepos,
         Configuration $config
-    )
-    {
-        parent::__construct($logger,$serializer);
+    ) {
+        parent::__construct($logger, $serializer);
         $this->structureRepos = $structureRepos;
         $this->competitionRepos = $competitionRepos;
         $this->config = $config;
     }
 
-    public function fetchOne( Request $request, Response $response, $args ): Response
+    public function fetchOne(Request $request, Response $response, $args): Response
     {
         try {
             $competition = $this->competitionRepos->find((int) $args['id']);
-            if ( $competition === null ) {
+            if ($competition === null) {
                 throw new \Exception("geen competitieseizoen met het opgegeven id gevonden", E_ERROR);
             }
-            $structure = $this->structureRepos->getStructure( $competition );
-            if ( $structure === null ) {
+            $structure = $this->structureRepos->getStructure($competition);
+            if ($structure === null) {
                 throw new \Exception("geen structuur gevonden bij het competitieseizoen", E_ERROR);
             }
             // var_dump($structure); die();
 
-            $json = $this->serializer->serialize( $structure, 'json');
+            $json = $this->serializer->serialize($structure, 'json');
             return $this->respondWithJson($response, $json);
-        }
-        catch( \Exception $e ){
+        } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 400);
         }
     }

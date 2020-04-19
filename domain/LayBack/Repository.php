@@ -14,5 +14,4 @@ namespace VOBetting\LayBack;
  */
 class Repository extends \Voetbal\Repository
 {
-
 }

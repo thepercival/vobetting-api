@@ -135,11 +135,11 @@ return [
             $config->getString('email.admin'),
         );
     },
-    ExternalSourceFactory::class => function( ContainerInterface $container ) {
+    ExternalSourceFactory::class => function (ContainerInterface $container) {
         return new ExternalSourceFactory(
             $container->get(ExternalSourceRepository::class),
             $container->get(CacheItemDbRepository::class),
-            $container->get(LoggerInterface::class )
+            $container->get(LoggerInterface::class)
         );
     }
 

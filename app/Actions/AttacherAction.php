@@ -169,9 +169,9 @@ final class AttacherAction extends Action
             if ($externalSource === null) {
                 throw new \Exception("er is geen externe bron meegegeven", E_ERROR);
             }
-            $associations = $attacherRepos->findBy(["externalSource" => $externalSource]);
+            $attachers = $attacherRepos->findBy(["externalSource" => $externalSource]);
 
-            $json = $this->serializer->serialize($associations, 'json');
+            $json = $this->serializer->serialize($attachers, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 400);

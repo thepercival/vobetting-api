@@ -38,7 +38,8 @@
     "phpunit/phpunit": "^8.2",
     "phpstan/phpstan": "^0.12",
     "phpstan/phpstan-doctrine": "^0.12",
-    "phpstan/extension-installer": "^1.0"
+    "phpstan/extension-installer": "^1.0",
+    "friendsofphp/php-cs-fixer": "^2.16"
   },
   "autoload": {
     "psr-4": {
@@ -59,7 +60,8 @@
     ],
     "stan": "vendor/bin/phpstan analyse --level=5 app config domain tests betfair",
     "doctrine-try": "vendor/bin/doctrine orm:schema-tool:update --dump-sql",
-    "doctrine-update": "vendor/bin/doctrine orm:schema-tool:update --force"
+    "doctrine-update": "vendor/bin/doctrine orm:schema-tool:update --force",
+    "cs-fix": "php-cs-fixer fix"
   },
   "config": {
     "process-timeout": 0

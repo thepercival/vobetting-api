@@ -9,6 +9,7 @@
 namespace VOBetting\ExternalSource\APIFootball;
 
 use Voetbal\ExternalSource;
+
 //use Voetbal\External\Object as ExternalObject;
 //use Voetbal\Competition\Service as CompetitionService;
 //use Voetbal\Competition\Repository as CompetitionRepos;
@@ -35,8 +36,7 @@ class ApiHelper
 
     public function __construct(
         ExternalSource $externalSource
-    )
-    {
+    ) {
         $this->externalSource = $externalSource;
         // $this->headers['http']['method'] = 'GET';
         // $this->headers['http']['header'] = 'X-Auth-Token: ' . $this->externalSource->getApikey();
