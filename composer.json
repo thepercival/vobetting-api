@@ -35,7 +35,7 @@
     "selective/config": "^0.1.1"
   },
   "require-dev": {
-    "phpunit/phpunit": "^8.2",
+    "phpunit/phpunit": "^9.1",
     "phpstan/phpstan": "^0.12",
     "phpstan/phpstan-doctrine": "^0.12",
     "phpstan/extension-installer": "^1.0",
@@ -56,12 +56,12 @@
   "scripts": {
     "start": "php -S localhost:2999 -t public/",
     "test": [
-      "vendor/bin/phpunit --bootstrap vendor/autoload.php tests/cases/"
+      "vendor/bin/phpunit --configuration tests/phpunit.xml tests/cases/"
     ],
     "stan": "vendor/bin/phpstan analyse --level=5 app config domain tests betfair",
     "doctrine-try": "vendor/bin/doctrine orm:schema-tool:update --dump-sql",
     "doctrine-update": "vendor/bin/doctrine orm:schema-tool:update --force",
-    "cs-fix": "php-cs-fixer fix"
+    "cs-fix": "php-cs-fixer fix ."
   },
   "config": {
     "process-timeout": 0
