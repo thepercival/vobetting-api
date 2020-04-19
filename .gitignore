@@ -6,4 +6,4 @@
 .idea
 .php_cs.cache
 /tests/.phpunit.result.cache
-/tests/codecoverage/*
+/tests/codecoverage/
