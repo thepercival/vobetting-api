@@ -80,13 +80,16 @@ class ApiHelper
 
     /**
      * @param League $league
-     * @param Period $importPeriod
+     * @param Period|null $period
      * @return array|stdClass[]
      */
-    public function getEvents(League $league, Period $importPeriod): array
+    public function getEvents(League $league, Period $period = null): array
     {
-        $start = $importPeriod->getStartDate()->format($this->getDateFormat());
-        $end = $importPeriod->getEndDate()->format($this->getDateFormat());
+        if( $period === null ) {
+            $period = $this->getImportPeriod();
+        }
+        $start = $period->getStartDate()->format($this->getDateFormat());
+        $end = $period->getEndDate()->format($this->getDateFormat());
         $action = 'listEvents';
         $cacheId = $this->externalSource->getName() . '-' . $action  . '-' . $league->getId() . '-' . $start . '-' . $end;
 
@@ -143,18 +146,26 @@ class ApiHelper
         $this->cacheItemDbRepos->saveItem($cacheId, serialize($data), 60);
         return $data;
     }
-//
-//    public function getMarketBooks( $marketId ) {
-//          GEEN CACHING!!!
-//        return $this->requestHelper(
-//            'listMarketBook',
-//            [
-//                'marketIds' => [$marketId],
-//                // 'selectionId' => $runnerId,
-//                "priceProjection" => ["priceData" => ["EX_BEST_OFFERS"]],
-//                "orderProjection" => "ALL",
-//                "matchProjection" => "ROLLED_UP_BY_PRICE"
-//            ]
-//        );
-//    }
+
+    protected function getImportPeriod(): Period
+    {
+        $today = (new DateTimeImmutable())->setTime(0, 0);
+        return new Period($today, $today->modify("+15 days"));
+    }
+
+    public function getMarketBooks( $marketId ) {
+        // GEEN CACHING!!!
+        return $this->client->betting(
+            [
+                'listMarketBook',
+                [
+                    'marketIds' => [$marketId],
+                    // 'selectionId' => $runnerId,
+                    "priceProjection" => ["priceData" => ["EX_BEST_OFFERS"]],
+                    "orderProjection" => "ALL",
+                    "matchProjection" => "ROLLED_UP_BY_PRICE"
+                ]
+            ]
+        );
+    }
 }

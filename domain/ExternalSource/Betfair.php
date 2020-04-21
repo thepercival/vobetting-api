@@ -9,6 +9,7 @@
 namespace VOBetting\ExternalSource;
 
 use Psr\Log\LoggerInterface;
+use VOBetting\LayBack as LayBackBase;
 use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
 use Voetbal\Competitor as CompetitorBase;
 use Voetbal\ExternalSource;
@@ -34,20 +35,11 @@ use VOBetting\ExternalSource\Betfair\Helper\Competitor as BetfairHelperCompetito
 use VOBetting\Bookmaker;
 use VOBetting\ExternalSource\Bookmaker as ExternalSourceBookmaker;
 use VOBetting\ExternalSource\Betfair\Helper\Bookmaker as BetfairHelperBookmaker;
+use VOBetting\LayBack;
+use VOBetting\ExternalSource\LayBack as ExternalSourceLayBack;
+use VOBetting\ExternalSource\Betfair\Helper\LayBack as BetfairHelperLayBack;
 
-use PeterColes\Betfair\Api\Auth as BetfairAuth;
-use VOBetting\BetLine\Repository as BetLineRepos;
-use VOBetting\ExternalSource\Importable\BetLine as BetLineImportable;
-use VOBetting\ExternalSource\Importer\BetLine as BetLineImporter;
-use VOBetting\ExternalSource\Betfair\BetLine as BetfairBetLineImporter;
-use VOBetting\ExternalSource\Betfair\Competitor as BetfairCompetitorGetter;
-use Voetbal\Competition\Repository as CompetitionRepos;
-use Voetbal\Game\Repository as GameRepos;
-use Voetbal\External\Competitor\Repository as ExternalCompetitorRepos;
-use VOBetting\LayBack\Repository as LayBackRepos;
-use VOBetting\Bookmaker\Repository as BookmakerRepos;
-use Monolog\Logger;
-use Voetbal\External\League as ExternalLeague;
+
 
 class Betfair implements
     ExternalSourceImplementation,
@@ -57,7 +49,8 @@ class Betfair implements
     ExternalSourceSeason,
     ExternalSourceCompetition,
     ExternalSourceCompetitor,
-    ExternalSourceBookmaker
+    ExternalSourceBookmaker,
+    ExternalSourceLayBack
 {
     public const NAME = "betfair";
 
@@ -105,43 +98,6 @@ class Betfair implements
         return $this->helpers[Betfair\ApiHelper::class];
     }
 
-//    public function init() {
-//
-//        $auth = new BetfairAuth();
-//        $auth->init(
-//            $this->externalSource->getApikey(),
-//            $this->externalSource->getUsername(),
-//            $this->externalSource->getPassword()
-//        );
-//    }
-//
-//    protected function getApiHelper()
-//    {
-//        return new Betfair\ApiHelper( /*$this->getExternalSource()*/ );
-//    }
-//
-//    public function getBetLineImporter(
-//        BetLineRepos $repos,
-//        CompetitionRepos $competitionRepos,
-//        GameRepos $gameRepos,
-//        ExternalCompetitorRepos $externalCompetitorRepos,
-//        LayBackRepos $layBackRepos,
-//        BookmakerRepos $bookmakerRepos,
-//        Logger $logger
-//    ) : BetLineImporter {
-//        return new BetfairBetLineImporter(
-//            $this->getExternalSource(),
-//            $this->getApiHelper(),
-//            $repos,
-//            $competitionRepos,
-//            $gameRepos,
-//            $externalCompetitorRepos,
-//            $layBackRepos,
-//            $bookmakerRepos,
-//            $logger
-//        );
-//    }
-//
     /**
      * @return ExternalSource
      */
@@ -336,5 +292,28 @@ class Betfair implements
             $this->logger
         );
         return $this->helpers[BetfairHelperBookmaker::class];
+    }
+
+    public function getLayBacks(Competition $competition): array
+    {
+        return $this->getLayBackHelper()->getLayBacks($competition);
+    }
+
+    public function getLayBack(Competition $competition, $id): ?LayBackBase
+    {
+        return $this->getLayBackHelper()->getLayBack($competition,$id);
+    }
+
+    protected function getLayBackHelper(): BetfairHelperLayBack
+    {
+        if (array_key_exists(BetfairHelperLayBack::class, $this->helpers)) {
+            return $this->helpers[BetfairHelperLayBack::class];
+        }
+        $this->helpers[BetfairHelperLayBack::class] = new BetfairHelperLayBack(
+            $this,
+            $this->getApiHelper(),
+            $this->logger
+        );
+        return $this->helpers[BetfairHelperLayBack::class];
     }
 }

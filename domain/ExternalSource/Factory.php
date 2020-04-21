@@ -12,12 +12,14 @@ use Psr\Log\LoggerInterface;
 use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
 use Voetbal\ExternalSource;
 use VOBetting\ExternalSource\Bookmaker as ExternalSourceBookmaker;
+use VOBetting\ExternalSource\LayBack as ExternalSourceLayBack;
 use Voetbal\ExternalSource\Factory as ExternalSourceFactory;
 use Voetbal\ExternalSource\Repository;
 
 class Factory extends ExternalSourceFactory
 {
     protected const BOOKMAKER = 512;
+    protected const LAYBACK = 1024;
 
     public function __construct(
         Repository $externalSourceRepos,
@@ -40,6 +42,9 @@ class Factory extends ExternalSourceFactory
         $implementations = parent::getImplementations($implementation);
         if ($implementation instanceof ExternalSourceBookmaker) {
             $implementations += static::BOOKMAKER;
+        }
+        if ($implementation instanceof ExternalSourceLayBack) {
+            $implementations += static::LAYBACK;
         }
         return $implementations;
     }

@@ -1,121 +1,116 @@
 <?php
-
 /**
  * Created by PhpStorm.
  * User: coen
- * Date: 14-3-18
- * Time: 12:02
+ * Date: 6-3-18
+ * Time: 19:55
  */
 
 namespace VOBetting\ExternalSource\Betfair\Helper;
 
-use VOBetting\External\System\Importer\BetLine as BetLineImporter;
-use Voetbal\ExternalSource;
-use Voetbal\League;
-use Voetbal\Game;
-use VOBetting\External\System\Betfair as ExternalSystemBetfair;
-use VOBetting\BetLine\Repository as BetLineRepos;
-use Voetbal\External\League as ExternalLeague;
-use League\Period\Period;
-use VOBetting\BetLine as BetLineBase;
-use Voetbal\Competition\Repository as CompetitionRepos;
-use Voetbal\Game\Repository as GameRepos;
-use Voetbal\External\Competitor\Repository as ExternalCompetitorRepos;
-use VOBetting\LayBack\Repository as LayBackRepos;
-use VOBetting\Bookmaker\Repository as BookmakerRepos;
-use VOBetting\LayBack;
-use Monolog\Logger;
-use VOBetting\Bookmaker;
-use Voetbal\Place;
-use Voetbal\Game\Place as GamePlace;
-use Voetbal\State;
+use VOBetting\BetLine;
+use VOBetting\ExternalSource\Betfair\Helper as BetfairHelper;
+use VOBetting\ExternalSource\Betfair\ApiHelper as BetfairApiHelper;
+use VOBetting\ExternalSource\LayBack as ExternalSourceLayBack;
+use VOBetting\LayBack as LayBackBase;
+use VOBetting\ExternalSource\Betfair;
+use Psr\Log\LoggerInterface;
+use stdClass;
+use Voetbal\Competition;
+use Voetbal\Competitor as CompetitorBase;
 
-class BetLine // implements BetLineImporter
+class LayBack extends BetfairHelper implements ExternalSourceLayBack
 {
+    public function __construct(
+        Betfair $parent,
+        BetfairApiHelper $apiHelper,
+        LoggerInterface $logger
+    ) {
+        parent::__construct(
+            $parent,
+            $apiHelper,
+            $logger
+        );
+    }
+
+    public function getLayBacks(Competition $competition): array
+    {
+        return array_values($this->getLayBacksHelper($competition));
+    }
+
+    public function getLayBack(Competition $competition, $id): ?LayBackBase
+    {
+        $competitionLayBacks = $this->getLayBacksHelper($competition);
+        if (array_key_exists($id, $competitionLayBacks)) {
+            return $competitionLayBacks[$id];
+        }
+        return null;
+    }
+
+    protected function getLayBacksHelper(Competition $competition): array
+    {
+        $competitionLayBacks = [];
+        $betType = BetLine::_MATCH_ODDS;
+        $events = $this->apiHelper->getEvents($competition->getLeague() );
+        foreach ($events as $event) {
+            $markets = $this->apiHelper->getMarkets($event->event->id, $betType);
+            foreach ($markets as $market) {
+
+                $marketBooks = $this->apiHelper->getMarketBooks($market->marketId);
+                foreach ($marketBooks as $marketBook) {
+                    foreach ($marketBook->runners as $runner) {
+                        // var_dump($betLine->status); // IF CLOSED => UPDATE GAME!!
+                        // var_dump($runnerOne->status); // "ACTIVE"
+                        $backs = $runner->ex->availableToBack;
+                        $lays = $runner->ex->availableToLay;
+//                        $this->saveLayBacks( $this->getImportPeriod()->getStartDate(), $betLine, $backs, true );
+//                        $this->saveLayBacks( $this->getImportPeriod()->getStartDate(), $betLine, $lays, false );
+                    }
+                }
+
+//                foreach ($market->runners as $runner) {
+//                    if ($runner->metadata->runnerId == $this->parent::THE_DRAW) {
+//                        continue;
+//                    }
+//                    $layBack = ["id" => $runner->metadata->runnerId, "name" => $runner->runnerName ];
+//                    if (in_array($layBack, $competitionLayBacks)) {
+//                        continue;
+//                    }
+//                    $competitionLayBacks[] = $layBack;
+//                }
+            }
+        }
+        return $competitionLayBacks;
+    }
+
 //    /**
-//     * @var ExternalSource
+//     *
+//     *
+//     * @param array|stdClass[] $externalLayBacks
 //     */
-//    private $externalSource;
-//    /**
-//     * @var ApiHelper
-//     */
-//    private $apiHelper;
-//    /**
-//     * @var GameRepos
-//     */
-//    private $gameRepos;
-//    /**
-//     * @var ExternalCompetitorRepos
-//     */
-//    private $externalCompetitorRepos;
-//    /**
-//     * @var BetLineRepos
-//     */
-//    private $repos;
-//    /**
-//     * @var CompetitionRepos
-//     */
-//    private $competitionRepos;
-//    /**
-//     * @var LayBackRepos
-//     */
-//    private $layBackRepos;
-//    /**
-//     * @var BookmakerRepos
-//     */
-//    private $bookmakerRepos;
-//    /**
-//     * @var Logger
-//     */
-//    private $logger;
+//    protected function setLayBacks(array $externalLayBacks)
+//    {
+//        $this->layBacks = [];
 //
-//    /**
-//     * @var int
-//     */
-//    private $maxDaysBeforeImport;
-//    /**
-//     * @var Period
-//     */
-//    private $period;
+//        /** @var stdClass $externalLayBack */
+//        foreach ($externalLayBacks as $externalLayBack) {
+//            $name = $externalLayBack->id;
+//            if ($this->hasName($this->layBacks, $name)) {
+//                continue;
+//            }
+//            $layBack = $this->createLayBack($externalLayBack) ;
+//            $this->layBacks[$layBack->getId()] = $layBack;
+//        }
+//    }
 //
-//
-//    public function __construct(
-//        ExternalSource $externalSource,
-//        ApiHelper $apiHelper,
-//        BetLineRepos $repos,
-//        CompetitionRepos $competitionRepos,
-//        GameRepos $gameRepos,
-//        ExternalCompetitorRepos $externalCompetitorRepos,
-//        LayBackRepos $layBackRepos,
-//        BookmakerRepos $bookmakerRepos,
-//        Logger $logger
-//
-//    ) {
-//        $this->externalSource = $externalSource;
-//        $this->apiHelper = $apiHelper;
-//        $this->repos = $repos;
-//        $this->competitionRepos = $competitionRepos;
-//        $this->gameRepos = $gameRepos;
-//        $this->externalCompetitorRepos = $externalCompetitorRepos;
-//        $this->layBackRepos = $layBackRepos;
-//        $this->bookmakerRepos = $bookmakerRepos;
-//        $this->logger = $logger;
+//    protected function createLayBack(stdClass $externalLayBack): LayBackBase
+//    {
+//        $layBack = new LayBackBase($externalLayBack->id, true);
+//        $layBack->setId($externalLayBack->id);
+//        return $layBack;
 //    }
 
-//    public function get( ExternalLeague $externalLeague )
-//    {
-//        return $this->apiHelper->getEvents( $externalLeague, $this->getImportPeriod() );
-//    }
-//
-//    public function getId( $externalSystemBetLine )
-//    {
-//        throw new \Exception("notimplyet", E_ERROR );
-//    }
-//
-//    private function getBookmaker(): Bookmaker
-//    {
-//        return $this->bookmakerRepos->findOneBy( array("name" => "Betfair") );
-//    }
+
 //
 //    public function process( League $league, $externalSystemEvent, $betType ) {
 //        $markets = $this->apiHelper->getMarkets( $externalSystemEvent->event->id, $betType );

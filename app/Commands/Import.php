@@ -10,6 +10,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use VOBetting\Attacher\Bookmaker\Repository as BookmakerAttacherRepository;
+use VOBetting\BetLine\Repository as BetLineRepository;
+use VOBetting\LayBack\Repository as LayBackRepository;
 use Voetbal\Attacher\Game\Repository as GameAttacherRepository;
 use Voetbal\Attacher\Place\Repository as PlaceAttacherRepository;
 use Voetbal\Attacher\Poule\Repository as PouleAttacherRepository;
@@ -25,7 +28,7 @@ use Voetbal\ExternalSource\SofaScore;
 use VOBetting\ExternalSource\Betfair;
 use Voetbal\Game\Repository as GameRepository;
 use Voetbal\Game\Score\Repository as GameScoreRepository;
-use Voetbal\Import\Service as VoetbalImportService;
+use VOBetting\Import\Service as ImportService;
 use Voetbal\Sport\Repository as SportRepository;
 use Voetbal\Association\Repository as AssociationRepository;
 use Voetbal\League\Repository as LeagueRepository;
@@ -44,6 +47,10 @@ class Import extends Command
      * @var ContainerInterface
      */
     protected $container;
+    /**
+     * @var ImportService
+     */
+    protected $importService;
 
     public function __construct(ContainerInterface $container)
     {
@@ -71,11 +78,10 @@ class Import extends Command
         $this->addOption('competitors', null, InputOption::VALUE_NONE, 'competitors');
         $this->addOption('structures', null, InputOption::VALUE_NONE, 'structure');
         $this->addOption('games', null, InputOption::VALUE_NONE, 'games');
+        $this->addOption('laybacks', null, InputOption::VALUE_NONE, 'laybacks');
 
         parent::configure();
     }
-
-
 
     protected function init(InputInterface $input, string $name)
     {
@@ -86,100 +92,165 @@ class Import extends Command
     {
         $this->init($input, 'cron-import');
 
-        $importService = new VoetbalImportService($this->logger);
+        $this->importService = new ImportService($this->logger);
 
         if ($input->getOption("sports")) {
-            $sofaScore = $this->externalSourceFactory->createByName(SofaScore::NAME);
-            $sportRepos = $this->container->get(SportRepository::class);
-            $sportAttacherRepos = $this->container->get(SportAttacherRepository::class);
-            $importService->importSports($sofaScore, $sportRepos, $sportAttacherRepos);
+            $this->importSports(SofaScore::NAME);
         }
         if ($input->getOption("associations")) {
-            $betFair = $this->externalSourceFactory->createByName(Betfair::NAME);
-            $associationRepos = $this->container->get(AssociationRepository::class);
-            $associationAttacherRepos = $this->container->get(AssociationAttacherRepository::class);
-            $importService->importAssociations($betFair, $associationRepos, $associationAttacherRepos);
+            $this->importAssociations(Betfair::NAME);
         }
-        // so season input manual
-        if ($input->getOption("seasons")) {
-//            $sofaScore = $this->externalSourceFactory->createByName( SofaScore::NAME );
-//            $seasonRepos = $this->container->get(SeasonRepository::class);
-//            $seasonAttacherRepos = $this->container->get(SeasonAttacherRepository::class);
-//            $importService->importSeasons($sofaScore, $seasonRepos, $seasonAttacherRepos);
-        }
+//        if ($input->getOption("seasons")) { // input manual
+//            $this->importSeasons();
+//        }
         if ($input->getOption("leagues")) {
-            $sofaScore = $this->externalSourceFactory->createByName(SofaScore::NAME);
-            $leagueRepos = $this->container->get(LeagueRepository::class);
-            $leagueAttacherRepos = $this->container->get(LeagueAttacherRepository::class);
-            $associationAttacherRepos = $this->container->get(AssociationAttacherRepository::class);
-            $importService->importLeagues($sofaScore, $leagueRepos, $leagueAttacherRepos, $associationAttacherRepos);
+            $this->importLeagues(SofaScore::NAME);
         }
         if ($input->getOption("competitions")) {
-            $sofaScore = $this->externalSourceFactory->createByName(SofaScore::NAME);
-            $competitionRepos = $this->container->get(CompetitionRepository::class);
-            $competitionAttacherRepos = $this->container->get(CompetitionAttacherRepository::class);
-            $leagueAttacherRepos = $this->container->get(LeagueAttacherRepository::class);
-            $seasonAttacherRepos = $this->container->get(SeasonAttacherRepository::class);
-            $sportAttacherRepos = $this->container->get(SportAttacherRepository::class);
-            $importService->importCompetitions(
-                $sofaScore,
-                $competitionRepos,
-                $competitionAttacherRepos,
-                $leagueAttacherRepos,
-                $seasonAttacherRepos,
-                $sportAttacherRepos
-            );
+            $this->importCompetitions(SofaScore::NAME);
         }
         if ($input->getOption("competitors")) {
-            $sofaScore = $this->externalSourceFactory->createByName(SofaScore::NAME);
-            $competitorRepos = $this->container->get(CompetitorRepository::class);
-            $competitorAttacherRepos = $this->container->get(CompetitorAttacherRepository::class);
-            $associationAttacherRepos = $this->container->get(AssociationAttacherRepository::class);
-            $competitionAttacherRepos = $this->container->get(CompetitionAttacherRepository::class);
-            $importService->importCompetitors(
-                $sofaScore,
-                $competitorRepos,
-                $competitorAttacherRepos,
-                $associationAttacherRepos,
-                $competitionAttacherRepos
-            );
+            $this->importCompetitors(SofaScore::NAME);
         }
-
         if ($input->getOption("structures")) {
-            $sofaScore = $this->externalSourceFactory->createByName(SofaScore::NAME);
-            $structureRepos = $this->container->get(StructureRepository::class);
+            $this->importStructures(SofaScore::NAME);
+        }
+        if ($input->getOption("games")) {
+            $this->importGames(SofaScore::NAME);
+        }
+        if ($input->getOption("laybacks")) {
+            $this->importLaybacks([Betfair::NAME]);
+        }
+        return 0;
+    }
+
+    protected function importSports(string $externalSourceName)
+    {
+        $externalSourcImpl = $this->externalSourceFactory->createByName($externalSourceName);
+        $sportRepos = $this->container->get(SportRepository::class);
+        $sportAttacherRepos = $this->container->get(SportAttacherRepository::class);
+        $this->importService->importSports($externalSourcImpl, $sportRepos, $sportAttacherRepos);
+    }
+
+    protected function importAssociations(string $externalSourceName)
+    {
+        $externalSourcImpl = $this->externalSourceFactory->createByName($externalSourceName);
+        $associationRepos = $this->container->get(AssociationRepository::class);
+        $associationAttacherRepos = $this->container->get(AssociationAttacherRepository::class);
+        $this->importService->importAssociations($externalSourcImpl, $associationRepos, $associationAttacherRepos);
+    }
+
+    protected function importSeasons(string $externalSourceName)
+    {
+        $externalSourcImpl = $this->externalSourceFactory->createByName($externalSourceName);
+        $seasonRepos = $this->container->get(SeasonRepository::class);
+        $seasonAttacherRepos = $this->container->get(SeasonAttacherRepository::class);
+        $this->importService->importSeasons($externalSourcImpl, $seasonRepos, $seasonAttacherRepos);
+    }
+
+    protected function importLeagues(string $externalSourceName)
+    {
+        $externalSourcImpl = $this->externalSourceFactory->createByName($externalSourceName);
+        $leagueRepos = $this->container->get(LeagueRepository::class);
+        $leagueAttacherRepos = $this->container->get(LeagueAttacherRepository::class);
+        $associationAttacherRepos = $this->container->get(AssociationAttacherRepository::class);
+        $this->importService->importLeagues($externalSourcImpl, $leagueRepos, $leagueAttacherRepos, $associationAttacherRepos);
+    }
+
+    protected function importCompetitions(string $externalSourceName)
+    {
+        $externalSourcImpl = $this->externalSourceFactory->createByName($externalSourceName);
+        $competitionRepos = $this->container->get(CompetitionRepository::class);
+        $competitionAttacherRepos = $this->container->get(CompetitionAttacherRepository::class);
+        $leagueAttacherRepos = $this->container->get(LeagueAttacherRepository::class);
+        $seasonAttacherRepos = $this->container->get(SeasonAttacherRepository::class);
+        $sportAttacherRepos = $this->container->get(SportAttacherRepository::class);
+        $this->importService->importCompetitions(
+            $externalSourcImpl,
+            $competitionRepos,
+            $competitionAttacherRepos,
+            $leagueAttacherRepos,
+            $seasonAttacherRepos,
+            $sportAttacherRepos
+        );
+    }
+
+    protected function importCompetitors(string $externalSourceName)
+    {
+        $externalSourcImpl = $this->externalSourceFactory->createByName($externalSourceName);
+        $competitorRepos = $this->container->get(CompetitorRepository::class);
+        $competitorAttacherRepos = $this->container->get(CompetitorAttacherRepository::class);
+        $associationAttacherRepos = $this->container->get(AssociationAttacherRepository::class);
+        $competitionAttacherRepos = $this->container->get(CompetitionAttacherRepository::class);
+        $this->importService->importCompetitors(
+            $externalSourcImpl,
+            $competitorRepos,
+            $competitorAttacherRepos,
+            $associationAttacherRepos,
+            $competitionAttacherRepos
+        );
+    }
+
+    protected function importStructures(string $externalSourceName)
+    {
+        $externalSourcImpl = $this->externalSourceFactory->createByName($externalSourceName);
+        $structureRepos = $this->container->get(StructureRepository::class);
+        $competitorAttacherRepos = $this->container->get(CompetitorAttacherRepository::class);
+        $competitionAttacherRepos = $this->container->get(CompetitionAttacherRepository::class);
+        $this->importService->importStructures(
+            $externalSourcImpl,
+            $structureRepos,
+            $competitorAttacherRepos,
+            $competitionAttacherRepos
+        );
+    }
+
+    protected function importGames(string $externalSourceName)
+    {
+        $externalSourcImpl = $this->externalSourceFactory->createByName($externalSourceName);
+        $gameRepos = $this->container->get(GameRepository::class);
+        $gameScoreRepos = $this->container->get(GameScoreRepository::class);
+        $competitorRepos = $this->container->get(CompetitorRepository::class);
+        $structureRepos = $this->container->get(StructureRepository::class);
+        $gameAttacherRepos = $this->container->get(GameAttacherRepository::class);
+        $competitionAttacherRepos = $this->container->get(CompetitionAttacherRepository::class);
+        $competitorAttacherRepos = $this->container->get(CompetitorAttacherRepository::class);
+
+        $this->importService->importGames(
+            $externalSourcImpl,
+            $gameRepos,
+            $gameScoreRepos,
+            $competitorRepos,
+            $structureRepos,
+            $gameAttacherRepos,
+            $competitionAttacherRepos,
+            $competitorAttacherRepos
+        );
+    }
+
+    /**
+     * @param array|string[] $externalSourceNames
+     */
+    protected function importLayBacks(array $externalSourceNames)
+    {
+        foreach ($externalSourceNames as $externalSourceName) {
+            $externalSourcImpl = $this->externalSourceFactory->createByName($externalSourceName);
+            $gameRepos = $this->container->get(GameRepository::class);
+            $layBackRepos = $this->container->get(LayBackRepository::class);
+            $betLineRepos = $this->container->get(BetLineRepository::class);
+            $bookmakerAttacherRepos = $this->container->get(BookmakerAttacherRepository::class);
             $competitorAttacherRepos = $this->container->get(CompetitorAttacherRepository::class);
             $competitionAttacherRepos = $this->container->get(CompetitionAttacherRepository::class);
-            $importService->importStructures(
-                $sofaScore,
-                $structureRepos,
+
+            $this->importService->importLaybacks(
+                $externalSourcImpl,
+                $gameRepos,
+                $layBackRepos,
+                $betLineRepos,
+                $bookmakerAttacherRepos,
                 $competitorAttacherRepos,
                 $competitionAttacherRepos
             );
         }
-
-        if ($input->getOption("games")) {
-            $sofaScore = $this->externalSourceFactory->createByName(SofaScore::NAME);
-            $gameRepos = $this->container->get(GameRepository::class);
-            $gameScoreRepos = $this->container->get(GameScoreRepository::class);
-            $competitorRepos = $this->container->get(CompetitorRepository::class);
-            $structureRepos = $this->container->get(StructureRepository::class);
-            $gameAttacherRepos = $this->container->get(GameAttacherRepository::class);
-            $competitionAttacherRepos = $this->container->get(CompetitionAttacherRepository::class);
-            $competitorAttacherRepos = $this->container->get(CompetitorAttacherRepository::class);
-
-            $importService->importGames(
-                $sofaScore,
-                $gameRepos,
-                $gameScoreRepos,
-                $competitorRepos,
-                $structureRepos,
-                $gameAttacherRepos,
-                $competitionAttacherRepos,
-                $competitorAttacherRepos
-            );
-        }
-
-        return 0;
     }
 }

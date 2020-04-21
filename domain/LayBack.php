@@ -8,62 +8,48 @@
 
 namespace VOBetting;
 
-use Voetbal\ExternalSource;
+use DateTimeImmutable;
 
 class LayBack
 {
     /**
-     * @var int
-     */
-    private $id;
-
-    /**
-     * @var bool
-     */
-    private $back;
-
-    /**
-     * @var float
-     */
-    private $price;
-
-    /**
-     * @var double
-     */
-    private $size;
-
-    /**
-     * @var \DateTimeImmutable
+     * @var DateTimeImmutable
      */
     private $dateTime;
-
     /**
      * @var BetLine
      */
     private $betLine;
-
     /**
      * @var Bookmaker
      */
     private $bookmaker;
 
     /**
-     * @var ExternalSource
+     * @var int
      */
-    private $externalSource;
-
-    // const _MATCH_ODDS = 1;
+    private $id;
+    /**
+     * @var bool
+     */
+    private $back;
+    /**
+     * @var float
+     */
+    private $price;
+    /**
+     * @var double
+     */
+    private $size;
 
     public function __construct(
-        \DateTimeImmutable $dateTime,
+        DateTimeImmutable $dateTime,
         BetLine $betLine,
-        Bookmaker $bookmaker,
-        ExternalSource $externalSource
+        Bookmaker $bookmaker
     ) {
         $this->setDateTime($dateTime);
         $this->setBetLine($betLine);
         $this->setBookmaker($bookmaker);
-        $this->setExternalSource($externalSource);
     }
 
     /**
@@ -140,14 +126,14 @@ class LayBack
     }
 
     /**
-     * @return \DateTimeImmutable
+     * @return DateTimeImmutable
      */
     public function getDateTime()
     {
         return $this->dateTime;
     }
 
-    public function setDateTime(\DateTimeImmutable $dateTime)
+    public function setDateTime(DateTimeImmutable $dateTime)
     {
         $this->dateTime = $dateTime;
     }
@@ -187,23 +173,5 @@ class LayBack
     public function setBookmaker($bookmaker)
     {
         $this->bookmaker = $bookmaker;
-    }
-
-    /**
-     * Get externalSource
-     *
-     * @return ExternalSource
-     */
-    public function getExternalSource()
-    {
-        return $this->externalSource;
-    }
-
-    /**
-     * @param ExternalSource $externalSource
-     */
-    public function setExternalSource(ExternalSource $externalSource)
-    {
-        $this->externalSource = $externalSource;
     }
 }

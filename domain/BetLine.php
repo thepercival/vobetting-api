@@ -17,17 +17,14 @@ class BetLine
      * @var int
      */
     private $id;
-
-    /**
-     * @var int
-     */
-    private $betType;
-
     /**
      * @var Game
      */
     private $game;
-
+    /**
+     * @var int
+     */
+    private $betType;
     /**
      * @var Place
      */

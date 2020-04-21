@@ -22,11 +22,6 @@ use Voetbal\ExternalSource\Competitor as ExternalSourceCompetitor;
 
 class Competitor extends BetfairHelper implements ExternalSourceCompetitor
 {
-    /**
-     * @var array|CompetitorBase[]|null
-     */
-    protected $competitors = [];
-
     public function __construct(
         Betfair $parent,
         BetfairApiHelper $apiHelper,
@@ -48,7 +43,7 @@ class Competitor extends BetfairHelper implements ExternalSourceCompetitor
     {
         $competitionCompetitors = $this->getCompetitorsHelper($competition);
         if (array_key_exists($id, $competitionCompetitors)) {
-            return $this->competitors[$id];
+            return $competitionCompetitors[$id];
         }
         return null;
     }
@@ -57,7 +52,7 @@ class Competitor extends BetfairHelper implements ExternalSourceCompetitor
     {
         $competitionCompetitors = [];
         $betType = BetLine::_MATCH_ODDS;
-        $events = $this->apiHelper->getEvents($competition->getLeague(), $this->getImportPeriod());
+        $events = $this->apiHelper->getEvents($competition->getLeague());
         foreach ($events as $event) {
             $markets = $this->apiHelper->getMarkets($event->event->id, $betType);
             foreach ($markets as $market) {
@@ -74,73 +69,5 @@ class Competitor extends BetfairHelper implements ExternalSourceCompetitor
             }
         }
         return $competitionCompetitors;
-    }
-
-    /**
-     * @param Competition $competition
-     * @return array|CompetitorBase[]
-     */
-//    protected function getCompetitorsHelper( Competition $competition ): array
-//    {
-//        $competitionCompetitors = [];
-//        $association = $competition->getLeague()->getAssociation();
-//
-//        $apiData = $this->apiHelper->getData(
-//            "u-tournament/". $competition->getLeague()->getId() .
-//            "/season/". $competition->getId() ."/json",
-//            ImportService::COMPETITOR_CACHE_MINUTES
-//        );
-//
-//        $apiDataTeams = $this->convertExternalSourceCompetitors( $apiData );
-//
-//        /** @var stdClass $externalSourceCompetitor */
-//        foreach ($apiDataTeams as $externalSourceCompetitor) {
-//
-    ////            if( $externalSourceCompetitor->tournament === null || !property_exists($externalSourceCompetitor->tournament, "uniqueId") ) {
-    ////                continue;
-    ////            }
-//            if( array_key_exists( $externalSourceCompetitor->id, $this->competitors ) ) {
-//                $competitor = $this->competitors[$externalSourceCompetitor->id];
-//                $competitionCompetitors[$competitor->getId()] = $competitor;
-//                continue;
-//            }
-//
-//            $newCompetitor = new CompetitorBase( $association, $externalSourceCompetitor->name );
-//            $abbreviation = substr( $externalSourceCompetitor->shortName, 0, CompetitorBase::MAX_LENGTH_ABBREVIATION );
-//            $newCompetitor->setAbbreviation( $abbreviation );
-//            $newCompetitor->setId( $externalSourceCompetitor->id );
-//            $this->competitors[$newCompetitor->getId()] = $newCompetitor;
-//            $competitionCompetitors[$newCompetitor->getId()] = $newCompetitor;
-//        }
-//        return $competitionCompetitors;
-//    }
-
-    protected function getImportPeriod(): Period
-    {
-        $today = (new DateTimeImmutable())->setTime(0, 0);
-        return new Period($today, $today->modify("+15 days"));
-    }
-
-    protected function convertExternalSourceCompetitors($apiData)
-    {
-        if (property_exists($apiData, 'teams')) {
-            return $apiData->teams;
-        }
-        $apiDataTeams = [];
-
-        if (!property_exists($apiData, 'standingsTables') || count($apiData->standingsTables) === 0) {
-            return $apiDataTeams;
-        }
-        $standingsTables = $apiData->standingsTables[0];
-        if (!property_exists($standingsTables, 'tableRows')) {
-            return $apiDataTeams;
-        }
-        foreach ($standingsTables->tableRows as $tableRow) {
-            if (!property_exists($tableRow, 'team')) {
-                continue;
-            }
-            $apiDataTeams[] = $tableRow->team;
-        }
-        return $apiDataTeams;
     }
 }
