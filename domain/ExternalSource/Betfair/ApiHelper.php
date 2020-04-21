@@ -13,7 +13,11 @@ use League\Period\Period;
 use PeterColes\Betfair\Betfair as BetfairClient;
 use stdClass;
 use VOBetting\BetLine;
+use VOBetting\ExternalSource\Betfair;
+use Voetbal\Association;
 use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
+use Voetbal\Competitor;
+use Voetbal\Game;
 use Voetbal\League;
 use Voetbal\ExternalSource;
 
@@ -68,7 +72,7 @@ class ApiHelper
         return 'Y-m-d\TH:i:s\Z';
     }
 
-    public function convertBetType($betType)
+    public function convertBetType(int $betType): string
     {
         if ($betType === BetLine::_MATCH_ODDS) {
             return 'MATCH_ODDS';
@@ -76,7 +80,13 @@ class ApiHelper
         throw new \Exception("unknown bettype", E_ERROR);
     }
 
-    //
+    public function convertBetTypeBack(string $betType): int
+    {
+        if ($betType === "Match Odds") {
+            return BetLine::_MATCH_ODDS;
+        }
+        throw new \Exception("unknown bettype", E_ERROR);
+    }
 
     /**
      * @param League $league
@@ -167,5 +177,37 @@ class ApiHelper
                 ]
             ]
         );
+    }
+
+    /**
+     * @param Association $association
+     * @param array|stdClass[] $runners
+     * @return array|Competitor[][]
+     * @throws \Exception
+     */
+    public function getCompetitors( Association $association, array $runners ): array {
+        $competitors = [ Game::HOME => [], Game::AWAY => [] ];
+        foreach ($runners as $homeAwayBF => $runner) {
+            if ($runner->metadata->runnerId == Betfair::THE_DRAW) {
+                continue;
+            }
+            $homeAway = $this->convertHomeAway($runner->sortPriority);
+            $competitor = new Competitor( $association, $runner->runnerName );
+            $competitor->setId($runner->metadata->runnerId);
+
+            $competitors[$homeAway][] = $competitor;
+        }
+        return $competitors;
+    }
+
+    public function convertHomeAway( int $homeAway ): ?bool
+    {
+        if( $homeAway === 1 ) {
+            return Game::HOME;
+        }
+        else if( $homeAway === 2 ) {
+            return Game::AWAY;
+        }
+        throw new \Exception("betfair homeaway-value unknown", E_ERROR );
     }
 }

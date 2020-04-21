@@ -52,8 +52,6 @@ class Betfair implements
     ExternalSourceBookmaker,
     ExternalSourceLayBack
 {
-    public const NAME = "betfair";
-
     /**
      * @var ExternalSource
      */
@@ -71,7 +69,8 @@ class Betfair implements
      */
     private $helpers;
 
-    const THE_DRAW = 58805;
+    public const THE_DRAW = 58805;
+    public const NAME = "betfair";
     public const DEFAULTSPORTID = "AllSports";
     public const DEFAULTSEASONID = "20002100";
 

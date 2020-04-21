@@ -14,6 +14,7 @@ use stdClass;
 use VOBetting\BetLine;
 use VOBetting\ExternalSource\Betfair\Helper as BetfairHelper;
 use VOBetting\ExternalSource\Betfair\ApiHelper as BetfairApiHelper;
+use Voetbal\Association;
 use Voetbal\Competitor as CompetitorBase;
 use Psr\Log\LoggerInterface;
 use VOBetting\ExternalSource\Betfair;
@@ -51,20 +52,20 @@ class Competitor extends BetfairHelper implements ExternalSourceCompetitor
     protected function getCompetitorsHelper(Competition $competition): array
     {
         $competitionCompetitors = [];
+        $association = $competition->getLeague()->getAssociation();
         $betType = BetLine::_MATCH_ODDS;
         $events = $this->apiHelper->getEvents($competition->getLeague());
         foreach ($events as $event) {
             $markets = $this->apiHelper->getMarkets($event->event->id, $betType);
             foreach ($markets as $market) {
-                foreach ($market->runners as $runner) {
-                    if ($runner->metadata->runnerId == $this->parent::THE_DRAW) {
-                        continue;
+                $competitors = $this->apiHelper->getCompetitors( $association, $market->runners );
+                foreach( $competitors as $homeAway => $homeAwayCompetitors ) {
+                    foreach( $homeAwayCompetitors as $homeAwayCompetitor ) {
+                        if( in_array($homeAwayCompetitor, $competitionCompetitors) ) {
+                            continue;
+                        }
+                        $competitionCompetitors[] = $homeAwayCompetitor;
                     }
-                    $competitor = ["id" => $runner->metadata->runnerId, "name" => $runner->runnerName ];
-                    if (in_array($competitor, $competitionCompetitors)) {
-                        continue;
-                    }
-                    $competitionCompetitors[] = $competitor;
                 }
             }
         }

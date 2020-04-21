@@ -10,6 +10,12 @@ namespace VOBetting\ExternalSource\Betfair;
 
 use VOBetting\ExternalSource\Betfair;
 use Psr\Log\LoggerInterface;
+use Voetbal\Competition;
+use Voetbal\Poule;
+use Voetbal\Range as VoetbalRange;
+use Voetbal\Structure as StructureBase;
+use Voetbal\Structure\Service as StructureService;
+use Voetbal\Structure\Options as StructureOptions;
 
 class Helper
 {
@@ -45,6 +51,22 @@ class Helper
             }
         }
         return false;
+    }
+
+    protected function createDummyPoule( Competition $competition ): Poule {
+        $competitors = $this->parent->getCompetitors( $competition );
+        $structureOptions = new StructureOptions(
+            new VoetbalRange(1, 32),
+            new VoetbalRange(2, 256),
+            new VoetbalRange(2, 30)
+        );
+        $structureService = new StructureService($structureOptions);
+        $structure = $structureService->create($competition, count($competitors), 1);
+        $poule = $structure->getRootRound()->getPoule(1);
+        foreach( $poule->getPlaces() as $place ) {
+            $place->setCompetitor( array_shift($competitors) );
+        }
+        return $poule;
     }
 
     private function notice($msg)

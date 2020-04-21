@@ -45,8 +45,9 @@ class Service extends ImportService
             return;
         }
         $importLayBackService = new Service\LayBack(
-             $layBackRepos,
+            $layBackRepos,
             $betLineRepos,
+            $gameRepos,
             $bookmakerAttacherRepos,
             $competitorAttacherRepos,
             $this->logger

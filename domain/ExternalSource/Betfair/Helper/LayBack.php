@@ -8,6 +8,8 @@
 
 namespace VOBetting\ExternalSource\Betfair\Helper;
 
+use DateTime;
+use DateTimeImmutable;
 use VOBetting\BetLine;
 use VOBetting\ExternalSource\Betfair\Helper as BetfairHelper;
 use VOBetting\ExternalSource\Betfair\ApiHelper as BetfairApiHelper;
@@ -17,7 +19,11 @@ use VOBetting\ExternalSource\Betfair;
 use Psr\Log\LoggerInterface;
 use stdClass;
 use Voetbal\Competition;
+use Voetbal\Competitor;
 use Voetbal\Competitor as CompetitorBase;
+use Voetbal\Game as GameBase;
+use Voetbal\Place;
+use Voetbal\Poule;
 
 class LayBack extends BetfairHelper implements ExternalSourceLayBack
 {
@@ -49,67 +55,90 @@ class LayBack extends BetfairHelper implements ExternalSourceLayBack
 
     protected function getLayBacksHelper(Competition $competition): array
     {
+        $association = $competition->getLeague()->getAssociation();
+        $dummyPoule = $this->createDummyPoule($competition);
         $competitionLayBacks = [];
         $betType = BetLine::_MATCH_ODDS;
         $events = $this->apiHelper->getEvents($competition->getLeague() );
         foreach ($events as $event) {
+            $startDateTime = DateTimeImmutable::createFromFormat( $this->apiHelper->getDateFormat(), $event->event->openData );
+
             $markets = $this->apiHelper->getMarkets($event->event->id, $betType);
             foreach ($markets as $market) {
+                $competitors = $this->apiHelper->getCompetitors( $association, $market->runners );
+                $game = $this->createGame( $dummyPoule, $startDateTime, $competitors);
+                if( $game === null ) {
+                    continue;
+                }
+                $betLine = new BetLine( $game, $this->apiHelper->convertBetTypeBack( $market->marketName ) );
 
                 $marketBooks = $this->apiHelper->getMarketBooks($market->marketId);
                 foreach ($marketBooks as $marketBook) {
+                    if( $marketBook->status !== "OPEN") {
+                        continue;
+                    }
                     foreach ($marketBook->runners as $runner) {
+                        if( $runner->status !== "ACTIVE") {
+                            continue;
+                        }
+                        $externalLayBacks = [
+                            LayBackBase::BACK => $runner->ex->availableToBack,
+                            LayBackBase::LAY => $runner->ex->availableToLay
+                        ];
+                        /** @var bool $layBackValue */
+                        foreach( $externalLayBacks as $layBackValue => $externalLayBack) {
+                            $competitionLayBacks[] = $this->createLayBackFromExternal( $betLine, $layBackValue, $externalLayBack );
+                        }
                         // var_dump($betLine->status); // IF CLOSED => UPDATE GAME!!
                         // var_dump($runnerOne->status); // "ACTIVE"
-                        $backs = $runner->ex->availableToBack;
-                        $lays = $runner->ex->availableToLay;
-//                        $this->saveLayBacks( $this->getImportPeriod()->getStartDate(), $betLine, $backs, true );
-//                        $this->saveLayBacks( $this->getImportPeriod()->getStartDate(), $betLine, $lays, false );
                     }
                 }
-
-//                foreach ($market->runners as $runner) {
-//                    if ($runner->metadata->runnerId == $this->parent::THE_DRAW) {
-//                        continue;
-//                    }
-//                    $layBack = ["id" => $runner->metadata->runnerId, "name" => $runner->runnerName ];
-//                    if (in_array($layBack, $competitionLayBacks)) {
-//                        continue;
-//                    }
-//                    $competitionLayBacks[] = $layBack;
-//                }
             }
         }
         return $competitionLayBacks;
     }
 
-//    /**
-//     *
-//     *
-//     * @param array|stdClass[] $externalLayBacks
-//     */
-//    protected function setLayBacks(array $externalLayBacks)
-//    {
-//        $this->layBacks = [];
-//
-//        /** @var stdClass $externalLayBack */
-//        foreach ($externalLayBacks as $externalLayBack) {
-//            $name = $externalLayBack->id;
-//            if ($this->hasName($this->layBacks, $name)) {
-//                continue;
-//            }
-//            $layBack = $this->createLayBack($externalLayBack) ;
-//            $this->layBacks[$layBack->getId()] = $layBack;
-//        }
-//    }
-//
-//    protected function createLayBack(stdClass $externalLayBack): LayBackBase
-//    {
-//        $layBack = new LayBackBase($externalLayBack->id, true);
-//        $layBack->setId($externalLayBack->id);
-//        return $layBack;
-//    }
+    /**
+     * @param Poule $dummyPoule
+     * @param DateTimeImmutable $dateTime
+     * @param array|Competitor[][] $competitors
+     * @return GameBase|null
+     */
+    protected function createGame(Poule $dummyPoule, DateTimeImmutable $dateTime, array $competitors ): ?GameBase {
+        $game = new GameBase($dummyPoule, 1, $dateTime);
+        /** @var bool $homeAway */
+        foreach( $competitors as $homeAway => $homeAwayCompetitors ) {
+            foreach( $homeAwayCompetitors as $competitor ) {
+                $place = $this->getPlaceFromPoule($dummyPoule, $competitor);
+                if ($place === null) {
+                    return null;
+                }
+                $game->addPlace($place, $homeAway);
+            }
+        }
+        return $game;
+    }
 
+    protected function getPlaceFromPoule(Poule $poule, Competitor $competitor): ?Place
+    {
+        $places = $poule->getPlaces()->filter(function (Place $place) use ($competitor) {
+            return $place->getCompetitor() && $place->getCompetitor()->getId() === $competitor->getId();
+        });
+        if ($places->count() !== 1) {
+            return null;
+        }
+        return $places->first();
+    }
+
+    protected function createLayBackFromExternal(BetLine $betLine, bool $layOrBack , stdClass $externalLayBack): LayBackBase
+    {
+        $bookMaker = $this->parent->getBookmaker($this->parent::NAME);
+        $layBackNew = new LayBackBase( new DateTimeImmutable(), $betLine, $bookMaker );
+        $layBackNew->setBack( $layOrBack );
+        $layBackNew->setPrice( $externalLayBack->price );
+        $layBackNew->setSize( $externalLayBack->size );
+        return $layBackNew;
+    }
 
 //
 //    public function process( League $league, $externalSystemEvent, $betType ) {
@@ -175,48 +204,7 @@ class LayBack extends BetfairHelper implements ExternalSourceLayBack
 //        return $this->repos->save($betLine);
 //    }
 //
-//    protected function getPoulePlace( Game $game, $competitor ): ?Place
-//    {
-//        $poulePlaces = $game->getPlaces()->map( function( GamePlace $gamePoulePlace ) {
-//            return $gamePoulePlace->getPlace();
-//        });
-//        $foundPoulePlaces = $poulePlaces->filter( function( Place $poulePlace ) use ( $competitor ) {
-//            return $poulePlace->getCompetitor() === $competitor;
-//        });
-//        return $foundPoulePlaces->first();
-//    }
 //
-//    public function convertHomeAway( $homeAway )
-//    {
-//        if( $homeAway === 1 ) {
-//            return Game::HOME;
-//        }
-//        else if( $homeAway === 2 ) {
-//            return Game::AWAY;
-//        }
-//        else if( $homeAway === 3 ) {
-//            return null;
-//        }
-//        throw new \Exception("betfair homeaway-value unknown", E_ERROR );
-//    }
-//
-//
-//
-//    protected function saveLayBacks(
-//        \DateTimeImmutable $dateTime,
-//        BetLineBase $betLine,
-//        $layBacks, $layBack
-//    ) {
-//        $bookmaker = $this->getBookmaker();
-//        foreach( $layBacks as $layBackIt ){
-//            $layBackNew = new LayBack( $dateTime, $betLine, $bookmaker, $this->externalSystemBase );
-//            $layBackNew->setBack( $layBack );
-//            $layBackNew->setPrice( $layBackIt->price );
-//            $layBackNew->setSize( $layBackIt->size );
-//            $this->layBackRepos->save($layBackNew);
-//            break; // only first layBack, because is most interesting price/size
-//        }
-//    }
 //
 //    protected function syncStartDateTime( Game $game, \DateTimeImmutable $startDateTime)
 //    {

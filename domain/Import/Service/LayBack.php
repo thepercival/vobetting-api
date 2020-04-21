@@ -3,6 +3,7 @@
 namespace VOBetting\Import\Service;
 
 use DateTimeImmutable;
+use League\Period\Period;
 use VOBetting\BetLine;
 use VOBetting\BetLine\Repository as BetLineRepository;
 use VOBetting\Bookmaker;
@@ -11,6 +12,7 @@ use Voetbal\Competition;
 use Voetbal\Competitor;
 use Voetbal\Attacher\Competitor\Repository as CompetitorAttacherRepository;
 use Voetbal\Game;
+use Voetbal\Game\Repository as GameRepository;
 use Voetbal\State as VoetbalState;
 use Voetbal\Import\ImporterInterface;
 use Voetbal\ExternalSource;
@@ -30,6 +32,10 @@ class LayBack implements ImporterInterface
      */
     protected $betLineRepos;
     /**
+     * @var GameRepository
+     */
+    protected $gameRepos;
+    /**
      * @var BookmakerAttacherRepository
      */
     protected $bookmakerAttacherRepos;
@@ -47,6 +53,7 @@ class LayBack implements ImporterInterface
     public function __construct(
         LayBackRepository $layBackRepos,
         BetLineRepository $betLineRepos,
+        GameRepository $gameRepos,
         BookmakerAttacherRepository $bookmakerAttacherRepos,
         CompetitorAttacherRepository $competitorAttacherRepos,
         LoggerInterface $logger
@@ -54,14 +61,10 @@ class LayBack implements ImporterInterface
         $this->logger = $logger;
         $this->layBackRepos = $layBackRepos;
         $this->betLineRepos = $betLineRepos;
+        $this->gameRepos = $gameRepos;
         $this->bookmakerAttacherRepos = $bookmakerAttacherRepos;
         $this->competitorAttacherRepos = $competitorAttacherRepos;
     }
-//
-//    protected function getDeadLine(): DateTimeImmutable {
-//        return (new DateTimeImmutable())->modify("-" . static::MAX_DAYS_BACK . " days");
-//    }
-
 
     /**
      * @param ExternalSource $externalSource
@@ -81,9 +84,15 @@ class LayBack implements ImporterInterface
 
     protected function createLayBack(ExternalSource $externalSource, LayBackBase $externalSourceLayBack): ?LayBackBase
     {
-        $betLine = $this->getBetLineFromExternal($externalSource, $externalSourceLayBack->getBetLine() );
+        $externalBetLine = $externalSourceLayBack->getBetLine();
+        $game = $this->getGameFromExternal($externalSource, $externalBetLine->getGame() );
+        if( $game === null ) {
+            return null;
+        }
+        $betLine = $this->getBetLine($game, $externalBetLine->getBetType() );
         if ($betLine === null) {
-            $betLine = $this->createBetLine($externalSource, $externalSourceLayBack->getBetLine() );
+            $betLine = new BetLine($game, $externalBetLine->getBetType() );
+            // $betLine->setPlace( ? );
             $this->betLineRepos->save($betLine);
         }
         $bookmaker = $this->getBookmakerFromExternal($externalSource, $externalSourceLayBack->getBookmaker() );
@@ -96,40 +105,35 @@ class LayBack implements ImporterInterface
             $betLine,
             $bookmaker);
 
-        // $layBack->setBack( ? );
-        // bool $back;
-        // float $price;
-        // double $size;
+        $layBack->setBack( $externalSourceLayBack->getBack() );
+        $layBack->setPrice( $externalSourceLayBack->getPrice() );
+        $layBack->setSize( $externalSourceLayBack->getSize() );
 
         return $layBack;
     }
 
-    protected function createBetLine(ExternalSource $externalSource, BetLine $externalSourceBetLine): ?BetLine
+    protected function getBetLine(Game $game, int $betType): ?BetLine
     {
-        $betType = 0;
-        $game = new Game();
-        $betLine = new BetLine($game, $betType);
-        // $betLine->setPlace( ? );
-        return $betLine;
+        return $this->betLineRepos->findOneBy( ["game" => $game, "betType" => $betType] );
     }
 
-    protected function getBetLineFromExternal(ExternalSource $externalSource, BetLine $betLine): ?BetLine
+    protected function getGameFromExternal(ExternalSource $externalSource, Game $externalGame): ?Game
     {
-        return null;
-//        $externalCompetition = $externalPoule->getRound()->getNumber()->getCompetition();
-//
-//        $competition = $this->competitionAttacherRepos->findImportable(
-//            $externalSource,
-//            $externalCompetition->getId()
-//        );
-//        if ($competition === null) {
-//            return null;
-//        }
-//        $structure = $this->structureRepos->getStructure($competition);
-//        if ($structure === null) {
-//            return null;
-//        }
-//        return $structure->getFirstRoundNumber()->getRounds()->first()->getPoules()->first();
+        $externalHomeCompetitor = $externalGame->getPlaces()->first()->getPlace()->getCompetitor();
+        $externalAwayCompetitor = $externalGame->getPlaces()->first()->getPlace()->getCompetitor();
+
+        $homeCompetitor = $this->getCompetitorFromExternal( $externalSource, $externalHomeCompetitor );
+        $awayCompetitor = $this->getCompetitorFromExternal( $externalSource, $externalAwayCompetitor );
+        $period = new Period(
+            $externalGame->getStartDateTime()->modify("-1 days"),
+            $externalGame->getStartDateTime()->modify("+1 days")
+        );
+        return $this->gameRepos->findOneByExt( $homeCompetitor, $awayCompetitor, $period);
+    }
+
+    protected function getCompetitorFromExternal(ExternalSource $externalSource, Competitor $externalCompetitor): ?Competitor
+    {
+        return $this->competitorAttacherRepos->findImportable( $externalSource, $externalCompetitor->getId() );
     }
 
     protected function getBookmakerFromExternal(ExternalSource $externalSource, Bookmaker $externalBookmaker): ?Bookmaker

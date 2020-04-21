@@ -42,6 +42,9 @@ class LayBack
      */
     private $size;
 
+    public const BACK = true;
+    public const LAY = false;
+
     public function __construct(
         DateTimeImmutable $dateTime,
         BetLine $betLine,
