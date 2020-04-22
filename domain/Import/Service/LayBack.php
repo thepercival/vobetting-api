@@ -119,8 +119,8 @@ class LayBack implements ImporterInterface
 
     protected function getGameFromExternal(ExternalSource $externalSource, Game $externalGame): ?Game
     {
-        $externalHomeCompetitor = $externalGame->getPlaces()->first()->getPlace()->getCompetitor();
-        $externalAwayCompetitor = $externalGame->getPlaces()->first()->getPlace()->getCompetitor();
+        $externalHomeCompetitor = $externalGame->getPlaces(Game::HOME)->first()->getPlace()->getCompetitor();
+        $externalAwayCompetitor = $externalGame->getPlaces(Game::AWAY)->first()->getPlace()->getCompetitor();
 
         $homeCompetitor = $this->getCompetitorFromExternal( $externalSource, $externalHomeCompetitor );
         $awayCompetitor = $this->getCompetitorFromExternal( $externalSource, $externalAwayCompetitor );

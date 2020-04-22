@@ -69,7 +69,7 @@ class ApiHelper
 
     public function getDateFormat()
     {
-        return 'Y-m-d\TH:i:s\Z';
+        return 'Y-m-d\TH:i:s.v\Z';
     }
 
     public function convertBetType(int $betType): string

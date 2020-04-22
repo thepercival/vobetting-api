@@ -5,7 +5,7 @@ VOBetting\BetLine:
 
   properties:
     id:
-      type: integer
+      read_only: true
     betType:
       type: integer
       serialized_name: betType

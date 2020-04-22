@@ -61,7 +61,7 @@ class LayBack extends BetfairHelper implements ExternalSourceLayBack
         $betType = BetLine::_MATCH_ODDS;
         $events = $this->apiHelper->getEvents($competition->getLeague() );
         foreach ($events as $event) {
-            $startDateTime = DateTimeImmutable::createFromFormat( $this->apiHelper->getDateFormat(), $event->event->openData );
+            $startDateTime = DateTimeImmutable::createFromFormat( $this->apiHelper->getDateFormat(), $event->event->openDate );
 
             $markets = $this->apiHelper->getMarkets($event->event->id, $betType);
             foreach ($markets as $market) {
@@ -86,8 +86,10 @@ class LayBack extends BetfairHelper implements ExternalSourceLayBack
                             LayBackBase::LAY => $runner->ex->availableToLay
                         ];
                         /** @var bool $layBackValue */
-                        foreach( $externalLayBacks as $layBackValue => $externalLayBack) {
-                            $competitionLayBacks[] = $this->createLayBackFromExternal( $betLine, $layBackValue, $externalLayBack );
+                        foreach( $externalLayBacks as $layBackValue => $externalLayOrBacks) {
+                            foreach( $externalLayOrBacks as $externalLayOrBack ) {
+                                $competitionLayBacks[] = $this->createLayBackFromExternal( $betLine, $layBackValue, $externalLayOrBack );
+                            }
                         }
                         // var_dump($betLine->status); // IF CLOSED => UPDATE GAME!!
                         // var_dump($runnerOne->status); // "ACTIVE"
