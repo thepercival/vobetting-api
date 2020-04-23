@@ -15,6 +15,8 @@
         <join-column name="pouleplaceid" referenced-column-name="id" nullable="true" on-delete="CASCADE"/>
       </join-columns>
     </many-to-one>
+    <one-to-many field="layBacks" target-entity="VOBetting\LayBack" mapped-by="betLine">
+    </one-to-many>
   </entity>
 
 </doctrine-mapping>

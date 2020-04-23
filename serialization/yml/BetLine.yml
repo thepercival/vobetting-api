@@ -9,6 +9,8 @@ VOBetting\BetLine:
     betType:
       type: integer
       serialized_name: betType
-    poulePlace:
+    place:
       type: Voetbal\Place
       serialized_name: poulePlace
+    layBacks:
+      type: ArrayCollection<VOBetting\LayBack>

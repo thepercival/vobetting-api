@@ -50,20 +50,18 @@ final class BetLineAction extends Action
     public function fetch(Request $request, Response $response, $args): Response
     {
         try {
-            $queryParams = $request->getQueryParams();
-
-            if (array_key_exists("gameid", $queryParams) === false || strlen($queryParams["gameid"]) === 0) {
+            if (array_key_exists("gameId", $args) === false || strlen($args["gameId"]) === 0) {
                 throw new \Exception("geen wedstrijdid opgegeven", E_ERROR);
             }
 
-            $game = $this->gameRepos->find((int)$queryParams["gameid"]);
+            $game = $this->gameRepos->find((int)$args["gameId"]);
             if ($game === null) {
                 throw new \Exception("er kan geen wedstrijd worden gevonden o.b.v. de invoergegevens", E_ERROR);
             }
             $filters = array( "game" => $game );
-            if (array_key_exists("betType", $queryParams) && strlen($queryParams["betType"]) > 0) {
-                $filters["betType"] = (int)$queryParams["betType"];
-            }
+//            if (array_key_exists("betType", $queryParams) && strlen($queryParams["betType"]) > 0) {
+//                $filters["betType"] = (int)$queryParams["betType"];
+//            }
             $betLines = $this->betLineRepos->findBy($filters);
 
             $json = $this->serializer->serialize($betLines, 'json');

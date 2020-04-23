@@ -15,32 +15,32 @@ class LayBack
     /**
      * @var DateTimeImmutable
      */
-    private $dateTime;
+    protected $dateTime;
     /**
      * @var BetLine
      */
-    private $betLine;
+    protected $betLine;
     /**
      * @var Bookmaker
      */
-    private $bookmaker;
+    protected $bookmaker;
 
     /**
      * @var int
      */
-    private $id;
+    protected $id;
     /**
      * @var bool
      */
-    private $back;
+    protected $back;
     /**
      * @var float
      */
-    private $price;
+    protected $price;
     /**
      * @var double
      */
-    private $size;
+    protected $size;
 
     public const BACK = true;
     public const LAY = false;

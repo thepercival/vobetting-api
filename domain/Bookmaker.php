@@ -15,15 +15,15 @@ class Bookmaker implements Importable
     /**
      * @var int|string
      */
-    private $id;
+    protected $id;
     /**
      * @var string
      */
-    private $name;
+    protected $name;
     /**
      * @var bool
      */
-    private $exchange;
+    protected $exchange;
 
     const MIN_LENGTH_NAME = 2;
     const MAX_LENGTH_NAME = 15;

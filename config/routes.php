@@ -6,6 +6,7 @@ use App\Actions\BetLineAction;
 use App\Actions\LayBackAction;
 use App\Actions\AuthAction;
 use App\Actions\BookmakerAction;
+use App\Actions\BetGameAction;
 use Slim\App;
 use Slim\Interfaces\RouteCollectorProxyInterface as Group;
 use App\Actions\Voetbal\SportAction;
@@ -31,8 +32,16 @@ return function (App $app) {
         $group->post('/validatetoken', AuthAction::class . ':validateToken');
     });
 
-//    $app->get('/betlines', BetLineAction::class . ':fetch');
+    $app->options('/betgames', BetGameAction::class . ':options');
+    $app->post('/betgames', BetGameAction::class . ':fetch');
+
+    $app->options('/betlines', BetLineAction::class . ':options');
+    $app->get('/betlines', BetLineAction::class . ':fetch');
+    $app->options('/betlines/{gameId}', BetLineAction::class . ':options');
+    $app->get('/betlines/{gameId}', BetLineAction::class . ':fetch');
+
 //    $app->get('/laybacks', LayBackAction::class . ':fetch');
+
 
     $app->group('/bookmakers', function (Group $group) {
         $group->options('', BookmakerAction::class . ':options');

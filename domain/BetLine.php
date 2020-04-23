@@ -8,6 +8,8 @@
 
 namespace VOBetting;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Voetbal\Game;
 use Voetbal\Place;
 
@@ -16,19 +18,23 @@ class BetLine
     /**
      * @var int
      */
-    private $id;
+    protected $id;
     /**
      * @var Game
      */
-    private $game;
+    protected $game;
     /**
      * @var int
      */
-    private $betType;
+    protected $betType;
     /**
      * @var Place
      */
-    private $place;
+    protected $place;
+    /**
+     * @var Collection|LayBack[]
+     */
+    protected $layBacks;
 
     const _MATCH_ODDS = 1;
 
@@ -36,6 +42,7 @@ class BetLine
     {
         $this->setGame($game);
         $this->setBetType($betType);
+        $this->layBacks = new ArrayCollection();
     }
 
     /**
@@ -107,5 +114,21 @@ class BetLine
     public function setPlace(Place $place = null)
     {
         $this->place = $place;
+    }
+
+    /**
+     * @return Collection|LayBack[]
+     */
+    public function getLayBacks()
+    {
+        return $this->layBacks;
+    }
+
+    /**
+     * @param Collection|LayBack[] $layBacks
+     */
+    public function setLayBacks(ArrayCollection $layBacks)
+    {
+        $this->layBacks = $layBacks;
     }
 }

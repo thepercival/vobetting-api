@@ -12,6 +12,7 @@ use Voetbal\CacheItemDb;
 
 use VOBetting\Bookmaker\Repository as BookmakerRepository;
 use VOBetting\Bookmaker;
+use VOBetting\BetGameRepository;
 use VOBetting\BetLine\Repository as BetLineRepository;
 use VOBetting\BetLine;
 use VOBetting\LayBack\Repository as LayBackRepository;
@@ -60,6 +61,9 @@ return [
     BookmakerAttacherRepository::class => function (ContainerInterface $container) {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new BookmakerAttacherRepository($entityManager, $entityManager->getClassMetaData(BookmakerAttacher::class));
+    },
+    BetGameRepository::class => function (ContainerInterface $container) {
+        return new BetGameRepository($container->get(\Doctrine\ORM\EntityManager::class));
     },
     BetLineRepository::class => function (ContainerInterface $container) {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);

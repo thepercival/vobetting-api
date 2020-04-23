@@ -1,0 +1,12 @@
+VOBetting\BetGameFilter:
+  exclusion_policy: ALL
+  exclude: false
+  access_type: public_method
+
+  properties:
+    start:
+      type: DateTimeImmutable<'Y-m-d\TH:i:s.u\Z'>
+    end:
+      type: DateTimeImmutable<'Y-m-d\TH:i:s.u\Z'>
+    competitionId:
+      type: int

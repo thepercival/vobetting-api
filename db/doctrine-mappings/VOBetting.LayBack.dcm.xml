@@ -8,7 +8,7 @@
     <field name="price" column="price" type="float" nullable="false" unique="false"/>
     <field name="size" column="size" type="float" nullable="false" unique="false"/>
     <field name="dateTime" column="dateTime" type="datetime_immutable" nullable="false" unique="false"/>
-    <many-to-one field="betLine" target-entity="VOBetting\BetLine" inversed-by="laybacks">
+    <many-to-one field="betLine" target-entity="VOBetting\BetLine" inversed-by="layBacks">
       <join-columns>
         <join-column name="betlineid" referenced-column-name="id" nullable="false" on-delete="CASCADE"/>
       </join-columns>
