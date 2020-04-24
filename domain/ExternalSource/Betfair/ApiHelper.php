@@ -188,12 +188,13 @@ class ApiHelper
     public function getCompetitors( Association $association, array $runners ): array {
         $competitors = [ Game::HOME => [], Game::AWAY => [] ];
         foreach ($runners as $homeAwayBF => $runner) {
-            if ($runner->metadata->runnerId == Betfair::THE_DRAW) {
+            $id = (int)$runner->metadata->runnerId;
+            if ( $id === Betfair::THE_DRAW) {
                 continue;
             }
             $homeAway = $this->convertHomeAway($runner->sortPriority);
             $competitor = new Competitor( $association, $runner->runnerName );
-            $competitor->setId($runner->metadata->runnerId);
+            $competitor->setId($id);
 
             $competitors[$homeAway][] = $competitor;
         }

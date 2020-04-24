@@ -30,6 +30,10 @@ class LayBack
      */
     protected $id;
     /**
+     * @var bool|null
+     */
+    protected $option;
+    /**
      * @var bool
      */
     protected $back;
@@ -48,10 +52,12 @@ class LayBack
     public function __construct(
         DateTimeImmutable $dateTime,
         BetLine $betLine,
-        Bookmaker $bookmaker
+        Bookmaker $bookmaker,
+        bool $option = null
     ) {
         $this->setDateTime($dateTime);
         $this->setBetLine($betLine);
+        $this->setOption($option);
         $this->setBookmaker($bookmaker);
     }
 
@@ -73,25 +79,26 @@ class LayBack
         $this->id = $id;
     }
 
+    public function getOption(): ?bool
+    {
+        return $this->option;
+    }
 
-    /**
-     * Get back
-     *
-     * @return bool
-     */
-    public function getBack()
+    public function setOption(bool $option = null)
+    {
+        $this->option = $option;
+    }
+
+    public function getBack(): bool
     {
         return $this->back;
     }
 
-    /**
-     * @param bool $back
-     */
-    public function setBack($back)
+    public function setBack(bool $back)
     {
         $this->back = $back;
     }
-
+    
     /**
      * Get price
      *

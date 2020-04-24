@@ -81,6 +81,7 @@ class LayBack extends BetfairHelper implements ExternalSourceLayBack
                         if( $runner->status !== "ACTIVE") {
                             continue;
                         }
+                        $homeAway = $this->getHomeAwayHelper($competitors, $runner->selectionId);
                         $externalLayBacks = [
                             LayBackBase::BACK => $runner->ex->availableToBack,
                             LayBackBase::LAY => $runner->ex->availableToLay
@@ -88,7 +89,7 @@ class LayBack extends BetfairHelper implements ExternalSourceLayBack
                         /** @var bool $layBackValue */
                         foreach( $externalLayBacks as $layBackValue => $externalLayOrBacks) {
                             foreach( $externalLayOrBacks as $externalLayOrBack ) {
-                                $competitionLayBacks[] = $this->createLayBackFromExternal( $betLine, $layBackValue, $externalLayOrBack );
+                                $competitionLayBacks[] = $this->createLayBackFromExternal( $betLine, $layBackValue, $externalLayOrBack, $homeAway );
                             }
                         }
                         // var_dump($betLine->status); // IF CLOSED => UPDATE GAME!!
@@ -98,6 +99,20 @@ class LayBack extends BetfairHelper implements ExternalSourceLayBack
             }
         }
         return $competitionLayBacks;
+    }
+
+    protected function getHomeAwayHelper( $competitors, int $selectionId ): ?bool {
+        if( $selectionId === $this->parent::THE_DRAW ) {
+            return null;
+        }
+        foreach( $competitors as $homeAway => $homeAwayCompetitors ) {
+            foreach( $homeAwayCompetitors as $homeAwayCompetitor ) {
+                if( $homeAwayCompetitor->getId() === $selectionId ) {
+                    return $homeAway;
+                }
+            }
+        }
+        throw new \Exception("the selectionid should always be found", E_ERROR );
     }
 
     /**
@@ -132,10 +147,10 @@ class LayBack extends BetfairHelper implements ExternalSourceLayBack
         return $places->first();
     }
 
-    protected function createLayBackFromExternal(BetLine $betLine, bool $layOrBack , stdClass $externalLayBack): LayBackBase
+    protected function createLayBackFromExternal(BetLine $betLine, bool $layOrBack, stdClass $externalLayBack, bool $option = null): LayBackBase
     {
         $bookMaker = $this->parent->getBookmaker($this->parent::NAME);
-        $layBackNew = new LayBackBase( new DateTimeImmutable(), $betLine, $bookMaker );
+        $layBackNew = new LayBackBase( new DateTimeImmutable(), $betLine, $bookMaker, $option );
         $layBackNew->setBack( $layOrBack );
         $layBackNew->setPrice( $externalLayBack->price );
         $layBackNew->setSize( $externalLayBack->size );

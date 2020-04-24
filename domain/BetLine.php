@@ -9,7 +9,6 @@
 namespace VOBetting;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Voetbal\Game;
 use Voetbal\Place;
 
@@ -32,7 +31,7 @@ class BetLine
      */
     protected $place;
     /**
-     * @var Collection|LayBack[]
+     * @var ArrayCollection|LayBack[]
      */
     protected $layBacks;
 
@@ -117,7 +116,7 @@ class BetLine
     }
 
     /**
-     * @return Collection|LayBack[]
+     * @return ArrayCollection|LayBack[]
      */
     public function getLayBacks()
     {
@@ -125,7 +124,7 @@ class BetLine
     }
 
     /**
-     * @param Collection|LayBack[] $layBacks
+     * @param ArrayCollection|LayBack[] $layBacks
      */
     public function setLayBacks(ArrayCollection $layBacks)
     {
