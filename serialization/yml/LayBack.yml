@@ -6,7 +6,7 @@ VOBetting\LayBack:
   properties:
     id:
       read_only: true
-    option:
+    runner:
       type: boolean
     back:
       type: boolean

@@ -32,7 +32,7 @@ class LayBack
     /**
      * @var bool|null
      */
-    protected $option;
+    protected $runner;
     /**
      * @var bool
      */
@@ -53,11 +53,11 @@ class LayBack
         DateTimeImmutable $dateTime,
         BetLine $betLine,
         Bookmaker $bookmaker,
-        bool $option = null
+        bool $runner = null
     ) {
         $this->setDateTime($dateTime);
         $this->setBetLine($betLine);
-        $this->setOption($option);
+        $this->setRunner($runner);
         $this->setBookmaker($bookmaker);
     }
 
@@ -79,14 +79,14 @@ class LayBack
         $this->id = $id;
     }
 
-    public function getOption(): ?bool
+    public function getRunner(): ?bool
     {
-        return $this->option;
+        return $this->runner;
     }
 
-    public function setOption(bool $option = null)
+    public function setRunner(bool $runner = null)
     {
-        $this->option = $option;
+        $this->runner = $runner;
     }
 
     public function getBack(): bool
