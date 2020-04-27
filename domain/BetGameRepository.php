@@ -51,6 +51,7 @@ class BetGameRepository
             ->join("c.league", "l")
             ->where('g.startDateTime >= :start' )
             ->andWhere('g.startDateTime <= :end' )
+            ->orderBy('g.startDateTime', 'ASC')
         ;
         $query = $query->setParameter('start', $betGameFilter->getStart());
         $query = $query->setParameter('end', $betGameFilter->getEnd());
