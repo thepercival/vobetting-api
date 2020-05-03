@@ -33,6 +33,8 @@ class Factory extends ExternalSourceFactory
     {
         if ($externalSource->getName() === Betfair::NAME) {
             return new Betfair($externalSource, $this->cacheItemDbRepos, $this->logger);
+        } elseif ($externalSource->getName() === Matchbook::NAME) {
+            return new Matchbook($externalSource, $this->cacheItemDbRepos, $this->logger);
         }
         return parent::create($externalSource);
     }
