@@ -61,7 +61,7 @@ class Competitor extends BetfairHelper implements ExternalSourceCompetitor
                 $competitors = $this->apiHelper->getCompetitors( $association, $market->runners );
                 foreach( $competitors as $homeAway => $homeAwayCompetitors ) {
                     foreach( $homeAwayCompetitors as $homeAwayCompetitor ) {
-                        if( in_array($homeAwayCompetitor, $competitionCompetitors) ) {
+                        if( in_array($homeAwayCompetitor, $competitionCompetitors, true ) ) {
                             continue;
                         }
                         $competitionCompetitors[] = $homeAwayCompetitor;

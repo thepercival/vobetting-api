@@ -119,7 +119,7 @@ class Import extends Command
             $this->importGames(SofaScore::NAME);
         }
         if ($input->getOption("laybacks")) {
-            $this->importLaybacks([Betfair::NAME]);
+            $this->importLayBacks([Betfair::NAME]);
         }
         return 0;
     }
@@ -242,7 +242,7 @@ class Import extends Command
             $competitorAttacherRepos = $this->container->get(CompetitorAttacherRepository::class);
             $competitionAttacherRepos = $this->container->get(CompetitionAttacherRepository::class);
 
-            $this->importService->importLaybacks(
+            $this->importService->importLayBacks(
                 $externalSourcImpl,
                 $gameRepos,
                 $layBackRepos,

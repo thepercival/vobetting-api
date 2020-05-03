@@ -17,7 +17,7 @@ class BookmakerTest extends \PHPUnit\Framework\TestCase
         $name = "MyBookie";
         $bookmaker = new Bookmaker($name, false);
 
-        $this->assertSame($bookmaker->getName(), $name);
-        $this->assertSame($bookmaker->getExchange(), false);
+        self::assertSame($bookmaker->getName(), $name);
+        self::assertSame($bookmaker->getExchange(), false);
     }
 }

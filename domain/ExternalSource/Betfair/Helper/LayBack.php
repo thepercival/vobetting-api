@@ -138,8 +138,8 @@ class LayBack extends BetfairHelper implements ExternalSourceLayBack
 
     protected function getPlaceFromPoule(Poule $poule, Competitor $competitor): ?Place
     {
-        $places = $poule->getPlaces()->filter(function (Place $place) use ($competitor) {
-            return $place->getCompetitor() && $place->getCompetitor()->getId() === $competitor->getId();
+        $places = $poule->getPlaces()->filter(function (Place $place) use ($competitor): bool {
+            return $place->getCompetitor() !== null && $place->getCompetitor()->getId() === $competitor->getId();
         });
         if ($places->count() !== 1) {
             return null;

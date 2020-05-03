@@ -68,11 +68,12 @@ class LayBack implements ImporterInterface
 
     /**
      * @param ExternalSource $externalSource
-     * @param array|LayBackBase[] $externalSourceLayBacks
+     * @param array $externalSourceLayBacks
      * @throws \Exception
      */
     public function import(ExternalSource $externalSource, array $externalSourceLayBacks)
     {
+        /** @var LayBackBase $externalSourceLayBack */
         foreach ($externalSourceLayBacks as $externalSourceLayBack) {
             $layBack = $this->createLayBack($externalSource, $externalSourceLayBack);
             if ($layBack === null) {

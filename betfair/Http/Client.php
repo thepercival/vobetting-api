@@ -25,7 +25,7 @@ class Client
      */
     public function __construct($httpClient = null)
     {
-        $this->guzzleClient = $httpClient ?: new GuzzleClient;
+        $this->guzzleClient = $httpClient !== null ? $httpClient : new GuzzleClient;
         $this->options[ 'headers' ] = [ 'Accept' => 'application/json' ];
     }
 
@@ -89,18 +89,10 @@ class Client
         return $this;
     }
 
-    /**
-     * Setter for params.
-     *
-     * @param array $params
-     * @return Client
-     */
-    public function setParams($params)
+    public function setParams(array $params): Client
     {
-        if (!empty($params)) {
-            foreach ($params as $key => $value) {
-                $this->options[ 'json' ][ $key ] = $value;
-            }
+        foreach ($params as $key => $value) {
+            $this->options[ 'json' ][ $key ] = $value;
         }
         return $this;
     }

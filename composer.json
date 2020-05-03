@@ -15,7 +15,7 @@
   ],
   "require": {
     "thepercival/voetbal": "dev-master",
-    "php": "^7.3",
+    "php": "^7.4",
     "vlucas/phpdotenv": "^4.1",
     "slim/slim": "^4.3",
     "slim/php-view": "^2.2",
@@ -39,7 +39,9 @@
     "phpstan/phpstan": "^0.12",
     "phpstan/phpstan-doctrine": "^0.12",
     "phpstan/extension-installer": "^1.0",
-    "friendsofphp/php-cs-fixer": "^2.16"
+    "friendsofphp/php-cs-fixer": "^2.16",
+    "phpstan/phpstan-strict-rules": "^0.12.2",
+    "phpstan/phpstan-phpunit": "^0.12.8"
   },
   "autoload": {
     "psr-4": {

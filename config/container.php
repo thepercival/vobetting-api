@@ -30,10 +30,10 @@ use Slim\Factory\AppFactory;
 
 return [
     // Application settings
-    Configuration::class => function () {
+    Configuration::class => function (): Configuration {
         return new Configuration(require __DIR__ . '/settings.php');
     },
-    App::class => function (ContainerInterface $container) {
+    App::class => function (ContainerInterface $container): App {
         AppFactory::setContainer($container);
         $app = AppFactory::create();
         $config = $container->get(Configuration::class);
@@ -45,7 +45,7 @@ return [
         }
         return $app;
     },
-    LoggerInterface::class => function (ContainerInterface $container) {
+    LoggerInterface::class => function (ContainerInterface $container): LoggerInterface {
         $config = $container->get(Configuration::class);
 
         $loggerSettings = $config->getArray('logger');
@@ -64,7 +64,7 @@ return [
 
         return $logger;
     },
-    EntityManager::class => function (ContainerInterface $container) {
+    EntityManager::class => function (ContainerInterface $container): EntityManager {
         $config = $container->get(Configuration::class)->getArray('doctrine');
         $doctrineBaseConfig = $container->get(Configuration::class)->getArray('doctrine');
         // $settings = $container->get('settings')['doctrine'];
@@ -80,7 +80,7 @@ return [
         // $em->getConnection()->setAutoCommit(false);
         return $em;
     },
-    SerializerInterface::class => function (ContainerInterface $container) {
+    SerializerInterface::class => function (ContainerInterface $container): SerializerInterface {
         $config = $container->get(Configuration::class);
         $env = $config->getString("environment");
         $serializerBuilder = SerializerBuilder::create()->setDebug($env === "development");
@@ -93,12 +93,12 @@ return [
             )
         );
         $serializerBuilder->setSerializationContextFactory(
-            function () {
+            function (): SerializationContext {
                 return SerializationContext::create()->setGroups(['Default']);
             }
         );
         $serializerBuilder->setDeserializationContextFactory(
-            function () {
+            function (): DeserializationContext {
                 return DeserializationContext::create()->setGroups(['Default']);
             }
         );
@@ -106,7 +106,7 @@ return [
             $serializerBuilder->addMetadataDir($ymldir, $ymlnamespace);
         }
         $serializerBuilder->configureHandlers(
-            function (JMS\Serializer\Handler\HandlerRegistry $registry) {
+            function (JMS\Serializer\Handler\HandlerRegistry $registry): void {
                 $registry->registerSubscribingHandler(new StructureSerializationHandler());
                 $registry->registerSubscribingHandler(new RoundNumberSerializationHandler());
                 $registry->registerSubscribingHandler(new RoundSerializationHandler());
@@ -126,7 +126,7 @@ return [
 
         return $serializerBuilder->build();
     },
-    Mailer::class => function (ContainerInterface $container) {
+    Mailer::class => function (ContainerInterface $container): Mailer {
         $config = $container->get(Configuration::class);
         return new Mailer(
             $container->get(LoggerInterface::class),
@@ -135,7 +135,7 @@ return [
             $config->getString('email.admin'),
         );
     },
-    ExternalSourceFactory::class => function (ContainerInterface $container) {
+    ExternalSourceFactory::class => function (ContainerInterface $container): ExternalSourceFactory {
         return new ExternalSourceFactory(
             $container->get(ExternalSourceRepository::class),
             $container->get(CacheItemDbRepository::class),

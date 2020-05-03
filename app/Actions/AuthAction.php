@@ -10,7 +10,7 @@ namespace App\Actions;
 
 use App\Exceptions\DomainRecordNotFoundException;
 use App\Response\ErrorResponse;
-use App\Response\ForbiddenResponse as ForbiddenResponse;
+use Psr\Log\LoggerInterface;
 use DateTimeImmutable;
 use JMS\Serializer\SerializerInterface;
 use \Firebase\JWT\JWT;
@@ -26,16 +26,9 @@ final class AuthAction extends Action
      * @var Configuration
      */
     protected $config;
-    /**
-     * @var SerializerInterface
-     */
-    protected $serializer;
 
-    public function __construct(
-        SerializerInterface $serializer,
-        Configuration $config
-    ) {
-        $this->serializer = $serializer;
+    public function __construct(LoggerInterface $logger, SerializerInterface $serializer,Configuration $config) {
+        parent::__construct($logger, $serializer);
         $this->config = $config;
     }
 
@@ -76,8 +69,8 @@ final class AuthAction extends Action
         $future = new DateTimeImmutable("now +3 months");
 
         $payload = [
-            "iat" => $now->getTimeStamp(),
-            "exp" => $future->getTimeStamp(),
+            "iat" => $now->getTimestamp(),
+            "exp" => $future->getTimestamp(),
             "jti" => $jti
         ];
         return JWT::encode($payload, $this->config->getString("auth.password"));

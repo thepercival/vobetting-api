@@ -20,7 +20,8 @@ class Token
 
     public function hasScope(array $scope)
     {
-        return !!count(array_intersect($scope, $this->decoded["scope"]));
+        $arr = array_intersect($scope, $this->decoded["scope"]);
+        return count($arr) > 0;
     }
 
     public function isPopulated()

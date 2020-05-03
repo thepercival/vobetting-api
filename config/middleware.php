@@ -53,10 +53,10 @@ return function (App $app) {
                         ]
                     )
                 ],
-                "error" => function (Response $response, $arguments) {
+                "error" => function (Response $response, $arguments): UnauthorizedResponse {
                     return new UnauthorizedResponse($arguments["message"]);
                 },
-                "before" => function (Request $request, $arguments) {
+                "before" => function (Request $request, $arguments): Request {
                     $token = new AuthToken($arguments["decoded"]);
                     return $request->withAttribute("token", $token);
                 }
@@ -79,7 +79,7 @@ return function (App $app) {
     // Set the Not Found Handler
     $errorMiddleware->setErrorHandler(
         HttpNotFoundException::class,
-        function (Request $request, Throwable $exception, bool $displayErrorDetails) {
+        function (Request $request, Throwable $exception, bool $displayErrorDetails): ErrorResponse {
             return new ErrorResponse($exception->getMessage(), 404);
         }
     );
@@ -87,7 +87,7 @@ return function (App $app) {
     // Set the Not Allowed Handler
     $errorMiddleware->setErrorHandler(
         HttpMethodNotAllowedException::class,
-        function (Request $request, Throwable $exception, bool $displayErrorDetails) {
+        function (Request $request, Throwable $exception, bool $displayErrorDetails): ErrorResponse {
             return new ErrorResponse($exception->getMessage(), 405);
         }
     );

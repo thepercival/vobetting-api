@@ -15,12 +15,10 @@ class Betting extends BaseApi
 
     /**
      * Prepare parameters for API requests, ensuring the mandatory requirments are satisfied
-     *
-     * @param array $params
      */
-    public function prepare($params)
+    public function prepare(array $params)
     {
-        $this->params = !empty($params) ? $params[ 0 ] : [ ];
+        $this->params = count($params) > 0 ? $params[ 0 ] : [ ];
 
         // force mandatory fields
         $this->filter();
@@ -42,7 +40,7 @@ class Betting extends BaseApi
             'listMarketCatalogue'
         ];
 
-        if (in_array($this->method, $lists) && empty($this->params[ 'filter' ])) {
+        if (in_array($this->method, $lists, true) && array_key_exists('filter', $this->params)) {
             $this->params[ 'filter' ] = new \stdClass;
         }
     }
@@ -52,7 +50,7 @@ class Betting extends BaseApi
      */
     protected function maxRecords()
     {
-        if ($this->method == 'listMarketCatalogue' && empty($this->params[ 'maxResults' ])) {
+        if ($this->method == 'listMarketCatalogue' && array_key_exists('maxResults', $this->params) ) {
             $this->params[ 'maxResults' ] = 1000;
         }
     }

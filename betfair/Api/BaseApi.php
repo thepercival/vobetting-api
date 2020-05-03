@@ -34,7 +34,7 @@ abstract class BaseApi
      */
     public function __construct(string $endpoint, HttpClient $httpClient = null)
     {
-        $this->httpClient = $httpClient ?: new HttpClient;
+        $this->httpClient = $httpClient !== null  ? $httpClient : new HttpClient;
         $this->endpoint = $endpoint;
     }
 
@@ -61,11 +61,9 @@ abstract class BaseApi
     /**
      * Prepare parameters for ingestion by API requests.
      * Minimum activity is to remove a layer of array.
-     *
-     * @param  array $params
      */
-    protected function prepare($params)
+    protected function prepare(array $params)
     {
-        $this->params = !empty($params) ? $params[ 0 ] : null;
+        $this->params = count($params) > 0 ? $params[ 0 ] : null;
     }
 }

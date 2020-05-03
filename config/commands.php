@@ -7,7 +7,7 @@ use Psr\Container\ContainerInterface;
 use App\Commands\Import as ImportCommand;
 
 return [
-    "app:import" => function (ContainerInterface $container) {
+    "app:import" => function (ContainerInterface $container): ImportCommand {
         return new ImportCommand($container);
     }
 ];
