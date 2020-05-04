@@ -63,20 +63,25 @@ class Sport extends MatchbookHelper implements ExternalSourceSport
      */
     protected function getSportData(): array
     {
-        return $this->apiHelper->getSports();
+        return $this->apiHelper->getEventsBySport();
     }
 
     /**
      *
      *
-     * @param array|stdClass[] $externalSports
+     * @param array|stdClass[] $externalEvents
      */
-    protected function setSports(array $externalSports)
+    protected function setSports(array $externalEvents)
     {
         $this->sports = [];
 
-        /** @var stdClass $externalSport */
-        foreach ($externalSports as $externalSport) {
+        /** @var stdClass $externalEvent */
+        foreach ($externalEvents as $externalEvent) {
+            $externalSport = $this->apiHelper->getSportData( $externalEvent->{"meta-tags"} );
+            if( $externalSport === null ) {
+                continue;
+            }
+
             $name = $externalSport->name;
             if ($this->hasName($this->sports, $name)) {
                 continue;

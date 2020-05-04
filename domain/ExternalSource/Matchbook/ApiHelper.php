@@ -16,6 +16,7 @@ use stdClass;
 use VOBetting\BetLine;
 use VOBetting\ExternalSource\Matchbook;
 use Voetbal\Association;
+use Voetbal\Association as AssociationBase;
 use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
 use Voetbal\Competitor;
 use Voetbal\Game;
@@ -92,49 +93,38 @@ class ApiHelper
     /**
      * @return array|stdClass[]
      */
-    public function getSports(): array
+    public function getEventsBySport(): array
     {
         $retVal = $this->getData( "edge/rest/events?sport-ids=15", 60 * 24 );
-
         // events data gebruiker voor sports, associations(COUNRTY meta-tag), competitions(COMPETITION meta-tag), competitors
         // voor laybacks een andere gebruiken!!
-        $sportsData = [];
-        foreach( $retVal->events as $event ) {
-            foreach( $event->{"meta-tags"} as $metaTag ) {
-                if( $metaTag->type !== "SPORT") {
-                    continue;
-                }
-                $sportsData[] = $metaTag;
-            }
-        }
-        return $sportsData;
-    }
-
-    /**
-     * @return array|stdClass[]
-     */
-    public function getAssociations(): array
-    {
-
-        $retVal = $this->getData( "edge/rest/events?sport-ids=15", 60 * 24 );
-
-        // events data gebruiker voor sports, associations(COUNRTY meta-tag), competitions(COMPETITION meta-tag), competitors
-        // voor laybacks een andere gebruiken!!
-        $associationData = [];
-        foreach( $retVal->events as $event ) {
-            foreach( $event->{"meta-tags"} as $metaTag ) {
-                if( $metaTag->type !== "COUNTRY") {
-                    continue;
-                }
-                $associationData[] = $metaTag;
-            }
-        }
-        return $associationData;
+        return $retVal->events;
     }
 
     public function getDateFormat()
     {
         return 'Y-m-d\TH:i:s.v\Z';
+    }
+
+    public function getSportData(array $dataMetaTags ): ?stdClass    {
+        return $this->getObjectData($dataMetaTags, "SPORT" );
+    }
+
+    public function getAssociationData(array $dataMetaTags ): ?stdClass    {
+        return $this->getObjectData($dataMetaTags, "COUNTRY" );
+    }
+
+    public function getLeagueData(array $dataMetaTags ): ?stdClass    {
+        return $this->getObjectData($dataMetaTags, "COMPETITION" );
+    }
+
+    protected function getObjectData(array $dataMetaTags, string $objectType ): ?stdClass    {
+        foreach( $dataMetaTags as $metaTag ) {
+            if( $metaTag->type === $objectType) {
+                return $metaTag;
+            }
+        }
+        return null;
     }
 
     public function convertBetType(int $betType): string

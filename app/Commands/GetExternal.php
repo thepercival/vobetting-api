@@ -2,6 +2,7 @@
 
 namespace App\Commands;
 
+use DateTimeInterface;
 use LucidFrame\Console\ConsoleTable;
 use Psr\Container\ContainerInterface;
 use App\Command;
@@ -103,20 +104,14 @@ class GetExternal extends Command
             $this->getSports($externalSourcImpl);
         } elseif ( $objectType === "associations" ) {
             $this->getAssociations($externalSourcImpl);
+        } elseif ( $objectType === "seasons" ) {
+            $this->getSeasons($externalSourcImpl);
+        } elseif ( $objectType === "leagues" ) {
+            $this->getLeagues($externalSourcImpl);
+        } elseif ( $objectType === "competitions" ) {
+            $this->getCompetitions($externalSourcImpl);
         }
 
-//        if ($input->getOption("associations")) {
-//            $this->importAssociations(Betfair::NAME);
-//        }
-////        if ($input->getOption("seasons")) { // input manual
-////            $this->importSeasons();
-////        }
-//        if ($input->getOption("leagues")) {
-//            $this->importLeagues(SofaScore::NAME);
-//        }
-//        if ($input->getOption("competitions")) {
-//            $this->importCompetitions(SofaScore::NAME);
-//        }
 //        if ($input->getOption("competitors")) {
 //            $this->importCompetitors(SofaScore::NAME);
 //        }
@@ -167,48 +162,66 @@ class GetExternal extends Command
         $table->display();
     }
 
-//    protected function importAssociations(string $externalSourceName)
-//    {
-//        $externalSourcImpl = $this->externalSourceFactory->createByName($externalSourceName);
-//        $associationRepos = $this->container->get(AssociationRepository::class);
-//        $associationAttacherRepos = $this->container->get(AssociationAttacherRepository::class);
-//        $this->importService->importAssociations($externalSourcImpl, $associationRepos, $associationAttacherRepos);
-//    }
-//
-//    protected function importSeasons(string $externalSourceName)
-//    {
-//        $externalSourcImpl = $this->externalSourceFactory->createByName($externalSourceName);
-//        $seasonRepos = $this->container->get(SeasonRepository::class);
-//        $seasonAttacherRepos = $this->container->get(SeasonAttacherRepository::class);
-//        $this->importService->importSeasons($externalSourcImpl, $seasonRepos, $seasonAttacherRepos);
-//    }
-//
-//    protected function importLeagues(string $externalSourceName)
-//    {
-//        $externalSourcImpl = $this->externalSourceFactory->createByName($externalSourceName);
-//        $leagueRepos = $this->container->get(LeagueRepository::class);
-//        $leagueAttacherRepos = $this->container->get(LeagueAttacherRepository::class);
-//        $associationAttacherRepos = $this->container->get(AssociationAttacherRepository::class);
-//        $this->importService->importLeagues($externalSourcImpl, $leagueRepos, $leagueAttacherRepos, $associationAttacherRepos);
-//    }
-//
-//    protected function importCompetitions(string $externalSourceName)
-//    {
-//        $externalSourcImpl = $this->externalSourceFactory->createByName($externalSourceName);
-//        $competitionRepos = $this->container->get(CompetitionRepository::class);
-//        $competitionAttacherRepos = $this->container->get(CompetitionAttacherRepository::class);
-//        $leagueAttacherRepos = $this->container->get(LeagueAttacherRepository::class);
-//        $seasonAttacherRepos = $this->container->get(SeasonAttacherRepository::class);
-//        $sportAttacherRepos = $this->container->get(SportAttacherRepository::class);
-//        $this->importService->importCompetitions(
-//            $externalSourcImpl,
-//            $competitionRepos,
-//            $competitionAttacherRepos,
-//            $leagueAttacherRepos,
-//            $seasonAttacherRepos,
-//            $sportAttacherRepos
-//        );
-//    }
+    protected function getSeasons(ExternalSource\Implementation $externalSourcImpl)
+    {
+        if( !($externalSourcImpl instanceof ExternalSource\Season ) ) {
+            echo "de externe bron \"" . $externalSourcImpl->getExternalSource()->getName() . "\" kan geen seizoenen opvragen" . PHP_EOL;
+            return;
+        }
+        $table = new ConsoleTable();
+        $table->setHeaders(array('Id', 'Name', 'Start', 'End'));
+        foreach( $externalSourcImpl->getSeasons() as $season ) {
+            $row = array(
+                $season->getId(),
+                $season->getName(),
+                $season->getStartDateTime()->format( DateTimeInterface::ATOM ),
+                $season->getEndDateTime()->format( DateTimeInterface::ATOM )
+                );
+            $table->addRow( $row );
+        }
+        $table->display();
+    }
+
+    protected function getLeagues(ExternalSource\Implementation $externalSourcImpl)
+    {
+        if( !($externalSourcImpl instanceof ExternalSource\League ) ) {
+            echo "de externe bron \"" . $externalSourcImpl->getExternalSource()->getName() . "\" kan geen competities opvragen" . PHP_EOL;
+            return;
+        }
+        $table = new ConsoleTable();
+        $table->setHeaders(array('Id', 'Name', 'Association'));
+        foreach( $externalSourcImpl->getLeagues() as $league ) {
+            $row = array(
+                $league->getId(),
+                $league->getName(),
+                $league->getAssociation()->getName()
+            );
+            $table->addRow( $row );
+        }
+        $table->display();
+    }
+
+    protected function getCompetitions(ExternalSource\Implementation $externalSourcImpl)
+    {
+        if( !($externalSourcImpl instanceof ExternalSource\Competition ) ) {
+            echo "de externe bron \"" . $externalSourcImpl->getExternalSource()->getName() . "\" kan geen competitieseizoenen opvragen" . PHP_EOL;
+            return;
+        }
+        $table = new ConsoleTable();
+        $table->setHeaders(array('Id', 'League', 'Season', 'StartDateTime', 'Association'));
+        foreach( $externalSourcImpl->getCompetitions() as $competition ) {
+            $row = array(
+                $competition->getId(),
+                $competition->getLeague()->getName(),
+                $competition->getSeason()->getName(),
+                $competition->getStartDateTime()->format( DateTimeInterface::ATOM ),
+                $competition->getLeague()->getAssociation()->getName()
+            );
+            $table->addRow( $row );
+        }
+        $table->display();
+    }
+
 //
 //    protected function importCompetitors(string $externalSourceName)
 //    {

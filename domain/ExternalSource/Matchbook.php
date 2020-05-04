@@ -71,7 +71,7 @@ class Matchbook implements
 
     public const THE_DRAW = 58805;
     public const NAME = "matchbook";
-    public const DEFAULTSPORTID = "AllSports";
+    public const DEFAULTSPORTID = "soocer";
     public const DEFAULTSEASONID = "20002100";
 
     public function __construct(

@@ -13,6 +13,8 @@ use VOBetting\ExternalSource\Matchbook;
 use VOBetting\ExternalSource\Matchbook\Helper as MatchbookHelper;
 use VOBetting\ExternalSource\Matchbook\ApiHelper as MatchbookApiHelper;
 use Voetbal\Competition as CompetitionBase;
+use Voetbal\League;
+use Voetbal\Season;
 use Voetbal\ExternalSource;
 use Psr\Log\LoggerInterface;
 use Voetbal\Sport\Config\Service as SportConfigService;
@@ -68,29 +70,45 @@ class Competition extends MatchbookHelper implements ExternalSourceCompetition
      */
     protected function getCompetitionData(): array
     {
-        return $this->apiHelper->listLeagues([]);
+        return $this->apiHelper->getEventsBySport();
     }
 
     /**
      *
      *
-     * @param array|stdClass[] $externalCompetitions
+     * @param array|stdClass[] $externalEvents
      */
-    protected function setCompetitions(array $externalCompetitions)
+    protected function setCompetitions(array $externalEvents)
     {
         $this->competitions = [];
-        $sport = $this->parent->getSport($this->parent::DEFAULTSPORTID);
+        
+        /** @var stdClass $externalEvent */
+        foreach ($externalEvents as $externalEvent) {
+            $externalSport = $this->apiHelper->getSportData( $externalEvent->{"meta-tags"} );
+            if( $externalSport === null ) {
+                continue;
+            }
+            $sport = $this->parent->getSport( $externalSport->{"url-name"} );
+            if( $sport === null ) {
+                continue;
+            }
+            $externalLeague = $this->apiHelper->getLeagueData( $externalEvent->{"meta-tags"} );
+            if( $externalLeague === null ) {
+                continue;
+            }
+            $league = $this->parent->getLeague( $externalLeague->{"url-name"} );
+            if( $league === null ) {
+                continue;
+            }
+            $season = $this->parent->getSeason($this->parent::DEFAULTSEASONID);
+            if ($season === null) {
+                continue;
+            }
 
-        /** @var stdClass $externalCompetition */
-        foreach ($externalCompetitions as $externalCompetition) {
-            if (!property_exists($externalCompetition, "competition")) {
+            if ($this->hasName($this->competitions, $league->getName())) {
                 continue;
             }
-            $name = $externalCompetition->competition->name;
-            if ($this->hasName($this->competitions, $name)) {
-                continue;
-            }
-            $competition = $this->createCompetition($sport, $externalCompetition) ;
+            $competition = $this->createCompetition($sport, $league, $season) ;
             if ($competition === null) {
                 continue;
             }
@@ -98,20 +116,8 @@ class Competition extends MatchbookHelper implements ExternalSourceCompetition
         }
     }
 
-    protected function createCompetition(Sport $sport, stdClass $externalSourceCompetition): ?CompetitionBase
+    protected function createCompetition(Sport $sport, League $league, Season $season): ?CompetitionBase
     {
-        if (!property_exists($externalSourceCompetition, "competition")) {
-            return null;
-        }
-        $league = $this->parent->getLeague($externalSourceCompetition->competition->id);
-        if ($league === null) {
-            return null;
-        }
-        $season = $this->parent->getSeason($this->parent::DEFAULTSEASONID);
-        if ($season === null) {
-            return null;
-        }
-
         $newCompetition = new CompetitionBase($league, $season);
         $newCompetition->setStartDateTime($season->getStartDateTime());
         $id = $league->getId() . "-" . $season->getId();

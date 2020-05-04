@@ -10,9 +10,9 @@ namespace VOBetting\ExternalSource\Matchbook\Helper;
 
 use VOBetting\ExternalSource\Matchbook\Helper as MatchbookHelper;
 use VOBetting\ExternalSource\Matchbook\ApiHelper as MatchbookApiHelper;
-use Voetbal\Association as AssociationBase;
 use Voetbal\ExternalSource\League as ExternalSourceLeague;
 use Voetbal\League as LeagueBase;
+use Voetbal\Association;
 use VOBetting\ExternalSource\Matchbook;
 use Psr\Log\LoggerInterface;
 use stdClass;
@@ -68,37 +68,47 @@ class League extends MatchbookHelper implements ExternalSourceLeague
      */
     protected function getLeagueData(): array
     {
-        return $this->apiHelper->listLeagues([]);
+        return $this->apiHelper->getEventsBySport();
     }
 
     /**
      *
      *
-     * @param array|stdClass[] $externalLeagues
+     * @param array|stdClass[] $externalEvents
      */
-    protected function setLeagues(array $externalLeagues)
+    protected function setLeagues(array $externalEvents)
     {
         $this->leagues = [];
 
-        /** @var stdClass $externalLeague */
-        foreach ($externalLeagues as $externalLeague) {
-            if (!property_exists($externalLeague, "competition")) {
+        /** @var stdClass $externalEvent */
+        foreach ($externalEvents as $externalEvent) {
+            $externalAssociation = $this->apiHelper->getAssociationData( $externalEvent->{"meta-tags"} );
+            if( $externalAssociation === null ) {
                 continue;
             }
-            $name = $externalLeague->competition->name;
+            $association = $this->parent->getAssociation( $externalAssociation->{"url-name"} );
+            if( $association === null ) {
+                continue;
+            }
+
+            $externalLeague = $this->apiHelper->getLeagueData( $externalEvent->{"meta-tags"} );
+            if( $externalLeague === null ) {
+                continue;
+            }
+
+            $name = $externalLeague->name;
             if ($this->hasName($this->leagues, $name)) {
                 continue;
             }
-            $league = $this->createLeague($externalLeague) ;
+            $league = $this->createLeague($externalLeague, $association) ;
             $this->leagues[$league->getId()] = $league;
         }
     }
 
-    protected function createLeague(stdClass $externalLeague): LeagueBase
+    protected function createLeague(stdClass $externalLeague, Association $association): LeagueBase
     {
-        $association = $this->parent->getAssociation($externalLeague->competitionRegion);
-        $league = new LeagueBase($association, $externalLeague->competition->name);
-        $league->setId($externalLeague->competition->id);
+        $league = new LeagueBase($association, $externalLeague->name);
+        $league->setId($externalLeague->{"url-name"});
         return $league;
     }
 }

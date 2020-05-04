@@ -69,21 +69,26 @@ class Association extends MatchbookHelper implements ExternalSourceAssociation
      */
     protected function getAssociationData(): array
     {
-        return $this->apiHelper->getAssociations();
+        return $this->apiHelper->getEventsBySport();
     }
 
     /**
      *
      *
-     * @param array|stdClass[] $externalAssociations
+     * @param array|stdClass[] $externalEvents
      */
-    protected function setAssociations(array $externalAssociations)
+    protected function setAssociations(array $externalEvents)
     {
         $defaultAssociation = $this->getDefaultAssociation();
         $this->associations = [ $defaultAssociation->getId() => $defaultAssociation ];
 
-        /** @var stdClass $externalAssociation */
-        foreach ($externalAssociations as $externalAssociation) {
+        /** @var stdClass $externalEvent */
+        foreach ($externalEvents as $externalEvent) {
+
+            $externalAssociation = $this->apiHelper->getAssociationData( $externalEvent->{"meta-tags"} );
+            if( $externalAssociation === null ) {
+                continue;
+            }
             $name = $externalAssociation->name;
             if ($this->hasName($this->associations, $name)) {
                 continue;
