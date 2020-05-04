@@ -11,6 +11,7 @@ namespace VOBetting\ExternalSource\Betfair;
 use VOBetting\ExternalSource\Betfair;
 use Psr\Log\LoggerInterface;
 use Voetbal\Competition;
+use Voetbal\Competitor;
 use Voetbal\Poule;
 use Voetbal\Range as VoetbalRange;
 use Voetbal\Structure as StructureBase;
