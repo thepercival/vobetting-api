@@ -53,8 +53,12 @@ class Helper
         return false;
     }
 
-    protected function createDummyPoule( Competition $competition ): Poule {
-        $competitors = $this->parent->getCompetitors( $competition );
+    /**
+     * @param Competition $competition
+     * @param array|Competitor[] $competitors
+     * @return Poule
+     */
+    protected function createDummyPoule( Competition $competition, array $competitors ): Poule {
         $structureOptions = new StructureOptions(
             new VoetbalRange(1, 32),
             new VoetbalRange(2, 256),

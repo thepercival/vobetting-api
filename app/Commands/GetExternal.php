@@ -2,7 +2,9 @@
 
 namespace App\Commands;
 
+use Voetbal\NameService;
 use DateTimeInterface;
+use Doctrine\Common\Collections\Collection;
 use LucidFrame\Console\ConsoleTable;
 use Psr\Container\ContainerInterface;
 use App\Command;
@@ -13,33 +15,12 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use VOBetting\Attacher\Bookmaker\Repository as BookmakerAttacherRepository;
-use VOBetting\BetLine\Repository as BetLineRepository;
-use VOBetting\LayBack\Repository as LayBackRepository;
-use Voetbal\Attacher\Game\Repository as GameAttacherRepository;
-use Voetbal\Attacher\Place\Repository as PlaceAttacherRepository;
-use Voetbal\Attacher\Poule\Repository as PouleAttacherRepository;
-use Voetbal\Attacher\Sport\Repository as SportAttacherRepository;
-use Voetbal\Attacher\Association\Repository as AssociationAttacherRepository;
-use Voetbal\Attacher\League\Repository as LeagueAttacherRepository;
-use Voetbal\Attacher\Season\Repository as SeasonAttacherRepository;
-use Voetbal\Attacher\Competition\Repository as CompetitionAttacherRepository;
-use Voetbal\Attacher\Competitor\Repository as CompetitorAttacherRepository;
-
 use VOBetting\ExternalSource\Factory as ExternalSourceFactory;
+use VOBetting\ExternalSource\Bookmaker as ExternalSourceBookmaker;
+use VOBetting\ExternalSource\LayBack as ExternalSourceLayBack;
 use Voetbal\ExternalSource;
-use Voetbal\ExternalSource\SofaScore;
-use VOBetting\ExternalSource\Betfair;
-use Voetbal\Game\Repository as GameRepository;
-use Voetbal\Game\Score\Repository as GameScoreRepository;
+use Voetbal\Competition;
 use VOBetting\Import\Service as ImportService;
-use Voetbal\Sport\Repository as SportRepository;
-use Voetbal\Association\Repository as AssociationRepository;
-use Voetbal\League\Repository as LeagueRepository;
-use Voetbal\Season\Repository as SeasonRepository;
-use Voetbal\Competition\Repository as CompetitionRepository;
-use Voetbal\Competitor\Repository as CompetitorRepository;
-use Voetbal\Structure\Repository as StructureRepository;
 
 class GetExternal extends Command
 {
@@ -110,11 +91,16 @@ class GetExternal extends Command
             $this->getLeagues($externalSourcImpl);
         } elseif ( $objectType === "competitions" ) {
             $this->getCompetitions($externalSourcImpl);
+        } elseif ( $objectType === "competitors" ) {
+            $this->getCompetitors($externalSourcImpl);
+        } elseif ( $objectType === "bookmakers" ) {
+            $this->getBookmakers($externalSourcImpl);
+        } elseif ( $objectType === "laybacks" ) {
+            $this->getLayBacks($externalSourcImpl);
+        } else {
+            echo "objectType \"" . $objectType . "\" kan niet worden opgehaald uit externe bronnen" . PHP_EOL;
         }
 
-//        if ($input->getOption("competitors")) {
-//            $this->importCompetitors(SofaScore::NAME);
-//        }
 //        if ($input->getOption("structures")) {
 //            $this->importStructures(SofaScore::NAME);
 //        }
@@ -135,8 +121,8 @@ class GetExternal extends Command
         }
         $table = new ConsoleTable();
         $table->setHeaders(array('Id', 'Name'));
-        foreach( $externalSourcImpl->getSports() as $association ) {
-            $row = array( $association->getId(), $association->getName() );
+        foreach( $externalSourcImpl->getSports() as $sport ) {
+            $row = array( $sport->getId(), $sport->getName() );
             $table->addRow( $row );
         }
         $table->display();
@@ -222,22 +208,90 @@ class GetExternal extends Command
         $table->display();
     }
 
-//
-//    protected function importCompetitors(string $externalSourceName)
-//    {
-//        $externalSourcImpl = $this->externalSourceFactory->createByName($externalSourceName);
-//        $competitorRepos = $this->container->get(CompetitorRepository::class);
-//        $competitorAttacherRepos = $this->container->get(CompetitorAttacherRepository::class);
-//        $associationAttacherRepos = $this->container->get(AssociationAttacherRepository::class);
-//        $competitionAttacherRepos = $this->container->get(CompetitionAttacherRepository::class);
-//        $this->importService->importCompetitors(
-//            $externalSourcImpl,
-//            $competitorRepos,
-//            $competitorAttacherRepos,
-//            $associationAttacherRepos,
-//            $competitionAttacherRepos
-//        );
-//    }
+    protected function getCompetitors(ExternalSource\Implementation $externalSourcImpl)
+    {
+        if( !($externalSourcImpl instanceof ExternalSource\Competition ) ) {
+            echo "de externe bron \"" . $externalSourcImpl->getExternalSource()->getName() . "\" kan geen competitieseizoenen opvragen" . PHP_EOL;
+            return;
+        }
+        if( !($externalSourcImpl instanceof ExternalSource\Competitor ) ) {
+            echo "de externe bron \"" . $externalSourcImpl->getExternalSource()->getName() . "\" kan geen deelnemers opvragen" . PHP_EOL;
+            return;
+        }
+        $getCompetitionCompetitors = function(Competition $competition) use ($externalSourcImpl): void {
+            $table = new ConsoleTable();
+            $table->setHeaders(array('Id', 'Name', 'Abbreviation', 'Competition'));
+            foreach( $externalSourcImpl->getCompetitors($competition) as $competitor ) {
+                $row = array(
+                    $competitor->getId(),
+                    $competitor->getName(),
+                    $competitor->getAbbreviation(),
+                    $competition->getName()
+                );
+                $table->addRow( $row );
+            }
+            $table->display();
+        };
+        foreach( $externalSourcImpl->getCompetitions() as $competition ) {
+            $getCompetitionCompetitors($competition);
+        }
+    }
+
+    protected function getBookmakers(ExternalSource\Implementation $externalSourcImpl)
+    {
+        if( !($externalSourcImpl instanceof ExternalSourceBookmaker ) ) {
+            echo "de externe bron \"" . $externalSourcImpl->getExternalSource()->getName() . "\" kan geen bookmakers opvragen" . PHP_EOL;
+            return;
+        }
+        $table = new ConsoleTable();
+        $table->setHeaders(array('Id', 'Name'));
+        foreach( $externalSourcImpl->getBookmakers() as $bookmaker ) {
+            $row = array( $bookmaker->getId(), $bookmaker->getName() );
+            $table->addRow( $row );
+        }
+        $table->display();
+    }
+
+    protected function getLayBacks(ExternalSource\Implementation $externalSourcImpl)
+    {
+        if( !($externalSourcImpl instanceof ExternalSource\Competition ) ) {
+            echo "de externe bron \"" . $externalSourcImpl->getExternalSource()->getName() . "\" kan geen competitieseizoenen opvragen" . PHP_EOL;
+            return;
+        }
+        if( !($externalSourcImpl instanceof ExternalSourceLayBack ) ) {
+            echo "de externe bron \"" . $externalSourcImpl->getExternalSource()->getName() . "\" kan geen laybacks opvragen" . PHP_EOL;
+            return;
+        }
+        $nameService = new NameService();
+        $getCompetitionLayBacks = function(Competition $competition) use ($externalSourcImpl, $nameService): void {
+            $table = new ConsoleTable();
+            $layBacks = $externalSourcImpl->getLayBacks($competition);
+            if( count($layBacks) === 0 ) {
+                $table->addRow( ['no laybacks', $competition->getName()] );
+            } else {
+                $table->setHeaders(array('b/l', 'bookmaker', 'price', 'size', 'bettype', 'game', 'competition' ));
+            }
+            foreach( $layBacks as $layBack ) {
+                $row = array(
+                    $layBack->getBack() ? "back" : "lay",
+                    $layBack->getBookmaker()->getName(),
+                    $layBack->getPrice(),
+                    $layBack->getSize(),
+                    $layBack->getBetLine()->getBetType(),
+                    $nameService->getPlacesFromName($layBack->getBetLine()->getGame()->getPlaces(), true, true),
+                    $competition->getName()
+                );
+                $table->addRow( $row );
+            }
+            $table->display();
+        };
+        foreach( $externalSourcImpl->getCompetitions() as $competition ) {
+            $getCompetitionLayBacks($competition);
+        }
+    }
+
+
+
 //
 //    protected function importStructures(string $externalSourceName)
 //    {

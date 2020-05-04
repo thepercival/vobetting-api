@@ -53,20 +53,20 @@ class Competitor extends MatchbookHelper implements ExternalSourceCompetitor
     {
         $competitionCompetitors = [];
         $association = $competition->getLeague()->getAssociation();
-        $betType = BetLine::_MATCH_ODDS;
-        $events = $this->apiHelper->getEvents($competition->getLeague());
-        foreach ($events as $event) {
-            $markets = $this->apiHelper->getMarkets($event->event->id, $betType);
-            foreach ($markets as $market) {
-                $competitors = $this->apiHelper->getCompetitors( $association, $market->runners );
-                foreach( $competitors as $homeAway => $homeAwayCompetitors ) {
-                    foreach( $homeAwayCompetitors as $homeAwayCompetitor ) {
-                        if( in_array($homeAwayCompetitor, $competitionCompetitors, true ) ) {
-                            continue;
-                        }
-                        $competitionCompetitors[] = $homeAwayCompetitor;
-                    }
+
+        $externalEvents = $this->apiHelper->getEventsByLeague($competition->getLeague());
+        /** @var stdClass $externalEvent */
+        foreach ($externalEvents as $externalEvent) {
+            /** @var stdClass $externalCompetitor */
+            foreach ($externalEvent->{"event-participants"} as $externalCompetitor ) {
+                $competitor = $this->apiHelper->convertCompetitorData( $association, $externalCompetitor );
+                if( $competitor === null ) {
+                    continue;
                 }
+                if( in_array($competitor, $competitionCompetitors, true ) ) {
+                    continue;
+                }
+                $competitionCompetitors[] = $competitor;
             }
         }
         return $competitionCompetitors;

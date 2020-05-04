@@ -85,7 +85,7 @@ class ApiHelper
         if ($betType === "Match Odds") {
             return BetLine::_MATCH_ODDS;
         }
-        throw new \Exception("unknown bettype", E_ERROR);
+        return 0;
     }
 
     /**
@@ -189,7 +189,7 @@ class ApiHelper
         $competitors = [ Game::HOME => [], Game::AWAY => [] ];
         foreach ($runners as $homeAwayBF => $runner) {
             $id = (int)$runner->metadata->runnerId;
-            if ( $id === Betfair::THE_DRAW) {
+            if ( $id === Betfair::THE_DRAW || $runner->runnerName === "Draw" ) {
                 continue;
             }
             $homeAway = $this->convertHomeAway($runner->sortPriority);

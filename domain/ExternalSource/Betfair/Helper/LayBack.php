@@ -56,7 +56,12 @@ class LayBack extends BetfairHelper implements ExternalSourceLayBack
     protected function getLayBacksHelper(Competition $competition): array
     {
         $association = $competition->getLeague()->getAssociation();
-        $dummyPoule = $this->createDummyPoule($competition);
+        $competitors = $this->parent->getCompetitors( $competition );
+        if( count($competitors) === 0 ) {
+            return []; // no competitors
+        }
+        $dummyPoule = $this->createDummyPoule($competition, $competitors);
+
         $competitionLayBacks = [];
         $betType = BetLine::_MATCH_ODDS;
         $events = $this->apiHelper->getEvents($competition->getLeague() );
@@ -70,7 +75,10 @@ class LayBack extends BetfairHelper implements ExternalSourceLayBack
                 if( $game === null ) {
                     continue;
                 }
-                $betLine = new BetLine( $game, $this->apiHelper->convertBetTypeBack( $market->marketName ) );
+                if( $betType !== $this->apiHelper->convertBetTypeBack( $market->marketName ) ) {
+                    continue;
+                }
+                $betLine = new BetLine( $game, $betType );
 
                 $marketBooks = $this->apiHelper->getMarketBooks($market->marketId);
                 foreach ($marketBooks as $marketBook) {

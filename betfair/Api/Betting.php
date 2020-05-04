@@ -40,7 +40,7 @@ class Betting extends BaseApi
             'listMarketCatalogue'
         ];
 
-        if (in_array($this->method, $lists, true) && array_key_exists('filter', $this->params)) {
+        if (in_array($this->method, $lists, true) && !array_key_exists('filter', $this->params)) {
             $this->params[ 'filter' ] = new \stdClass;
         }
     }
@@ -50,7 +50,7 @@ class Betting extends BaseApi
      */
     protected function maxRecords()
     {
-        if ($this->method == 'listMarketCatalogue' && array_key_exists('maxResults', $this->params) ) {
+        if ($this->method == 'listMarketCatalogue' && !array_key_exists('maxResults', $this->params) ) {
             $this->params[ 'maxResults' ] = 1000;
         }
     }

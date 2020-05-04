@@ -55,50 +55,56 @@ class LayBack extends MatchbookHelper implements ExternalSourceLayBack
 
     protected function getLayBacksHelper(Competition $competition): array
     {
-        $association = $competition->getLeague()->getAssociation();
-        $dummyPoule = $this->createDummyPoule($competition);
-        $competitionLayBacks = [];
-        $betType = BetLine::_MATCH_ODDS;
-        $events = $this->apiHelper->getEvents($competition->getLeague() );
-        foreach ($events as $event) {
-            $startDateTime = DateTimeImmutable::createFromFormat( $this->apiHelper->getDateFormat(), $event->event->openDate );
+        return [];
 
-            $markets = $this->apiHelper->getMarkets($event->event->id, $betType);
-            foreach ($markets as $market) {
-                $competitors = $this->apiHelper->getCompetitors( $association, $market->runners );
-                $game = $this->createGame( $dummyPoule, $startDateTime, $competitors);
-                if( $game === null ) {
-                    continue;
-                }
-                $betLine = new BetLine( $game, $this->apiHelper->convertBetTypeBack( $market->marketName ) );
-
-                $marketBooks = $this->apiHelper->getMarketBooks($market->marketId);
-                foreach ($marketBooks as $marketBook) {
-                    if( $marketBook->status !== "OPEN") {
-                        continue;
-                    }
-                    foreach ($marketBook->runners as $runner) {
-                        if( $runner->status !== "ACTIVE") {
-                            continue;
-                        }
-                        $homeAway = $this->getHomeAwayHelper($competitors, $runner->selectionId);
-                        $externalLayBacks = [
-                            LayBackBase::BACK => $runner->ex->availableToBack,
-                            LayBackBase::LAY => $runner->ex->availableToLay
-                        ];
-                        /** @var bool $layBackValue */
-                        foreach( $externalLayBacks as $layBackValue => $externalLayOrBacks) {
-                            foreach( $externalLayOrBacks as $externalLayOrBack ) {
-                                $competitionLayBacks[] = $this->createLayBackFromExternal( $betLine, $layBackValue, $externalLayOrBack, $homeAway );
-                            }
-                        }
-                        // var_dump($betLine->status); // IF CLOSED => UPDATE GAME!!
-                        // var_dump($runnerOne->status); // "ACTIVE"
-                    }
-                }
-            }
-        }
-        return $competitionLayBacks;
+//        $association = $competition->getLeague()->getAssociation();
+//        $competitors = $this->parent->getCompetitors( $competition );
+//        if( count($competitors) === 0 ) {
+//            return []; // no competitors
+//        }
+//        $dummyPoule = $this->createDummyPoule($competition, $competitors);
+//        $competitionLayBacks = [];
+//        $betType = BetLine::_MATCH_ODDS;
+//        $events = $this->apiHelper->getEvents($competition->getLeague() );
+//        foreach ($events as $event) {
+//            $startDateTime = DateTimeImmutable::createFromFormat( $this->apiHelper->getDateFormat(), $event->event->openDate );
+//
+//            $markets = $this->apiHelper->getMarkets($event->event->id, $betType);
+//            foreach ($markets as $market) {
+//                $competitors = []; // $this->apiHelper->getCompetitors( $association, $market->runners );
+//                $game = $this->createGame( $dummyPoule, $startDateTime, $competitors);
+//                if( $game === null ) {
+//                    continue;
+//                }
+//                $betLine = new BetLine( $game, $this->apiHelper->convertBetTypeBack( $market->marketName ) );
+//
+//                $marketBooks = $this->apiHelper->getMarketBooks($market->marketId);
+//                foreach ($marketBooks as $marketBook) {
+//                    if( $marketBook->status !== "OPEN") {
+//                        continue;
+//                    }
+//                    foreach ($marketBook->runners as $runner) {
+//                        if( $runner->status !== "ACTIVE") {
+//                            continue;
+//                        }
+//                        $homeAway = $this->getHomeAwayHelper($competitors, $runner->selectionId);
+//                        $externalLayBacks = [
+//                            LayBackBase::BACK => $runner->ex->availableToBack,
+//                            LayBackBase::LAY => $runner->ex->availableToLay
+//                        ];
+//                        /** @var bool $layBackValue */
+//                        foreach( $externalLayBacks as $layBackValue => $externalLayOrBacks) {
+//                            foreach( $externalLayOrBacks as $externalLayOrBack ) {
+//                                $competitionLayBacks[] = $this->createLayBackFromExternal( $betLine, $layBackValue, $externalLayOrBack, $homeAway );
+//                            }
+//                        }
+//                        // var_dump($betLine->status); // IF CLOSED => UPDATE GAME!!
+//                        // var_dump($runnerOne->status); // "ACTIVE"
+//                    }
+//                }
+//            }
+//        }
+//        return $competitionLayBacks;
     }
 
     protected function getHomeAwayHelper( $competitors, int $selectionId ): ?bool {

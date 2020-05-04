@@ -11,18 +11,14 @@ namespace VOBetting\ExternalSource\Matchbook;
 use DateTimeImmutable;
 use GuzzleHttp\Client;
 use League\Period\Period;
-use PeterColes\Matchbook\Matchbook as MatchbookClient;
 use stdClass;
 use VOBetting\BetLine;
-use VOBetting\ExternalSource\Matchbook;
 use Voetbal\Association;
-use Voetbal\Association as AssociationBase;
 use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
 use Voetbal\Competitor;
 use Voetbal\Game;
 use Voetbal\League;
 use Voetbal\ExternalSource;
-use Voetbal\Range as VoetbalRange;
 
 class ApiHelper
 {
@@ -96,8 +92,6 @@ class ApiHelper
     public function getEventsBySport(): array
     {
         $retVal = $this->getData( "edge/rest/events?sport-ids=15", 60 * 24 );
-        // events data gebruiker voor sports, associations(COUNRTY meta-tag), competitions(COMPETITION meta-tag), competitors
-        // voor laybacks een andere gebruiken!!
         return $retVal->events;
     }
 
@@ -127,6 +121,13 @@ class ApiHelper
         return null;
     }
 
+    public function convertCompetitorData( Association $association, stdClass $externalCompetitor ): ?Competitor {
+        $competitor = new Competitor( $association, $externalCompetitor->{"participant-name"} );
+        $competitor->setId($externalCompetitor->id);
+        $competitor->setAbbreviation(substr($competitor->getName(), 0, 3));
+        return $competitor;
+    }
+
     public function convertBetType(int $betType): string
     {
         if ($betType === BetLine::_MATCH_ODDS) {
@@ -148,37 +149,16 @@ class ApiHelper
      * @param Period|null $period
      * @return array|stdClass[]
      */
-    public function getEvents(League $league, Period $period = null): array
+    public function getEventsByLeague(League $league, Period $period = null): array
     {
-        return [];
-//        if( $period === null ) {
-//            $period = $this->getImportPeriod();
-//        }
-//        $start = $period->getStartDate()->format($this->getDateFormat());
-//        $end = $period->getEndDate()->format($this->getDateFormat());
-//        $action = 'listEvents';
-//        $cacheId = $this->externalSource->getName() . '-' . $action  . '-' . $league->getId() . '-' . $start . '-' . $end;
-//
-//        $data = $this->cacheItemDbRepos->getItem($cacheId);
-//        if ($data !== null) {
-//            return unserialize($data);
-//        }
-//        $data = $this->client->betting(
-//            [
-//                $action,
-//                [
-//                    'filter' => [
-//                        'competitionIds' => [$league->getId()],
-//                        "marketStartTime" => [
-//                            "from" => $start,
-//                            "to" => $end
-//                        ]
-//                    ]
-//                ]
-//            ]
-//        );
-//        $this->cacheItemDbRepos->saveItem($cacheId, serialize($data), 60 * 24);
-//        return $data;
+        if( $period === null ) {
+            $period = $this->getImportPeriod();
+        }
+        $start = $period->getStartDate()->format($this->getDateFormat());
+        $end = $period->getEndDate()->format($this->getDateFormat());
+
+        $retVal = $this->getData( "edge/rest/events?tag-url-names=" . $league->getId() . "&include-event-participants=true", 60 * 24 );
+        return $retVal->events;
     }
 
     /**
@@ -235,29 +215,6 @@ class ApiHelper
 //                ]
 //            ]
 //        );
-    }
-
-    /**
-     * @param Association $association
-     * @param array|stdClass[] $runners
-     * @return array|Competitor[][]
-     * @throws \Exception
-     */
-    public function getCompetitors( Association $association, array $runners ): array {
-        return [];
-//        $competitors = [ Game::HOME => [], Game::AWAY => [] ];
-//        foreach ($runners as $homeAwayBF => $runner) {
-//            $id = (int)$runner->metadata->runnerId;
-//            if ( $id === Matchbook::THE_DRAW) {
-//                continue;
-//            }
-//            $homeAway = $this->convertHomeAway($runner->sortPriority);
-//            $competitor = new Competitor( $association, $runner->runnerName );
-//            $competitor->setId($id);
-//
-//            $competitors[$homeAway][] = $competitor;
-//        }
-//        return $competitors;
     }
 
     public function convertHomeAway( int $homeAway ): ?bool

@@ -64,6 +64,7 @@ abstract class BaseApi
      */
     protected function prepare(array $params)
     {
+        // $this->params = !empty($params) ? $params[ 0 ] : null;
         $this->params = count($params) > 0 ? $params[ 0 ] : null;
     }
 }
