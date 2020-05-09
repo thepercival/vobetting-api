@@ -53,11 +53,11 @@ class LayBack
         DateTimeImmutable $dateTime,
         BetLine $betLine,
         Bookmaker $bookmaker,
-        bool $runner = null
+        bool $runnerHomeAway = null
     ) {
         $this->setDateTime($dateTime);
         $this->setBetLine($betLine);
-        $this->setRunner($runner);
+        $this->setRunner($runnerHomeAway);
         $this->setBookmaker($bookmaker);
     }
 
@@ -84,9 +84,9 @@ class LayBack
         return $this->runner;
     }
 
-    public function setRunner(bool $runner = null)
+    public function setRunner(bool $runnerHomeAway = null)
     {
-        $this->runner = $runner;
+        $this->runner = $runnerHomeAway;
     }
 
     public function getBack(): bool

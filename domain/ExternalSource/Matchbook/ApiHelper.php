@@ -13,12 +13,14 @@ use GuzzleHttp\Client;
 use League\Period\Period;
 use stdClass;
 use VOBetting\BetLine;
+use VOBetting\ExternalSource\Betfair;
 use Voetbal\Association;
 use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
 use Voetbal\Competitor;
 use Voetbal\Game;
 use Voetbal\League;
 use Voetbal\ExternalSource;
+
 
 class ApiHelper
 {
@@ -70,26 +72,64 @@ class ApiHelper
         ];
     }
 
-    protected function getData(string $postUrl, int $cacheMinutes)
+    protected function getData(string $postUrl, int $cacheMinutes = null )
     {
-        $data = $this->cacheItemDbRepos->getItem($postUrl);
-        if ($data !== null) {
-            return json_decode($data);
+        if( $cacheMinutes !== null ) {
+            $data = $this->cacheItemDbRepos->getItem($postUrl);
+            if ($data !== null) {
+                return json_decode($data);
+            }
         }
-
         $response = $this->getClient()->get(
             $this->externalSource->getApiurl() . $postUrl,
             $this->getHeaders()
         );
+        if( $cacheMinutes === null ) {
+            return json_decode( $response->getBody()->getContents() );
+        }
         return json_decode(
             $this->cacheItemDbRepos->saveItem($postUrl, $response->getBody()->getContents(), $cacheMinutes)
         );
     }
 
     /**
-     * @return array|stdClass[]
+     * return array|stdClass
      */
     public function getEventsBySport(): array
+    {
+        $results = [];
+        foreach ( $this->getDefaultPeriods() as $period ) {
+            $resultsPeriod = $this->getEventsBySportHelper( $period );
+            $results = array_merge( $results, $resultsPeriod );
+        }
+        return $results;
+    }
+
+    /**
+     * @return array|Period[]
+     */
+    protected function getDefaultPeriods(): array {
+        $today = (new DateTimeImmutable())->setTime(0, 0);
+        return [
+            new Period($today, $today->modify("+7 days")),
+            new Period($today->modify("+14 days"), $today->modify("+21 days"))
+        ];
+    }
+
+    protected function getEventsBySportHelper( Period $period ): array
+    {
+        $urlSuffix = "edge/rest/events";
+        $urlArgs = array_merge( [ "sport-ids" => 15 ], $this->getUrlPeriodArgs( $period ) );
+        $urlArgsAsString = $this->convertUrlArgsToString( $urlArgs );
+        $retVal = $this->getData( $urlSuffix ."?" . $urlArgsAsString, 60 * 24 );
+
+        return $retVal->events;
+    }
+
+    /**
+     * @return array|stdClass[]
+     */
+    public function getPeriodFilter(): array
     {
         $retVal = $this->getData( "edge/rest/events?sport-ids=15", 60 * 24 );
         return $retVal->events;
@@ -131,7 +171,7 @@ class ApiHelper
     public function convertBetType(int $betType): string
     {
         if ($betType === BetLine::_MATCH_ODDS) {
-            return 'MATCH_ODDS';
+            return "Match Odds";
         }
         throw new \Exception("unknown bettype", E_ERROR);
     }
@@ -152,13 +192,32 @@ class ApiHelper
     public function getEventsByLeague(League $league, Period $period = null): array
     {
         if( $period === null ) {
-            $period = $this->getImportPeriod();
+            $today = (new DateTimeImmutable())->setTime(0, 0);
+            $period = new Period($today, $today->modify("+15 days"));
         }
-        $start = $period->getStartDate()->format($this->getDateFormat());
-        $end = $period->getEndDate()->format($this->getDateFormat());
-
-        $retVal = $this->getData( "edge/rest/events?tag-url-names=" . $league->getId() . "&include-event-participants=true", 60 * 24 );
+        $urlSuffix = "edge/rest/events";
+        $urlArgs = array_merge( [
+            "tag-url-names" => $league->getId(),
+            "include-event-participants" => "true"
+        ], $this->getUrlPeriodArgs( $period ) );
+        $urlArgsAsString = $this->convertUrlArgsToString( $urlArgs );
+        $retVal = $this->getData( $urlSuffix ."?" . $urlArgsAsString, 60 * 24 );
         return $retVal->events;
+    }
+
+    protected function convertUrlArgsToString( array $urlArgs ): string {
+        $urlArgsNew = [];
+        foreach( $urlArgs as $name => $value ) {
+            $urlArgsNew[] = $name . "=" . urlencode( $value );
+        }
+        return implode( "&", $urlArgsNew );
+    }
+
+    protected function getUrlPeriodArgs( Period $period ): array {
+
+        $start = $period->getStartDate();
+        $end = $period->getEndDate();
+        return ["after" => $start->getTimestamp(), "before" => $end->getTimestamp() ];
     }
 
     /**
@@ -169,7 +228,16 @@ class ApiHelper
      */
     public function getMarkets($eventId, int $betType): array
     {
-        return [];
+        // edge/rest/events/1429118577040017/markets
+        // &names=Match%20Odds
+        // states=open
+        // 'https://api.matchbook.com/edge/rest/events/1429118577040017/markets?offset=0&per-page=20&names=Match%20Odds&states=open%
+
+        $urlSuffix = "edge/rest/events/" . $eventId . "/markets";
+        $urlArgs = [ "names" => $this->convertBetType( $betType ) ];
+        $urlArgsAsString = $this->convertUrlArgsToString( $urlArgs );
+        $retVal = $this->getData( $urlSuffix ."?" . $urlArgsAsString );
+        return $retVal->markets;
 //        $action = 'listMarketCatalogue';
 //        $cacheId = $this->externalSource->getName() . '-' . $action . '-' . $eventId . '-' . $betType;
 //
@@ -192,12 +260,6 @@ class ApiHelper
 //        );
 //        $this->cacheItemDbRepos->saveItem($cacheId, serialize($data), 60);
 //        return $data;
-    }
-
-    protected function getImportPeriod(): Period
-    {
-        $today = (new DateTimeImmutable())->setTime(0, 0);
-        return new Period($today, $today->modify("+15 days"));
     }
 
     public function getMarketBooks( $marketId ) {
@@ -226,5 +288,36 @@ class ApiHelper
             return Game::AWAY;
         }
         throw new \Exception("matchbook homeaway-value unknown", E_ERROR );
+    }
+
+    /**
+     * @param Association $association
+     * @param string $eventName
+     * @param array|stdClass[] $runners
+     * @return array|Competitor[][]
+     * @throws \Exception
+     */
+    public function getCompetitors( Association $association, string $eventName, array $runners ): array {
+        $competitors = [ Game::HOME => [], Game::AWAY => [] ];
+        foreach ($runners as $runner) {
+            if( property_exists($runner, "event-participant-id" ) === false ) {
+                continue;
+            }
+            $id = (int)$runner->{"event-participant-id"};
+            $strPos = strpos( $eventName, $runner->name );
+            $homeAway = null;
+            if( $strPos === 0 ) {
+                $homeAway = Game::HOME;
+            } else if( $strPos > 0 ) {
+                $homeAway = Game::AWAY;
+            } else {
+                continue;
+            }
+            $competitor = new Competitor( $association, $runner->name );
+            $competitor->setId($id);
+
+            $competitors[$homeAway][] = $competitor;
+        }
+        return $competitors;
     }
 }
