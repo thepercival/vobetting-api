@@ -103,9 +103,9 @@ class Import extends Command
 //        if ($input->getOption("seasons")) { // input manual
 //            $this->importSeasons();
 //        }
-        if ($input->getOption("leagues")) {
-            $this->importLeagues(SofaScore::NAME);
-        }
+//        if ($input->getOption("leagues")) {
+//            $this->importLeagues(SofaScore::NAME);
+//        }
         if ($input->getOption("competitions")) {
             $this->importCompetitions(SofaScore::NAME);
         }
