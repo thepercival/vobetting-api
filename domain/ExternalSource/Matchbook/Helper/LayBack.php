@@ -95,7 +95,7 @@ class LayBack extends MatchbookHelper implements ExternalSourceLayBack
                     }
                     $homeAway = null;
                     if( property_exists($runner, "event-participant-id") ) {
-                        $this->getHomeAwayHelper($competitors, $runner->{"event-participant-id"} );
+                        $homeAway = $this->getHomeAwayHelper($competitors, $runner->{"event-participant-id"} );
                     }
                     /** @var bool $layBackValue */
                     foreach( $runner->prices as $externalLayOrBack) {

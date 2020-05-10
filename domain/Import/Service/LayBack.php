@@ -126,6 +126,9 @@ class LayBack implements ImporterInterface
 
         $homeCompetitor = $this->getCompetitorFromExternal( $externalSource, $externalHomeCompetitor );
         $awayCompetitor = $this->getCompetitorFromExternal( $externalSource, $externalAwayCompetitor );
+        if( $homeCompetitor === null || $awayCompetitor === null ) {
+            return null;
+        }
         $period = new Period(
             $externalGame->getStartDateTime()->modify("-1 days"),
             $externalGame->getStartDateTime()->modify("+1 days")

@@ -12,6 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use VOBetting\Attacher\Bookmaker\Repository as BookmakerAttacherRepository;
 use VOBetting\BetLine\Repository as BetLineRepository;
+use VOBetting\ExternalSource\Matchbook;
 use VOBetting\LayBack\Repository as LayBackRepository;
 use Voetbal\Attacher\Game\Repository as GameAttacherRepository;
 use Voetbal\Attacher\Place\Repository as PlaceAttacherRepository;
@@ -119,7 +120,7 @@ class Import extends Command
             $this->importGames(SofaScore::NAME);
         }
         if ($input->getOption("laybacks")) {
-            $this->importLayBacks([Betfair::NAME]);
+            $this->importLayBacks([Betfair::NAME, Matchbook::NAME]);
         }
         return 0;
     }
