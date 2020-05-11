@@ -44,14 +44,14 @@ class LayBack extends BetfairHelper implements ExternalSourceLayBack
         return array_values($this->getLayBacksHelper($competition));
     }
 
-    public function getLayBack(Competition $competition, $id): ?LayBackBase
-    {
-        $competitionLayBacks = $this->getLayBacksHelper($competition);
-        if (array_key_exists($id, $competitionLayBacks)) {
-            return $competitionLayBacks[$id];
-        }
-        return null;
-    }
+//    public function getLayBack(Competition $competition, $id): ?LayBackBase
+//    {
+//        $competitionLayBacks = $this->getLayBacksHelper($competition);
+//        if (array_key_exists($id, $competitionLayBacks)) {
+//            return $competitionLayBacks[$id];
+//        }
+//        return null;
+//    }
 
     protected function getLayBacksHelper(Competition $competition): array
     {

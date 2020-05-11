@@ -16,32 +16,32 @@ use Voetbal\ExternalSource;
 use Voetbal\ExternalSource\Implementation as ExternalSourceImplementation;
 use Voetbal\Sport;
 use Voetbal\ExternalSource\Sport as ExternalSourceSport;
-use VOBetting\ExternalSource\Matchbook\Helper\Sport as MatchbookHelperSport;
+use VOBetting\ExternalSource\TheOddsApi\Helper\Sport as TheOddsApiHelperSport;
 use Voetbal\Association;
 use Voetbal\ExternalSource\Association as ExternalSourceAssociation;
-use VOBetting\ExternalSource\Matchbook\Helper\Association as MatchbookHelperAssociation;
+use VOBetting\ExternalSource\TheOddsApi\Helper\Association as TheOddsApiHelperAssociation;
 use Voetbal\League;
 use Voetbal\ExternalSource\League as ExternalSourceLeague;
-use VOBetting\ExternalSource\Matchbook\Helper\League as MatchbookHelperLeague;
+use VOBetting\ExternalSource\TheOddsApi\Helper\League as TheOddsApiHelperLeague;
 use Voetbal\Season;
 use Voetbal\ExternalSource\Season as ExternalSourceSeason;
-use VOBetting\ExternalSource\Matchbook\Helper\Season as MatchbookHelperSeason;
+use VOBetting\ExternalSource\TheOddsApi\Helper\Season as TheOddsApiHelperSeason;
 use Voetbal\Competition;
 use Voetbal\ExternalSource\Competition as ExternalSourceCompetition;
-use VOBetting\ExternalSource\Matchbook\Helper\Competition as MatchbookHelperCompetition;
+use VOBetting\ExternalSource\TheOddsApi\Helper\Competition as TheOddsApiHelperCompetition;
 use Voetbal\Competitor;
 use Voetbal\ExternalSource\Competitor as ExternalSourceCompetitor;
-use VOBetting\ExternalSource\Matchbook\Helper\Competitor as MatchbookHelperCompetitor;
+use VOBetting\ExternalSource\TheOddsApi\Helper\Competitor as TheOddsApiHelperCompetitor;
 use VOBetting\Bookmaker;
 use VOBetting\ExternalSource\Bookmaker as ExternalSourceBookmaker;
-use VOBetting\ExternalSource\Matchbook\Helper\Bookmaker as MatchbookHelperBookmaker;
+use VOBetting\ExternalSource\TheOddsApi\Helper\Bookmaker as TheOddsApiHelperBookmaker;
 use VOBetting\LayBack;
 use VOBetting\ExternalSource\LayBack as ExternalSourceLayBack;
-use VOBetting\ExternalSource\Matchbook\Helper\LayBack as MatchbookHelperLayBack;
+use VOBetting\ExternalSource\TheOddsApi\Helper\LayBack as TheOddsApiHelperLayBack;
 
 
 
-class Matchbook implements
+class TheOddsApi implements
     ExternalSourceImplementation,
     ExternalSourceSport,
     ExternalSourceAssociation,
@@ -69,7 +69,8 @@ class Matchbook implements
      */
     private $helpers;
 
-    public const NAME = "matchbook";
+    public const NAME = "theoddsapi";
+    public const DEFAULTSPORTID = "Soccer";
     public const DEFAULTSEASONID = "20002100";
 
     public function __construct(
@@ -85,14 +86,14 @@ class Matchbook implements
 
     protected function getApiHelper()
     {
-        if (array_key_exists(Matchbook\ApiHelper::class, $this->helpers)) {
-            return $this->helpers[Matchbook\ApiHelper::class];
+        if (array_key_exists(TheOddsApi\ApiHelper::class, $this->helpers)) {
+            return $this->helpers[TheOddsApi\ApiHelper::class];
         }
-        $this->helpers[Matchbook\ApiHelper::class] = new Matchbook\ApiHelper(
+        $this->helpers[TheOddsApi\ApiHelper::class] = new TheOddsApi\ApiHelper(
             $this->getExternalSource(),
             $this->cacheItemDbRepos
         );
-        return $this->helpers[Matchbook\ApiHelper::class];
+        return $this->helpers[TheOddsApi\ApiHelper::class];
     }
 
     /**
@@ -124,17 +125,17 @@ class Matchbook implements
         return $this->getSportHelper()->getSport($id);
     }
 
-    protected function getSportHelper(): MatchbookHelperSport
+    protected function getSportHelper(): TheOddsApiHelperSport
     {
-        if (array_key_exists(MatchbookHelperSport::class, $this->helpers)) {
-            return $this->helpers[MatchbookHelperSport::class];
+        if (array_key_exists(TheOddsApiHelperSport::class, $this->helpers)) {
+            return $this->helpers[TheOddsApiHelperSport::class];
         }
-        $this->helpers[MatchbookHelperSport::class] = new MatchbookHelperSport(
+        $this->helpers[TheOddsApiHelperSport::class] = new TheOddsApiHelperSport(
             $this,
             $this->getApiHelper(),
             $this->logger
         );
-        return $this->helpers[MatchbookHelperSport::class];
+        return $this->helpers[TheOddsApiHelperSport::class];
     }
 
     /**
@@ -150,17 +151,17 @@ class Matchbook implements
         return $this->getAssociationHelper()->getAssociation($id);
     }
 
-    protected function getAssociationHelper(): MatchbookHelperAssociation
+    protected function getAssociationHelper(): TheOddsApiHelperAssociation
     {
-        if (array_key_exists(MatchbookHelperAssociation::class, $this->helpers)) {
-            return $this->helpers[MatchbookHelperAssociation::class];
+        if (array_key_exists(TheOddsApiHelperAssociation::class, $this->helpers)) {
+            return $this->helpers[TheOddsApiHelperAssociation::class];
         }
-        $this->helpers[MatchbookHelperAssociation::class] = new MatchbookHelperAssociation(
+        $this->helpers[TheOddsApiHelperAssociation::class] = new TheOddsApiHelperAssociation(
             $this,
             $this->getApiHelper(),
             $this->logger
         );
-        return $this->helpers[MatchbookHelperAssociation::class];
+        return $this->helpers[TheOddsApiHelperAssociation::class];
     }
 
     /**
@@ -176,17 +177,17 @@ class Matchbook implements
         return $this->getLeagueHelper()->getLeague($id);
     }
 
-    protected function getLeagueHelper(): MatchbookHelperLeague
+    protected function getLeagueHelper(): TheOddsApiHelperLeague
     {
-        if (array_key_exists(MatchbookHelperLeague::class, $this->helpers)) {
-            return $this->helpers[MatchbookHelperLeague::class];
+        if (array_key_exists(TheOddsApiHelperLeague::class, $this->helpers)) {
+            return $this->helpers[TheOddsApiHelperLeague::class];
         }
-        $this->helpers[MatchbookHelperLeague::class] = new MatchbookHelperLeague(
+        $this->helpers[TheOddsApiHelperLeague::class] = new TheOddsApiHelperLeague(
             $this,
             $this->getApiHelper(),
             $this->logger
         );
-        return $this->helpers[MatchbookHelperLeague::class];
+        return $this->helpers[TheOddsApiHelperLeague::class];
     }
 
     /**
@@ -202,17 +203,17 @@ class Matchbook implements
         return $this->getSeasonHelper()->getSeason($id);
     }
 
-    protected function getSeasonHelper(): MatchbookHelperSeason
+    protected function getSeasonHelper(): TheOddsApiHelperSeason
     {
-        if (array_key_exists(MatchbookHelperSeason::class, $this->helpers)) {
-            return $this->helpers[MatchbookHelperSeason::class];
+        if (array_key_exists(TheOddsApiHelperSeason::class, $this->helpers)) {
+            return $this->helpers[TheOddsApiHelperSeason::class];
         }
-        $this->helpers[MatchbookHelperSeason::class] = new MatchbookHelperSeason(
+        $this->helpers[TheOddsApiHelperSeason::class] = new TheOddsApiHelperSeason(
             $this,
             $this->getApiHelper(),
             $this->logger
         );
-        return $this->helpers[MatchbookHelperSeason::class];
+        return $this->helpers[TheOddsApiHelperSeason::class];
     }
 
     /**
@@ -228,17 +229,17 @@ class Matchbook implements
         return $this->getCompetitionHelper()->getCompetition($id);
     }
 
-    protected function getCompetitionHelper(): MatchbookHelperCompetition
+    protected function getCompetitionHelper(): TheOddsApiHelperCompetition
     {
-        if (array_key_exists(MatchbookHelperCompetition::class, $this->helpers)) {
-            return $this->helpers[MatchbookHelperCompetition::class];
+        if (array_key_exists(TheOddsApiHelperCompetition::class, $this->helpers)) {
+            return $this->helpers[TheOddsApiHelperCompetition::class];
         }
-        $this->helpers[MatchbookHelperCompetition::class] = new MatchbookHelperCompetition(
+        $this->helpers[TheOddsApiHelperCompetition::class] = new TheOddsApiHelperCompetition(
             $this,
             $this->getApiHelper(),
             $this->logger
         );
-        return $this->helpers[MatchbookHelperCompetition::class];
+        return $this->helpers[TheOddsApiHelperCompetition::class];
     }
 
 
@@ -252,17 +253,17 @@ class Matchbook implements
         return $this->getCompetitorHelper()->getCompetitor($competition, $id);
     }
 
-    protected function getCompetitorHelper(): MatchbookHelperCompetitor
+    protected function getCompetitorHelper(): TheOddsApiHelperCompetitor
     {
-        if (array_key_exists(MatchbookHelperCompetitor::class, $this->helpers)) {
-            return $this->helpers[MatchbookHelperCompetitor::class];
+        if (array_key_exists(TheOddsApiHelperCompetitor::class, $this->helpers)) {
+            return $this->helpers[TheOddsApiHelperCompetitor::class];
         }
-        $this->helpers[MatchbookHelperCompetitor::class] = new MatchbookHelperCompetitor(
+        $this->helpers[TheOddsApiHelperCompetitor::class] = new TheOddsApiHelperCompetitor(
             $this,
             $this->getApiHelper(),
             $this->logger
         );
-        return $this->helpers[MatchbookHelperCompetitor::class];
+        return $this->helpers[TheOddsApiHelperCompetitor::class];
     }
 
     /**
@@ -278,17 +279,17 @@ class Matchbook implements
         return $this->getBookmakerHelper()->getBookmaker($id);
     }
     
-    protected function getBookmakerHelper(): MatchbookHelperBookmaker
+    protected function getBookmakerHelper(): TheOddsApiHelperBookmaker
     {
-        if (array_key_exists(MatchbookHelperBookmaker::class, $this->helpers)) {
-            return $this->helpers[MatchbookHelperBookmaker::class];
+        if (array_key_exists(TheOddsApiHelperBookmaker::class, $this->helpers)) {
+            return $this->helpers[TheOddsApiHelperBookmaker::class];
         }
-        $this->helpers[MatchbookHelperBookmaker::class] = new MatchbookHelperBookmaker(
+        $this->helpers[TheOddsApiHelperBookmaker::class] = new TheOddsApiHelperBookmaker(
             $this,
             $this->getApiHelper(),
             $this->logger
         );
-        return $this->helpers[MatchbookHelperBookmaker::class];
+        return $this->helpers[TheOddsApiHelperBookmaker::class];
     }
 
     public function getLayBacks(Competition $competition): array
@@ -301,16 +302,16 @@ class Matchbook implements
 //        return $this->getLayBackHelper()->getLayBack($competition,$id);
 //    }
 
-    protected function getLayBackHelper(): MatchbookHelperLayBack
+    protected function getLayBackHelper(): TheOddsApiHelperLayBack
     {
-        if (array_key_exists(MatchbookHelperLayBack::class, $this->helpers)) {
-            return $this->helpers[MatchbookHelperLayBack::class];
+        if (array_key_exists(TheOddsApiHelperLayBack::class, $this->helpers)) {
+            return $this->helpers[TheOddsApiHelperLayBack::class];
         }
-        $this->helpers[MatchbookHelperLayBack::class] = new MatchbookHelperLayBack(
+        $this->helpers[TheOddsApiHelperLayBack::class] = new TheOddsApiHelperLayBack(
             $this,
             $this->getApiHelper(),
             $this->logger
         );
-        return $this->helpers[MatchbookHelperLayBack::class];
+        return $this->helpers[TheOddsApiHelperLayBack::class];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Commands;
 
+use Voetbal\Game;
 use Voetbal\NameService;
 use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
@@ -244,9 +245,9 @@ class GetExternal extends Command
             return;
         }
         $table = new ConsoleTable();
-        $table->setHeaders(array('Id', 'Name'));
+        $table->setHeaders(array('Id', 'Name', 'Exchange'));
         foreach( $externalSourcImpl->getBookmakers() as $bookmaker ) {
-            $row = array( $bookmaker->getId(), $bookmaker->getName() );
+            $row = array( $bookmaker->getId(), $bookmaker->getName(), $bookmaker->getExchange() ? 'yes' : '' );
             $table->addRow( $row );
         }
         $table->display();
@@ -269,7 +270,7 @@ class GetExternal extends Command
             if( count($layBacks) === 0 ) {
                 $table->addRow( ['no laybacks', $competition->getName()] );
             } else {
-                $table->setHeaders(array('b/l', 'bookmaker', 'price', 'size', 'bettype', 'game', 'competition' ));
+                $table->setHeaders(array('b/l', 'bookmaker', 'price', 'size', 'bettype', 'homeaway', 'game', 'competition' ));
             }
             foreach( $layBacks as $layBack ) {
                 $row = array(
@@ -278,6 +279,7 @@ class GetExternal extends Command
                     $layBack->getPrice(),
                     $layBack->getSize(),
                     $layBack->getBetLine()->getBetType(),
+                    $layBack->getRunnerHomeAway() === Game::HOME ? 'home' : ( $layBack->getRunnerHomeAway() === Game::AWAY ? 'away' : 'draw' ),
                     $nameService->getPlacesFromName($layBack->getBetLine()->getGame()->getPlaces(), true, true),
                     $competition->getName()
                 );

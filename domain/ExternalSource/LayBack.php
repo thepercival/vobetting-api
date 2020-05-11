@@ -17,5 +17,5 @@ interface LayBack
      * @param mixed $id
      * @return LayBackBase|null
      */
-    public function getLayBack(Competition $competition, $id): ?LayBackBase;
+    // public function getLayBack(Competition $competition, $id): ?LayBackBase;
 }

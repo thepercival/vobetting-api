@@ -6,7 +6,7 @@
  * Time: 19:27
  */
 
-namespace VOBetting\ExternalSource\APIFootball;
+namespace VOBetting\ExternalSource\Old\APIFootball;
 
 use Voetbal\ExternalSource;
 

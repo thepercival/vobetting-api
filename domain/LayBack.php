@@ -32,7 +32,7 @@ class LayBack
     /**
      * @var bool|null
      */
-    protected $runner;
+    protected $runnerHomeAway;
     /**
      * @var bool
      */
@@ -57,7 +57,7 @@ class LayBack
     ) {
         $this->setDateTime($dateTime);
         $this->setBetLine($betLine);
-        $this->setRunner($runnerHomeAway);
+        $this->setRunnerHomeAway($runnerHomeAway);
         $this->setBookmaker($bookmaker);
     }
 
@@ -79,14 +79,14 @@ class LayBack
         $this->id = $id;
     }
 
-    public function getRunner(): ?bool
+    public function getRunnerHomeAway(): ?bool
     {
-        return $this->runner;
+        return $this->runnerHomeAway;
     }
 
-    public function setRunner(bool $runnerHomeAway = null)
+    public function setRunnerHomeAway(bool $runnerHomeAway = null)
     {
-        $this->runner = $runnerHomeAway;
+        $this->runnerHomeAway = $runnerHomeAway;
     }
 
     public function getBack(): bool

@@ -6,26 +6,26 @@
  * Time: 19:55
  */
 
-namespace VOBetting\ExternalSource\Matchbook\Helper;
+namespace VOBetting\ExternalSource\TheOddsApi\Helper;
 
 use DateTimeImmutable;
 use League\Period\Period;
 use stdClass;
 use VOBetting\BetLine;
-use VOBetting\ExternalSource\Matchbook\Helper as MatchbookHelper;
-use VOBetting\ExternalSource\Matchbook\ApiHelper as MatchbookApiHelper;
+use VOBetting\ExternalSource\TheOddsApi\Helper as TheOddsApiHelper;
+use VOBetting\ExternalSource\TheOddsApi\ApiHelper as TheOddsApiApiHelper;
 use Voetbal\Association;
 use Voetbal\Competitor as CompetitorBase;
 use Psr\Log\LoggerInterface;
-use VOBetting\ExternalSource\Matchbook;
+use VOBetting\ExternalSource\TheOddsApi;
 use Voetbal\Competition;
 use Voetbal\ExternalSource\Competitor as ExternalSourceCompetitor;
 
-class Competitor extends MatchbookHelper implements ExternalSourceCompetitor
+class Competitor extends TheOddsApiHelper implements ExternalSourceCompetitor
 {
     public function __construct(
-        Matchbook $parent,
-        MatchbookApiHelper $apiHelper,
+        TheOddsApi $parent,
+        TheOddsApiApiHelper $apiHelper,
         LoggerInterface $logger
     ) {
         parent::__construct(
@@ -57,8 +57,8 @@ class Competitor extends MatchbookHelper implements ExternalSourceCompetitor
         $externalEvents = $this->apiHelper->getEventsByLeague($competition->getLeague());
         /** @var stdClass $externalEvent */
         foreach ($externalEvents as $externalEvent) {
-            /** @var stdClass $externalCompetitor */
-            foreach ($externalEvent->{"event-participants"} as $externalCompetitor ) {
+            /** @var string $externalCompetitor */
+            foreach ($externalEvent->teams as $externalCompetitor ) {
                 $competitor = $this->apiHelper->convertCompetitorData( $association, $externalCompetitor );
                 $filtered = array_filter( $competitionCompetitors, function( CompetitorBase $competitionCompetitor ) use ($competitor) : bool  {
                     return $competitionCompetitor->getId() === $competitor->getId();

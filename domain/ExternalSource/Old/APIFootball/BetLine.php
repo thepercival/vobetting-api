@@ -6,7 +6,7 @@
  * Time: 10:48
  */
 
-namespace VOBetting\ExternalSource\APIFootball;
+namespace VOBetting\ExternalSource\Old\APIFootball;
 
 use PeterColes\Betfair\Betfair as PeterColesBetfair;
 use VOBetting\External\System\Importer\BetLine as BetLineImporter;

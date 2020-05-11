@@ -298,10 +298,10 @@ class Betfair implements
         return $this->getLayBackHelper()->getLayBacks($competition);
     }
 
-    public function getLayBack(Competition $competition, $id): ?LayBackBase
-    {
-        return $this->getLayBackHelper()->getLayBack($competition,$id);
-    }
+//    public function getLayBack(Competition $competition, $id): ?LayBackBase
+//    {
+//        return $this->getLayBackHelper()->getLayBack($competition,$id);
+//    }
 
     protected function getLayBackHelper(): BetfairHelperLayBack
     {

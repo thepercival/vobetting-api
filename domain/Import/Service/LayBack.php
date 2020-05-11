@@ -105,7 +105,7 @@ class LayBack implements ImporterInterface
             $externalSourceLayBack->getDateTime(),
             $betLine,
             $bookmaker,
-            $externalSourceLayBack->getRunner());
+            $externalSourceLayBack->getRunnerHomeAway());
 
         $layBack->setBack( $externalSourceLayBack->getBack() );
         $layBack->setPrice( $externalSourceLayBack->getPrice() );

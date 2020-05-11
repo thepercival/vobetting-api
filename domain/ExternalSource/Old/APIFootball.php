@@ -6,7 +6,7 @@
  * Time: 10:41
  */
 
-namespace VOBetting\ExternalSource;
+namespace VOBetting\ExternalSource\Old;
 
 use Voetbal\ExternalSource\Implementation as ExternalSourceImplementation;
 use Voetbal\ExternalSource;
