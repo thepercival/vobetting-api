@@ -122,7 +122,7 @@ class ApiHelper
 
     public function getAssociationName( stdClass $externalLeague ): string {
         if( strpos( $externalLeague->details, "Soccer") !== false ) {
-            return $externalLeague->details;
+            return $this->removeIcons( $externalLeague->details );
         }
         return $externalLeague->title;
     }
@@ -138,6 +138,15 @@ class ApiHelper
     public function getLeagueId( stdClass $externalLeague): string {
         return $externalLeague->key;
     }
+
+    protected function removeIcons(string $title): string {
+        $strlen = mb_strlen($title);
+        $spacePos = mb_strrpos( $title, " " );
+        if( $strlen - $spacePos === 3 ) {
+            return trim( mb_substr( $title, 0, $spacePos ) );
+        }
+        return trim($title);
+}
 
     public function convertCompetitorData( Association $association, string $externalCompetitor ): Competitor {
         $competitor = new Competitor( $association, $externalCompetitor );
@@ -175,7 +184,7 @@ class ApiHelper
               "region" => "eu",
                 "mkt" => "h2h"
           ] );
-        $retVal = $this->getData( $urlSuffix ."?" . $urlArgsAsString, 60 * 24 * 7 ); // @TODO TWELVE MINUTES
+        $retVal = $this->getData( $urlSuffix ."?" . $urlArgsAsString, 60 * 24 * 7 ); // @TODO TWELVE MINUTES MAX 500 PER MONTH
         return $retVal->data;
     }
 
