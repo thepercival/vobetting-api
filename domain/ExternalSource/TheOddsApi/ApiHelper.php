@@ -184,7 +184,7 @@ class ApiHelper
               "region" => "eu",
                 "mkt" => "h2h"
           ] );
-        $retVal = $this->getData( $urlSuffix ."?" . $urlArgsAsString, 60 * 24 * 7 ); // @TODO TWELVE MINUTES MAX 500 PER MONTH
+        $retVal = $this->getData( $urlSuffix ."?" . $urlArgsAsString, 60 * 6 ); // 6 HOURS MAX 500 PER MONTH
         return $retVal->data;
     }
 
