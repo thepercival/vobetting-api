@@ -9,6 +9,9 @@
 namespace VOBetting;
 
 use DateTimeImmutable;
+use Voetbal\Game;
+use Voetbal\State;
+use Voetbal\Sport\ScoreConfig\Service as SportScoreConfigService;
 
 class LayBack
 {
@@ -183,5 +186,20 @@ class LayBack
     public function setBookmaker($bookmaker)
     {
         $this->bookmaker = $bookmaker;
+    }
+
+    public function isWinner(): bool {
+        if( $this->getBetLine()->getGame()->getState() !== State::Finished ) {
+            return false;
+        }
+        $sportScoreConfigService = new SportScoreConfigService();
+        $score = $sportScoreConfigService->getFinalScore( $this->getBetLine()->getGame() );
+        if ( $score === null ) {
+            return  false;
+        }
+        $layBackResult = $this->getRunnerHomeAway() === Game::HOME ? Game::RESULT_HOME : (
+            $this->getRunnerHomeAway() === Game::AWAY ? Game::RESULT_AWAY : Game::RESULT_DRAW
+        );
+        return $score->getResult() === $layBackResult;
     }
 }

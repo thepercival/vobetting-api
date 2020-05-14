@@ -1,26 +1,17 @@
-associations/12/leagues
 
-associations/12/leagues/4/competitions/2
-
-associations/12/competitros/4
-
-competitions/12/structure
-
-competitions/12/rounds/13/poules/12/games/3
-
-sofascore als waarheid, deze vult alle associations, competitorss, leagues, competitions, rounds, poules, games
-
-toevoegen via eigen api, zo hoeven we geen extra code te schrijven voor als deze componenten
-
-return self::URL . "u-tournament/".$sCompetitionId."/season/".$sSeasonId."/matches/round/".$nGameRoundId.$this->getUrlPostfix();
-
-sofa-category is association
-sofa-tournament-tournament is een league
-sofa-tournament is een competitie
-sofa-tournament-season is een seizoen
+kijken wanner je wat zou kunnen verdienen?
 
 
+via betfair betaal je 4% extra
+via matchbook betaal je 1.5%
 
+eerst maar eens transacties van 10 euro
 
+strategie 1:
+    a pak van een wedstrijd de favoriet
+    b wanneer de lay van matchbook of betfair onder de back van 1xbet komt dan (layen)
+    c verkopen wanneer
+        1 3% winst(hier is al afgetrokken de opslag),
+        2 anders 10 minuten voor de wedstrijd verkopen
 
-
+Dit kan al gedraaid worden over de bestaande wedstrijden!

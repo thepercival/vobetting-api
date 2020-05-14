@@ -56,8 +56,8 @@ class GetExternal extends Command
             // the "--help" option
             ->setHelp('import the objects');
 
-        $this->addArgument('externalSource', InputArgument::REQUIRED, 'externalSource');
-        $this->addArgument('objectType', InputArgument::REQUIRED, 'objectType');
+        $this->addArgument('externalSource', InputArgument::REQUIRED, 'for example sofascore');
+        $this->addArgument('objectType', InputArgument::REQUIRED, 'for example associations or comopetitions');
 
         parent::configure();
     }
