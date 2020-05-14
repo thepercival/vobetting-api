@@ -6,8 +6,9 @@ VOBetting\LayBack:
   properties:
     id:
       read_only: true
-    runner:
+    runnerHomeAway:
       type: boolean
+      runnerHomeAway: dateTime
     back:
       type: boolean
     price:

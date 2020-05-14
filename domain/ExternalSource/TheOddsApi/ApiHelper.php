@@ -89,6 +89,12 @@ class ApiHelper
             $this->externalSource->getApiurl() . $urlSuffix . $apiKeySuffix,
             $this->getHeaders()
         );
+//        $headerRequestsRemaining = $response->getHeader("x-requests-remaining");
+//        $nrOfRequestRemaining = reset($headerRequestsRemaining );
+//        $headerRequestsUsed = $response->getHeader("x-requests-used");
+//        $nrOfRequestUsed = reset($headerRequestsUsed );
+//        echo "requests-remaining => " . $nrOfRequestRemaining . ", requests-used => " . $nrOfRequestUsed . PHP_EOL;
+
         if( $cacheMinutes === null ) {
             return json_decode( $response->getBody()->getContents() );
         }
