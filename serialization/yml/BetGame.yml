@@ -1,0 +1,18 @@
+VOBetting\BetGame:
+  exclusion_policy: ALL
+  exclude: false
+  access_type: public_property
+
+  properties:
+    gameId:
+      read_only: true
+    start:
+      type: DateTimeImmutable<'Y-m-d\TH:i:s.u\Z'>
+    competitionId:
+      read_only: true
+    competitionName:
+      type: string
+    home:
+      type: string
+    away:
+      type: string
