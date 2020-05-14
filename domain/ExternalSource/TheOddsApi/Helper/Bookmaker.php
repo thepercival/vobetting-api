@@ -49,7 +49,7 @@ class Bookmaker extends TheOddsApiHelper implements ExternalSourceBookmaker
     protected function getBookmakersHelper(): array
     {
         $bookmakers = [];
-        foreach( $this->getFilteredCompetitions() as $competition ) {
+        foreach( $this->getFilteredCompetitions("soccer_germany_bundesliga") as $competition ) {
             $this->addBookmakers( $competition, $bookmakers );
         }
         return $bookmakers;
@@ -58,7 +58,7 @@ class Bookmaker extends TheOddsApiHelper implements ExternalSourceBookmaker
     /**
      * @return array|Competition[]
      */
-    protected function getFilteredCompetitions(): array {
+    protected function getFilteredCompetitions( string $leagueKey ): array {
         $competitions = $this->parent->getCompetitions();
         $soccerCompetitions = array_filter( $competitions, function( Competition $competitionIt ): bool  {
             return $competitionIt->getSportBySportId( $this->parent::DEFAULTSPORTID ) !== null;
@@ -66,7 +66,13 @@ class Bookmaker extends TheOddsApiHelper implements ExternalSourceBookmaker
         if( count( $soccerCompetitions ) === 0 ) {
             return [];
         }
-        return array_splice( $soccerCompetitions, 0, 1);
+        $keyCompetitions = array_filter( $soccerCompetitions, function( Competition $competitionIt ) use ($leagueKey): bool  {
+            return $competitionIt->getLeague()->getId() === $leagueKey;
+        });
+        if( count( $keyCompetitions ) === 0 ) {
+            return array_splice( $soccerCompetitions, 0, 1);
+        }
+        return array_splice( $keyCompetitions, 0, 1);
     }
 
     protected function addBookmakers(Competition $competition, array & $bookmakers )
