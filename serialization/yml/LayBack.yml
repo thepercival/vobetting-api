@@ -17,6 +17,5 @@ VOBetting\LayBack:
       type: float
     dateTime:
       type: DateTimeImmutable<'Y-m-d\TH:i:s.u\Z'>
-      serialized_name: dateTime
     bookmaker:
       type: VOBetting\Bookmaker

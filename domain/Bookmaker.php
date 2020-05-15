@@ -24,6 +24,10 @@ class Bookmaker implements Importable
      * @var bool
      */
     protected $exchange;
+    /**
+     * @var float
+     */
+    protected $feePercentage = 0;
 
     const MIN_LENGTH_NAME = 2;
     const MAX_LENGTH_NAME = 15;
@@ -80,5 +84,15 @@ class Bookmaker implements Importable
     public function setExchange($exchange)
     {
         $this->exchange = $exchange;
+    }
+
+    public function getFeePercentage(): float
+    {
+        return $this->feePercentage;
+    }
+
+    public function setFeePercentage(float $feePercentage)
+    {
+        $this->feePercentage = $feePercentage;
     }
 }

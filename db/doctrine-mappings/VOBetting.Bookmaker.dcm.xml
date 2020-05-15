@@ -5,6 +5,7 @@
       <generator strategy="AUTO"/>
     </id>
     <field name="name" column="name" type="string" length="15" nullable="false" unique="false"/>
+    <field name="feePercentage" column="feePercentage" type="float" nullable="true" unique="false"/>
     <field name="exchange" column="exchange" type="boolean" nullable="false"/>
   </entity>
 </doctrine-mapping>

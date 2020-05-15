@@ -8,9 +8,7 @@ VOBetting\BetLine:
       read_only: true
     betType:
       type: integer
-      serialized_name: betType
     place:
       type: Voetbal\Place
-      serialized_name: poulePlace
     layBacks:
       type: ArrayCollection<VOBetting\LayBack>

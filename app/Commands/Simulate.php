@@ -2,26 +2,31 @@
 
 namespace App\Commands;
 
-use DateTime;
 use DateTimeImmutable;
 use Exception;
+use League\Period\Period;
 use LucidFrame\Console\ConsoleTable;
 use Psr\Container\ContainerInterface;
 use App\Command;
 use Selective\Config\Configuration;
 
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use VOBetting\BetLine\Repository as BetLineRepository;
+use VOBetting\LayBack\Repository as LayBackRepository;
+use VOBetting\Bookmaker\Repository as BookmakerRepository;
 use VOBetting\Transaction;
 use VOBetting\Wallet;
 use Voetbal\Game;
 use Voetbal\NameService;
 use Voetbal\Range;
-use VOBetting\LayBack\Strategy as LayBackStrategy;
+use VOBetting\Strategy;
+use VOBetting\Strategy\PreMatchPriceGoingUp;
+use Voetbal\Sport\Repository as SportRepository;
 
 /*
-    moment to buy: exchange-lay 1% below bookmaker back and not yet bought and 2 days before start game, games should be beofre now
+    moment to buy: exchange-lay 1% below bookmaker back and not yet bought and 2 days before start game, games should be before now
     moment to sell: (something to sell and 3% profit on back) or, less than 30 minutes before game
 */
 
@@ -62,15 +67,19 @@ class Simulate extends Command
      */
     protected $wallet;
     /**
-     * @var array|LayBackStrategy[]
+     * @var array|Strategy[]
      */
     protected $strategies;
 
-    protected const DEFAULT_START_DAYSBACK = 2;
+    protected const DEFAULT_DAYS_IN_PAST_START = 14;
+    protected const DEFAULT_DAYS_IN_PAST_END = 0;
     protected const DEFAULT_NROFMINUTESPERSTEP = 14;
     protected const DEFAULT_MIN_CURRENCY_SIZE = 2;
     protected const DEFAULT_MAX_CURRENCY_SIZE = 10;
-
+    // strategy
+    protected const DEFAULT_BUY_HOURS_IN_PAST_START = 2;
+    protected const DEFAULT_BUY_HOURS_IN_PAST_END = 24 * 14;
+    protected const DEFAULT_BASELINE_DELTA_PERCENTAGE = 0;
 
 /*
 wallet
@@ -82,9 +91,6 @@ winst-percentage-back(excl. exchange-opslag)*/
     {
         $this->container = $container;
         parent::__construct($container->get(Configuration::class));
-        $this->strategies = array(
-            new LayBackStrategy()
-        );
     }
 
     protected function configure()
@@ -98,11 +104,15 @@ winst-percentage-back(excl. exchange-opslag)*/
             // the "--help" option
             ->setHelp('simulate strategies');
 
-        $this->addOption('startdate', null, InputOption::VALUE_OPTIONAL, 'format is Y-m-d, defaults to ' . self::DEFAULT_START_DAYSBACK . ' days back');
-        $this->addOption('enddate', null, InputOption::VALUE_OPTIONAL, 'format is Y-m-d, defaults to now');
-        $this->addOption('nrofminutesperstep', null, InputOption::VALUE_OPTIONAL, 'defaults to ' . self::DEFAULT_NROFMINUTESPERSTEP);
-        $this->addOption('mincurrencysize', null, InputOption::VALUE_OPTIONAL, 'defaults to ' . self::DEFAULT_MIN_CURRENCY_SIZE);
-        $this->addOption('maxcurrencysize', null, InputOption::VALUE_OPTIONAL, 'defaults to ' . self::DEFAULT_MAX_CURRENCY_SIZE);
+        $this->addArgument('daysinpaststart', InputArgument::OPTIONAL, 'defaults to ' . self::DEFAULT_DAYS_IN_PAST_START );
+        $this->addArgument('daysinpastend', InputArgument::OPTIONAL, 'defaults to ' . self::DEFAULT_DAYS_IN_PAST_END );
+        $this->addArgument('nrofminutesperstep', InputArgument::OPTIONAL, 'defaults to ' . self::DEFAULT_NROFMINUTESPERSTEP);
+        $this->addArgument('mincurrencysize', InputArgument::OPTIONAL, 'defaults to ' . self::DEFAULT_MIN_CURRENCY_SIZE);
+        $this->addArgument('maxcurrencysize', InputArgument::OPTIONAL, 'defaults to ' . self::DEFAULT_MAX_CURRENCY_SIZE);
+        // strategy
+        $this->addArgument('buyperiodinhours', InputArgument::OPTIONAL, 'format is ' . self::DEFAULT_BUY_HOURS_IN_PAST_START . '->' . self::DEFAULT_BUY_HOURS_IN_PAST_END );
+        $this->addArgument('baselinedeltapercentage', InputArgument::OPTIONAL, 'defaults to ' . self::DEFAULT_BASELINE_DELTA_PERCENTAGE );
+        $this->addArgument('baselinebookmakernames', InputArgument::OPTIONAL, 'format is comma-separate-list of bookmaker-names, defaults to nothing(average) ' . self::DEFAULT_BASELINE_DELTA_PERCENTAGE );
 
         parent::configure();
     }
@@ -111,35 +121,79 @@ winst-percentage-back(excl. exchange-opslag)*/
     {
         $this->initLogger($input, $name);
         $this->endDate = new DateTimeImmutable();
-        if( $input->getOption('enddate') ) {
-            $this->startDate = DateTime::createFromFormat(
-                'Y-m-d H:i:s',
-                $input->getOption('startdate') . ' 00:00:00'
-            );
+
+        $now = new DateTimeImmutable();
+        $daysInPastStart = self::DEFAULT_DAYS_IN_PAST_START;
+        if( $input->getArgument('daysinpaststart') !== null ) {
+            $daysInPastStart = (int) $input->getArgument('daysinpaststart');
         }
-        $this->startDate = $this->endDate->modify("-" . self::DEFAULT_START_DAYSBACK . " days")->setTime(0,0);
-        if( $input->getOption('startdate') ) {
-            $this->startDate = DateTime::createFromFormat(
-                'Y-m-d H:i:s',
-                $input->getOption('startdate') . ' 00:00:00'
-            );
+        $this->startDate = $now->modify("-".$daysInPastStart." days");
+
+        $daysInPastEnd = self::DEFAULT_DAYS_IN_PAST_END;
+        if( $input->getArgument('daysinpastend') !== null ) {
+            $daysInPastEnd = (int) $input->getArgument('daysinpastend');
         }
+        $this->endDate = $now->modify("-".$daysInPastEnd." days");
+
         $this->nrOfMinutesPerStep = self::DEFAULT_NROFMINUTESPERSTEP;
-        if( $input->getOption('nrofminutesperstep') ) {
-            $this->nrOfMinutesPerStep = (int) $input->getOption('nrofminutesperstep');
+        if( $input->getArgument('nrofminutesperstep') !== null ) {
+            $this->nrOfMinutesPerStep = (int) $input->getArgument('nrofminutesperstep');
         }
 
         $this->minCurrencySize = self::DEFAULT_MIN_CURRENCY_SIZE;
-        if( $input->getOption('mincurrencysize') ) {
-            $this->minCurrencySize = (int) $input->getOption('mincurrencysize');
+        if( $input->getArgument('mincurrencysize') !== null ) {
+            $this->minCurrencySize = (int) $input->getArgument('mincurrencysize');
         }
 
         $this->maxCurrencySize = self::DEFAULT_MAX_CURRENCY_SIZE;
-        if( $input->getOption('maxcurrencysize') ) {
-            $this->maxCurrencySize = (int) $input->getOption('maxcurrencysize');
+        if( $input->getArgument('maxcurrencysize') !== null ) {
+            $this->maxCurrencySize = (int) $input->getArgument('maxcurrencysize');
         }
 
         $this->wallet = new Wallet( new Range( $this->minCurrencySize, $this->maxCurrencySize));
+
+        $this->initStrategy( $input );
+
+    }
+
+    protected function initStrategy(InputInterface $input)
+    {
+        $buyHoursInPastStart = self::DEFAULT_BUY_HOURS_IN_PAST_START;
+        $buyHoursInPastEnd = self::DEFAULT_BUY_HOURS_IN_PAST_END;
+        if( $input->getArgument('buyperiodinhours') !== null ) {
+            $strPos = strpos( $input->getArgument('buyperiodinhours'), "=>" );
+            if( $strPos !== false ) {
+                $buyHoursInPastStart = substr( $input->getArgument('buyperiodinhours'), 0, $strPos );
+                $buyHoursInPastEnd = substr( $input->getArgument('buyperiodinhours'), $strPos + strlen("=>") );
+            }
+        }
+        $buyPeriodInHours = new Range( $buyHoursInPastStart, $buyHoursInPastEnd );
+
+        $baselineDeltaPercentage = self::DEFAULT_BASELINE_DELTA_PERCENTAGE;
+        if( $input->getArgument('baselinedeltapercentage') !== null ) {
+            $baselineDeltaPercentage = (int) $input->getArgument('baselinedeltapercentage');
+        }
+
+        $baselineBookmakers = [];
+        if( $input->getArgument('baselinebookmakernames') !== null ) {
+            $bookmakerRepos = $this->container->get(BookmakerRepository::class);
+            $baselineBookmakerNames = explode(",", $input->getArgument('baselinebookmakernames') );
+            foreach( $baselineBookmakerNames as $baselineBookmakerName ) {
+                $bookmaker = $bookmakerRepos->findOneBy( ["name" => $baselineBookmakerName ]);
+                if( $bookmaker !== null ) {
+                    $baselineBookmakers[] = $bookmaker;
+                }
+            }
+        }
+
+        $this->strategies = array(
+            new PreMatchPriceGoingUp(
+                $this->container->get(BetLineRepository::class),
+                $this->container->get(LayBackRepository::class),
+                $buyPeriodInHours,
+                $baselineBookmakers,
+                $baselineDeltaPercentage )
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -148,7 +202,8 @@ winst-percentage-back(excl. exchange-opslag)*/
 
         $dateIt = clone $this->startDate;
         while ( $dateIt < $this->endDate ) {
-            $buyTransactions = $this->buyLayBacks( $dateIt );
+            $period = new Period( $dateIt->modify("-" . $this->nrOfMinutesPerStep  . " minutes"), $dateIt );
+            $buyTransactions = $this->buyLayBacks( $period );
             $paidTransactions = $this->wallet->checkPayouts();
             if( count($buyTransactions) > 0 or count($paidTransactions) > 0 ) {
                 $this->showWallet($dateIt);
@@ -160,13 +215,13 @@ winst-percentage-back(excl. exchange-opslag)*/
     }
 
     /**
-     * @param DateTimeImmutable $dateTime
+     * @param Period $period
      * @return array|Transaction[]
      */
-    protected function buyLayBacks( DateTimeImmutable $dateTime): array {
+    protected function buyLayBacks( Period $period): array {
         $transactions = [];
         foreach( $this->strategies as $strategy ) {
-            foreach( $strategy->getLayBacks($dateTime) as $layBack ) {
+            foreach( $strategy->getLayBackCandidates($period) as $layBack ) {
                 try {
                     $transactions[] = $this->wallet->buy( $layBack );
                 } catch( Exception $e ) {

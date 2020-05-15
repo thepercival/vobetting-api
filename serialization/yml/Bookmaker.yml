@@ -10,3 +10,5 @@ VOBetting\Bookmaker:
       type: string
     exchange:
       type: boolean
+    feePercentage:
+      type: float

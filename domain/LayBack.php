@@ -45,7 +45,7 @@ class LayBack
      */
     protected $price;
     /**
-     * @var double
+     * @var float
      */
     protected $size;
 
@@ -101,39 +101,23 @@ class LayBack
     {
         $this->back = $back;
     }
-    
-    /**
-     * Get price
-     *
-     * @return double
-     */
-    public function getPrice()
+
+    public function getPrice(): float
     {
         return $this->price;
     }
 
-    /**
-     * @param double $price
-     */
-    public function setPrice($price)
+    public function setPrice(float $price)
     {
         $this->price = $price;
     }
 
-    /**
-     * Get size
-     *
-     * @return double
-     */
-    public function getSize()
+    public function getSize(): float
     {
         return $this->size;
     }
 
-    /**
-     * @param double $size
-     */
-    public function setSize($size)
+    public function setSize(float $size)
     {
         $this->size = $size;
     }
