@@ -175,8 +175,8 @@ winst-percentage-back(excl. exchange-opslag)*/
         }
 
         $baselineBookmakers = [];
+        $bookmakerRepos = $this->container->get(BookmakerRepository::class);
         if( $input->getArgument('baselinebookmakernames') !== null ) {
-            $bookmakerRepos = $this->container->get(BookmakerRepository::class);
             $baselineBookmakerNames = explode(",", $input->getArgument('baselinebookmakernames') );
             foreach( $baselineBookmakerNames as $baselineBookmakerName ) {
                 $bookmaker = $bookmakerRepos->findOneBy( ["name" => $baselineBookmakerName ]);
@@ -184,6 +184,8 @@ winst-percentage-back(excl. exchange-opslag)*/
                     $baselineBookmakers[] = $bookmaker;
                 }
             }
+        } else {
+            $baselineBookmakers = $bookmakerRepos->findBy( [ "exchange" => false ] );
         }
 
         $this->strategies = array(
@@ -203,6 +205,7 @@ winst-percentage-back(excl. exchange-opslag)*/
         $dateIt = clone $this->startDate;
         while ( $dateIt < $this->endDate ) {
             $period = new Period( $dateIt->modify("-" . $this->nrOfMinutesPerStep  . " minutes"), $dateIt );
+            $this->logger->info("processing period " . $period->getStartDate()->format("Y-m-d H:i") . "  => " . $period->getEndDate()->format("Y-m-d H:i"));
             $buyTransactions = $this->buyLayBacks( $period );
             $paidTransactions = $this->wallet->checkPayouts();
             if( count($buyTransactions) > 0 or count($paidTransactions) > 0 ) {

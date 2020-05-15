@@ -96,6 +96,7 @@ class PreMatchPriceGoingUp extends StrategyBase
         $totalSize = 0.0;
         $totalPrice = 0.0;
         foreach( $runnerLayBacks as $runnerLayBack ) {
+            echo $runnerLayBack->getBookmaker()->getName();
             if( !in_array( $runnerLayBack->getBookmaker(), $this->baselineBookmakers, true) ) {
                 continue;
             }
