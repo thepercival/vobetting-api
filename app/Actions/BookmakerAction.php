@@ -80,6 +80,7 @@ final class BookmakerAction extends Action
             }
 
             $newBookmaker = new \VOBetting\Bookmaker($bookmakerSer->getName(), $bookmakerSer->getExchange());
+            $newBookmaker->setFeePercentage($bookmakerSer->getFeePercentage());
             $this->bookmakerRepos->save($newBookmaker);
 
             $json = $this->serializer->serialize($newBookmaker, 'json');
@@ -92,9 +93,10 @@ final class BookmakerAction extends Action
     public function edit(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \VOBetting\Bookmaker $bookmakerSer */
+            /** @var Bookmaker $bookmakerSer */
             $bookmakerSer = $this->serializer->deserialize($this->getRawData(), 'VOBetting\Bookmaker', 'json');
 
+            /** @var Bookmaker|null $bookmaker */
             $bookmaker = $this->bookmakerRepos->find((int) $args['id']);
             if ($bookmaker === null) {
                 throw new \Exception("de bookmaker met het opgegeven id bestaat niet meer", E_ERROR);
@@ -106,6 +108,7 @@ final class BookmakerAction extends Action
             }
             $bookmaker->setName($bookmakerSer->getName());
             $bookmaker->setExchange($bookmakerSer->getExchange());
+            $bookmaker->setFeePercentage($bookmakerSer->getFeePercentage());
             $this->bookmakerRepos->save($bookmaker);
 
             $json = $this->serializer->serialize($bookmaker, 'json');
