@@ -10,17 +10,19 @@ use Psr\Container\ContainerInterface;
 use App\Command;
 use Selective\Config\Configuration;
 
-use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use VOBetting\BetLine\Repository as BetLineRepository;
 use VOBetting\LayBack\Repository as LayBackRepository;
 use VOBetting\Bookmaker\Repository as BookmakerRepository;
 use VOBetting\Transaction;
+use VOBetting\Transaction\Output as TransactionOutput;
 use VOBetting\Wallet;
 use Voetbal\Game;
 use Voetbal\NameService;
 use Voetbal\Range;
+use VOBetting\Output;
 use VOBetting\Strategy;
 use VOBetting\Strategy\PreMatchPriceGoingUp;
 use Voetbal\Sport\Repository as SportRepository;
@@ -77,9 +79,12 @@ class Simulate extends Command
     protected const DEFAULT_MIN_CURRENCY_SIZE = 2;
     protected const DEFAULT_MAX_CURRENCY_SIZE = 10;
     // strategy
+    protected const DEFAULT_SELL_HOURS_IN_PAST_START = 0;
+    protected const DEFAULT_SELL_HOURS_IN_PAST_END = 24 * 14;
     protected const DEFAULT_BUY_HOURS_IN_PAST_START = 2;
     protected const DEFAULT_BUY_HOURS_IN_PAST_END = 24 * 14;
     protected const DEFAULT_BASELINE_DELTA_PERCENTAGE = 0;
+    protected const DEFAULT_PROFIT_PERCENTAGE = 3;
 
 /*
 wallet
@@ -104,15 +109,17 @@ winst-percentage-back(excl. exchange-opslag)*/
             // the "--help" option
             ->setHelp('simulate strategies');
 
-        $this->addArgument('daysinpaststart', InputArgument::OPTIONAL, 'defaults to ' . self::DEFAULT_DAYS_IN_PAST_START );
-        $this->addArgument('daysinpastend', InputArgument::OPTIONAL, 'defaults to ' . self::DEFAULT_DAYS_IN_PAST_END );
-        $this->addArgument('nrofminutesperstep', InputArgument::OPTIONAL, 'defaults to ' . self::DEFAULT_NROFMINUTESPERSTEP);
-        $this->addArgument('mincurrencysize', InputArgument::OPTIONAL, 'defaults to ' . self::DEFAULT_MIN_CURRENCY_SIZE);
-        $this->addArgument('maxcurrencysize', InputArgument::OPTIONAL, 'defaults to ' . self::DEFAULT_MAX_CURRENCY_SIZE);
+        $this->addOption('daysinpaststart', null, InputOption::VALUE_OPTIONAL, 'defaults to ' . self::DEFAULT_DAYS_IN_PAST_START );
+        $this->addOption('daysinpastend', null, InputOption::VALUE_OPTIONAL, 'defaults to ' . self::DEFAULT_DAYS_IN_PAST_END );
+        $this->addOption('nrofminutesperstep', null, InputOption::VALUE_OPTIONAL, 'defaults to ' . self::DEFAULT_NROFMINUTESPERSTEP);
+        $this->addOption('mincurrencysize', null, InputOption::VALUE_OPTIONAL, 'defaults to ' . self::DEFAULT_MIN_CURRENCY_SIZE);
+        $this->addOption('maxcurrencysize', null, InputOption::VALUE_OPTIONAL, 'defaults to ' . self::DEFAULT_MAX_CURRENCY_SIZE);
         // strategy
-        $this->addArgument('buyperiodinhours', InputArgument::OPTIONAL, 'format is ' . self::DEFAULT_BUY_HOURS_IN_PAST_START . '->' . self::DEFAULT_BUY_HOURS_IN_PAST_END );
-        $this->addArgument('baselinedeltapercentage', InputArgument::OPTIONAL, 'defaults to ' . self::DEFAULT_BASELINE_DELTA_PERCENTAGE );
-        $this->addArgument('baselinebookmakernames', InputArgument::OPTIONAL, 'format is comma-separate-list of bookmaker-names, defaults to nothing(average) ' . self::DEFAULT_BASELINE_DELTA_PERCENTAGE );
+        $this->addOption('buyperiodinhours', null, InputOption::VALUE_OPTIONAL, 'format is ' . self::DEFAULT_BUY_HOURS_IN_PAST_START . '->' . self::DEFAULT_BUY_HOURS_IN_PAST_END );
+        $this->addOption('sellperiodinhours', null, InputOption::VALUE_OPTIONAL, 'format is ' . self::DEFAULT_SELL_HOURS_IN_PAST_START . '->' . self::DEFAULT_SELL_HOURS_IN_PAST_END );
+        $this->addOption('baselinebookmakernames', null, InputOption::VALUE_OPTIONAL, 'format is comma-separate-list of bookmaker-names, defaults to nothing(average) ' . self::DEFAULT_BASELINE_DELTA_PERCENTAGE );
+        $this->addOption('profitpercentage', null, InputOption::VALUE_OPTIONAL, 'defaults to ' . self::DEFAULT_PROFIT_PERCENTAGE );
+        $this->addOption('baselinedeltapercentage', null, InputOption::VALUE_OPTIONAL, 'defaults to ' . self::DEFAULT_BASELINE_DELTA_PERCENTAGE );
 
         parent::configure();
     }
@@ -124,30 +131,30 @@ winst-percentage-back(excl. exchange-opslag)*/
 
         $now = new DateTimeImmutable();
         $daysInPastStart = self::DEFAULT_DAYS_IN_PAST_START;
-        if( $input->getArgument('daysinpaststart') !== null ) {
-            $daysInPastStart = (int) $input->getArgument('daysinpaststart');
+        if( $input->getOption('daysinpaststart') !== null ) {
+            $daysInPastStart = (int) $input->getOption('daysinpaststart');
         }
         $this->startDate = $now->modify("-".$daysInPastStart." days");
 
         $daysInPastEnd = self::DEFAULT_DAYS_IN_PAST_END;
-        if( $input->getArgument('daysinpastend') !== null ) {
-            $daysInPastEnd = (int) $input->getArgument('daysinpastend');
+        if( $input->getOption('daysinpastend') !== null ) {
+            $daysInPastEnd = (int) $input->getOption('daysinpastend');
         }
         $this->endDate = $now->modify("-".$daysInPastEnd." days");
 
         $this->nrOfMinutesPerStep = self::DEFAULT_NROFMINUTESPERSTEP;
-        if( $input->getArgument('nrofminutesperstep') !== null ) {
-            $this->nrOfMinutesPerStep = (int) $input->getArgument('nrofminutesperstep');
+        if( $input->getOption('nrofminutesperstep') !== null ) {
+            $this->nrOfMinutesPerStep = (int) $input->getOption('nrofminutesperstep');
         }
 
         $this->minCurrencySize = self::DEFAULT_MIN_CURRENCY_SIZE;
-        if( $input->getArgument('mincurrencysize') !== null ) {
-            $this->minCurrencySize = (int) $input->getArgument('mincurrencysize');
+        if( $input->getOption('mincurrencysize') !== null ) {
+            $this->minCurrencySize = (int) $input->getOption('mincurrencysize');
         }
 
         $this->maxCurrencySize = self::DEFAULT_MAX_CURRENCY_SIZE;
-        if( $input->getArgument('maxcurrencysize') !== null ) {
-            $this->maxCurrencySize = (int) $input->getArgument('maxcurrencysize');
+        if( $input->getOption('maxcurrencysize') !== null ) {
+            $this->maxCurrencySize = (int) $input->getOption('maxcurrencysize');
         }
 
         $this->wallet = new Wallet( new Range( $this->minCurrencySize, $this->maxCurrencySize));
@@ -160,24 +167,30 @@ winst-percentage-back(excl. exchange-opslag)*/
     {
         $buyHoursInPastStart = self::DEFAULT_BUY_HOURS_IN_PAST_START;
         $buyHoursInPastEnd = self::DEFAULT_BUY_HOURS_IN_PAST_END;
-        if( $input->getArgument('buyperiodinhours') !== null ) {
-            $strPos = strpos( $input->getArgument('buyperiodinhours'), "=>" );
+        if( $input->getOption('buyperiodinhours') !== null ) {
+            $strPos = strpos( $input->getOption('buyperiodinhours'), "=>" );
             if( $strPos !== false ) {
-                $buyHoursInPastStart = substr( $input->getArgument('buyperiodinhours'), 0, $strPos );
-                $buyHoursInPastEnd = substr( $input->getArgument('buyperiodinhours'), $strPos + strlen("=>") );
+                $buyHoursInPastStart = substr( $input->getOption('buyperiodinhours'), 0, $strPos );
+                $buyHoursInPastEnd = substr( $input->getOption('buyperiodinhours'), $strPos + strlen("=>") );
             }
         }
         $buyPeriodInHours = new Range( $buyHoursInPastStart, $buyHoursInPastEnd );
 
-        $baselineDeltaPercentage = self::DEFAULT_BASELINE_DELTA_PERCENTAGE;
-        if( $input->getArgument('baselinedeltapercentage') !== null ) {
-            $baselineDeltaPercentage = (int) $input->getArgument('baselinedeltapercentage');
+        $sellHoursInPastStart = self::DEFAULT_SELL_HOURS_IN_PAST_START;
+        $sellHoursInPastEnd = self::DEFAULT_SELL_HOURS_IN_PAST_END;
+        if( $input->getOption('sellperiodinhours') !== null ) {
+            $strPos = strpos( $input->getOption('sellperiodinhours'), "=>" );
+            if( $strPos !== false ) {
+                $sellHoursInPastStart = substr( $input->getOption('sellperiodinhours'), 0, $strPos );
+                $sellHoursInPastEnd = substr( $input->getOption('sellperiodinhours'), $strPos + strlen("=>") );
+            }
         }
+        $sellPeriodInHours = new Range( $sellHoursInPastStart, $sellHoursInPastEnd );
 
         $baselineBookmakers = [];
         $bookmakerRepos = $this->container->get(BookmakerRepository::class);
-        if( $input->getArgument('baselinebookmakernames') !== null ) {
-            $baselineBookmakerNames = explode(",", $input->getArgument('baselinebookmakernames') );
+        if( $input->getOption('baselinebookmakernames') !== null ) {
+            $baselineBookmakerNames = explode(",", $input->getOption('baselinebookmakernames') );
             foreach( $baselineBookmakerNames as $baselineBookmakerName ) {
                 $bookmaker = $bookmakerRepos->findOneBy( ["name" => $baselineBookmakerName ]);
                 if( $bookmaker !== null ) {
@@ -188,16 +201,34 @@ winst-percentage-back(excl. exchange-opslag)*/
             $baselineBookmakers = $bookmakerRepos->findBy( [ "exchange" => false ] );
         }
 
+        $profitPercentage = self::DEFAULT_PROFIT_PERCENTAGE;
+        if( $input->getOption('profitpercentage') !== null ) {
+            $profitPercentage = (int) $input->getOption('profitpercentage');
+        }
+
+        $baselineDeltaPercentage = self::DEFAULT_BASELINE_DELTA_PERCENTAGE;
+        if( $input->getOption('baselinedeltapercentage') !== null ) {
+            $baselineDeltaPercentage = (int) $input->getOption('baselinedeltapercentage');
+        }
+
         $this->strategies = array(
             new PreMatchPriceGoingUp(
                 $this->container->get(BetLineRepository::class),
                 $this->container->get(LayBackRepository::class),
                 $buyPeriodInHours,
+                $sellPeriodInHours,
                 $baselineBookmakers,
+                $profitPercentage,
                 $baselineDeltaPercentage )
             );
     }
 
+
+    // in de wallet zitten alle transacties
+    // normaliter bestaat 1 succesvolle bet voor pricegoingup uit:
+    // 1 : buy transaction => goedkope lay
+    // 2 : buy transaction => dure back
+    // 3 : payout transactions(2x) => waarbij de een 0 en de ander eerst meer als de som van de 2 buy transactions
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->init($input, 'cron-simulate');
@@ -207,8 +238,8 @@ winst-percentage-back(excl. exchange-opslag)*/
             $period = new Period( $dateIt->modify("-" . $this->nrOfMinutesPerStep  . " minutes"), $dateIt );
             $this->logger->info("processing period " . $period->getStartDate()->format("Y-m-d H:i") . "  => " . $period->getEndDate()->format("Y-m-d H:i"));
             $buyTransactions = $this->buyLayBacks( $period );
-            $paidTransactions = $this->wallet->checkPayouts();
-            if( count($buyTransactions) > 0 or count($paidTransactions) > 0 ) {
+            $payoutTransactions = $this->wallet->checkPayouts($period->getEndDate());
+            if( count($buyTransactions) > 0 or count($payoutTransactions) > 0 ) {
                 $this->showWallet($dateIt);
             }
             $dateIt = $dateIt->modify("+" . $this->nrOfMinutesPerStep  . " minutes");
@@ -224,9 +255,15 @@ winst-percentage-back(excl. exchange-opslag)*/
     protected function buyLayBacks( Period $period): array {
         $transactions = [];
         foreach( $this->strategies as $strategy ) {
-            foreach( $strategy->getLayBackCandidates($period) as $layBack ) {
+            $candidates = $strategy->getLayBackCandidates($period);
+            foreach( $candidates as $layBack ) {
                 try {
-                    $transactions[] = $this->wallet->buy( $layBack );
+                    $transaction = $this->wallet->buy( $layBack, $period->getEndDate() );
+                    if( $transaction === null ) {
+                        continue;
+                    }
+                    $transactions[] = $transaction;
+                    $strategy->addTransaction( $transaction );
                 } catch( Exception $e ) {
                     // could be that max amount is exceeded
                 }
@@ -236,22 +273,11 @@ winst-percentage-back(excl. exchange-opslag)*/
     }
 
     protected function showWallet( DateTimeImmutable $dateTime ){
-        $nameService = new NameService();
-        $table = new ConsoleTable();
-        $table->setHeaders(array( $dateTime->format("Y-m-d H:i:s"), 'thuis', 'uit', 'odds', 'inzet', $this->wallet->getAmount(), ));
-        foreach( $this->wallet->getTransactions() as $transaction ) {
-            $layBack = $transaction->getLayBack();
-            $game = $layBack->getBetLine()->getGame();
-            $row = array(
-                $game->getStartDateTime()->format("Y-m-d H:i:s"),
-                $nameService->getPlacesFromName($game->getPlaces(Game::HOME), true, true),
-                $nameService->getPlacesFromName($game->getPlaces(Game::AWAY), true, true),
-                $layBack->getPrice(),
-                $transaction->getSize(),
-                $transaction->getPayout()
-            );
-            $table->addRow( $row );
-        }
-        $table->display();
+
+        // $table->setHeaders(array( $dateTime->format("Y-m-d H:i:s"), 'thuis', 'uit', 'odds', 'inzet', $this->wallet->getAmount(), ));
+        //
+        $this->logger->info("all transactions of wallet at  " . $dateTime->format(Output::DATEFORMAT ) );
+        $transactionOutput = new TransactionOutput($this->wallet->getTransactions());
+        $transactionOutput->toConsole();
     }
 }

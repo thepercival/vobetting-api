@@ -84,7 +84,7 @@ class Listing extends Command
                 echo "  " . $argument->getName() . " (" . $argument->getDescription() . ")" . PHP_EOL;
             }
             foreach( $command->getDefinition()->getOptions() as $option ) {
-                echo "  --" . $option->getName() . PHP_EOL;
+                echo " --" . $option->getName() . " (" . $option->getDescription() . ")" . PHP_EOL;
             }
             echo PHP_EOL;
         }

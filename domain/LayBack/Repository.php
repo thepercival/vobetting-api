@@ -23,22 +23,30 @@ class Repository extends \Voetbal\Repository
     /**
      * @param BetLine $betLine
      * @param Period $period
-     * @param bool|null $runner
      * @return array|LayBack[]
      */
-    public function findByExt( BetLine $betLine, Period $period, bool $runner = null): array
+    public function findByExt( BetLine $betLine, Period $period/*, bool $runner = null, bool $layOrBack = null, bool $exchange = null*/): array
     {
         $query = $this->createQueryBuilder('lb')
             ->join("lb.betLine", "bl")
             ->join("bl.game", "g")
-            ->where('lb.dateTime >= :start')
+            ->join("lb.bookmaker", "b")
+            ->where('lb.betLine = :betLine')
+            // ->andWhere('lb.runnerHomeAway = :runner')
+            ->andWhere('lb.dateTime >= :start')
             ->andWhere('lb.dateTime <= :end')
-            ->andWhere('lb.runnerHomeAway = :runner')
-            ->addOrderBy('lb.size', 'DESC')
+            ->addOrderBy('lb.price', 'DESC')
         ;
+        $query = $query->setParameter('betLine', $betLine);
+        // $query = $query->setParameter('runner', $runner);
         $query = $query->setParameter('start', $period->getStartDate());
         $query = $query->setParameter('end', $period->getEndDate());
-        $query = $query->setParameter('runner', $runner);
+        /*if( $layOrBack !== null ) {
+            $query = $query->andWhere('lb.back = :layOrBack')->setParameter('layOrBack', $layOrBack);
+        }
+        if( $exchange !== null ) {
+            $query = $query->andWhere('b.exchange = :exchange')->setParameter('exchange', $exchange);
+        }*/
         return $query->getQuery()->getResult();
     }
 }

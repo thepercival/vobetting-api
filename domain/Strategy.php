@@ -2,6 +2,7 @@
 
 namespace VOBetting;
 
+use DateTimeImmutable;
 use League\Period\Period;
 use VOBetting\BetLine\Repository as BetLineRepository;
 use VOBetting\LayBack\Repository as LayBackRepository;
@@ -30,4 +31,6 @@ abstract class Strategy
      * @return array|LayBack[]
      */
     abstract public function getLayBackCandidates( Period $period ): array;
+
+    abstract public function addTransaction( Transaction $transaction ): void;
 }

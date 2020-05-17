@@ -88,6 +88,9 @@ class Bookmaker implements Importable
 
     public function getFeePercentage(): float
     {
+        if( $this->feePercentage == null ) {
+            return 0.0;
+        }
         return $this->feePercentage;
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Commands;
 
+use VOBetting\LayBack\Output;
 use Voetbal\Game;
 use Voetbal\NameService;
 use DateTimeInterface;
@@ -263,98 +264,17 @@ class GetExternal extends Command
             echo "de externe bron \"" . $externalSourcImpl->getExternalSource()->getName() . "\" kan geen laybacks opvragen" . PHP_EOL;
             return;
         }
-        $nameService = new NameService();
-        $getCompetitionLayBacks = function(Competition $competition) use ($externalSourcImpl, $nameService): void {
-            $table = new ConsoleTable();
+
+        $getCompetitionLayBacks = function(Competition $competition) use ($externalSourcImpl): void {
             $layBacks = $externalSourcImpl->getLayBacks($competition);
             if( count($layBacks) === 0 ) {
-                $table->addRow( ['no laybacks', $competition->getName()] );
-            } else {
-                $table->setHeaders(array('b/l', 'bookmaker', 'price', 'size', 'bettype', 'homeaway', 'game', 'competition' ));
+                echo 'no laybacks for ' . $competition->getName() . PHP_EOL;
+                return;
             }
-            foreach( $layBacks as $layBack ) {
-                $row = array(
-                    $layBack->getBack() ? "back" : "lay",
-                    $layBack->getBookmaker()->getName(),
-                    $layBack->getPrice(),
-                    $layBack->getSize(),
-                    $layBack->getBetLine()->getBetType(),
-                    $layBack->getRunnerHomeAway() === Game::HOME ? 'home' : ( $layBack->getRunnerHomeAway() === Game::AWAY ? 'away' : 'draw' ),
-                    $nameService->getPlacesFromName($layBack->getBetLine()->getGame()->getPlaces(), true, true),
-                    $competition->getName()
-                );
-                $table->addRow( $row );
-            }
-            $table->display();
+            (new Output( $layBacks ))->toConsole();
         };
         foreach( $externalSourcImpl->getCompetitions() as $competition ) {
             $getCompetitionLayBacks($competition);
         }
     }
-
-
-
-//
-//    protected function importStructures(string $externalSourceName)
-//    {
-//        $externalSourcImpl = $this->externalSourceFactory->createByName($externalSourceName);
-//        $structureRepos = $this->container->get(StructureRepository::class);
-//        $competitorAttacherRepos = $this->container->get(CompetitorAttacherRepository::class);
-//        $competitionAttacherRepos = $this->container->get(CompetitionAttacherRepository::class);
-//        $this->importService->importStructures(
-//            $externalSourcImpl,
-//            $structureRepos,
-//            $competitorAttacherRepos,
-//            $competitionAttacherRepos
-//        );
-//    }
-//
-//    protected function importGames(string $externalSourceName)
-//    {
-//        $externalSourcImpl = $this->externalSourceFactory->createByName($externalSourceName);
-//        $gameRepos = $this->container->get(GameRepository::class);
-//        $gameScoreRepos = $this->container->get(GameScoreRepository::class);
-//        $competitorRepos = $this->container->get(CompetitorRepository::class);
-//        $structureRepos = $this->container->get(StructureRepository::class);
-//        $gameAttacherRepos = $this->container->get(GameAttacherRepository::class);
-//        $competitionAttacherRepos = $this->container->get(CompetitionAttacherRepository::class);
-//        $competitorAttacherRepos = $this->container->get(CompetitorAttacherRepository::class);
-//
-//        $this->importService->importGames(
-//            $externalSourcImpl,
-//            $gameRepos,
-//            $gameScoreRepos,
-//            $competitorRepos,
-//            $structureRepos,
-//            $gameAttacherRepos,
-//            $competitionAttacherRepos,
-//            $competitorAttacherRepos
-//        );
-//    }
-//
-//    /**
-//     * @param array|string[] $externalSourceNames
-//     */
-//    protected function importLayBacks(array $externalSourceNames)
-//    {
-//        foreach ($externalSourceNames as $externalSourceName) {
-//            $externalSourcImpl = $this->externalSourceFactory->createByName($externalSourceName);
-//            $gameRepos = $this->container->get(GameRepository::class);
-//            $layBackRepos = $this->container->get(LayBackRepository::class);
-//            $betLineRepos = $this->container->get(BetLineRepository::class);
-//            $bookmakerAttacherRepos = $this->container->get(BookmakerAttacherRepository::class);
-//            $competitorAttacherRepos = $this->container->get(CompetitorAttacherRepository::class);
-//            $competitionAttacherRepos = $this->container->get(CompetitionAttacherRepository::class);
-//
-//            $this->importService->importLayBacks(
-//                $externalSourcImpl,
-//                $gameRepos,
-//                $layBackRepos,
-//                $betLineRepos,
-//                $bookmakerAttacherRepos,
-//                $competitorAttacherRepos,
-//                $competitionAttacherRepos
-//            );
-//        }
-//    }
 }

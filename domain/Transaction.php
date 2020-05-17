@@ -13,6 +13,10 @@ use DateTimeImmutable;
 class Transaction
 {
     /**
+     * @var int
+     */
+    protected $action;
+    /**
      * @var DateTimeImmutable
      */
     protected $dateTime;
@@ -24,8 +28,11 @@ class Transaction
      * @var float
      */
     protected $size;
+    public const BUY = 1;
+    public const PAYOUT = 2;
 
-    public function __construct( DateTimeImmutable $dateTime, LayBack $layBack, float $size) {
+    public function __construct( int $action, DateTimeImmutable $dateTime, LayBack $layBack, float $size) {
+        $this->action = $action;
         $this->dateTime = $dateTime;
         $this->layBack = $layBack;
         $this->size = $size;
@@ -33,6 +40,10 @@ class Transaction
 
     public function getDateTime(): DateTimeImmutable {
         return $this->dateTime;
+    }
+
+    public function getAction(): int {
+        return $this->action;
     }
 
     public function getLayBack(): LayBack {

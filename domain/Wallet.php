@@ -23,7 +23,7 @@ class Wallet
     /**
      * @var float
      */
-    protected $amount;
+    protected $amount = 0.0;
     /**
      * @var array|Transaction[]
      */
@@ -34,16 +34,20 @@ class Wallet
         $this->transactions = array();
     }
 
-    public function buy( LayBack $layBack ): Transaction {
+    public function buy( LayBack $layBack, DateTimeImmutable $currentDateTime ): ?Transaction {
         if( $layBack->getSize() < $this->currencyRange->min ) {
             throw new Exception("layback not bought, not over minimum", E_ERROR );
         }
         $sizeBought = $this->getSizeBought( $layBack->getBetLine() );
-        if( $this->willMaxBeExceeded( $sizeBought, $layBack->getSize() ) ) {
-            throw new Exception("layback not bought, maximum exceeded", E_ERROR );
+
+        if( $sizeBought >= ( $this->currencyRange->max - $this->currencyRange->min)  ) {
+            throw new Exception("layback not bought, already or almost on maximum", E_ERROR );
         }
         $sizeBuy = $this->getSizeBuying( $sizeBought, $layBack->getSize() );
-        $transaction = new Transaction( new DateTimeImmutable(), $layBack, $sizeBuy );
+        if( $sizeBuy == 0 ) {
+            return null;
+        }
+        $transaction = new Transaction( Transaction::BUY, $currentDateTime, $layBack, $sizeBuy );
         $this->transactions[] = $transaction;
         return $transaction;
     }
@@ -73,15 +77,14 @@ class Wallet
     }
 
     /**
+     * @param DateTimeImmutable $currentDateTime
      * @return array|Transaction[]
-     * @throws Exception
      */
-    public function checkPayouts(): array {
-        $now = new DateTimeImmutable();
+    public function checkPayouts( DateTimeImmutable $currentDateTime): array {
         $transactionsToCheck = [];
         foreach( $this->transactions as $key => $transaction ) {
             $game = $transaction->getLayBack()->getBetLine()->getGame();
-            if( $game->getState() === State::Finished && $game->getStartDateTime() > $now ) {
+            if( $game->getState() === State::Finished && $game->getStartDateTime() > $currentDateTime ) {
                 $transactionsToCheck[] = $transaction;
             }
         }
