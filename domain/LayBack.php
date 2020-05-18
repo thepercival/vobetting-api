@@ -107,6 +107,11 @@ class LayBack
         return $this->price;
     }
 
+    public function getFee(): float
+    {
+        return (($this->price / 100) * $this->getBookmaker()->getFeePercentage() );
+    }
+
     public function setPrice(float $price)
     {
         $this->price = $price;

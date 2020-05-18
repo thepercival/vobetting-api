@@ -15,6 +15,12 @@ use Voetbal\Game;
 use Voetbal\Range;
 use Exception;
 
+/**
+ * // Commission charged = ((stake * odds) - stake) * commission rate
+ *
+ * Class PreMatchPriceGoingUp
+ * @package VOBetting\Strategy
+ */
 class PreMatchPriceGoingUp extends StrategyBase
 {
     /**
@@ -100,6 +106,10 @@ class PreMatchPriceGoingUp extends StrategyBase
                 /** @var bool|null $runner */
                 foreach( [Game::HOME,Game::AWAY, null] as $runner ) {
 
+                    // @TODO CHANGE STRAT: FAVORITES GO DOWN, REVERSE FOR OTHER
+
+                    // @TODO get highest back in past(for, betline, runner, $layOrBack, $exchange=true, if highest-back is x% more than candidate-lay continue
+                    // @TODO wait with candidates until lay is rising!, determine average of current and previous and compare!!
 
                     $backs = $layBackOrganizer->get( $runner, LayBack::BACK, false );
                     $baselinePrice = $this->getBaselinePrice( $backs );
@@ -111,11 +121,12 @@ class PreMatchPriceGoingUp extends StrategyBase
                     }
                     $lays = $layBackOrganizer->get( $runner, LayBack::LAY, true );
                     $correctLays = array_filter( $lays, function( LayBack $lay ) use ($baselinePrice) : bool {
-                        return $this->layPriceIsLowEnough( $baselinePrice, $lay->getPrice() );
+                        return $this->layPriceIsLowEnough( $baselinePrice, $lay->getPrice() + $lay->getFee() );
                     });
-//                    if( count( $correctLays ) > 0 ) {
-//                        (new LayBack\Output($correctLays))->toConsole();
-//                    }
+                    if( count( $correctLays ) > 0 ) {
+                        (new LayBack\Output($correctLays))->toConsole();
+                        (new LayBack\Output(array_merge($backs, $lays)))->toConsole();
+                    }
                     $candidates = array_merge( $candidates, $correctLays );
                 }
             }
@@ -198,15 +209,15 @@ class PreMatchPriceGoingUp extends StrategyBase
 
     protected function getLayPeriod( DateTimeImmutable $currentDateTime ): Period {
         return new Period(
-            $currentDateTime->modify("+".$this->layHourRange->min." hours"),
-            $currentDateTime->modify("+".$this->layHourRange->max." hours")
+            $currentDateTime->modify("+".$this->layHourRange->max." hours"),
+            $currentDateTime->modify("+".$this->layHourRange->min." hours")
         );
     }
 
     protected function getBackPeriod( DateTimeImmutable $currentDateTime ): Period {
         return new Period(
-            $currentDateTime->modify("+".$this->backHourRange->min." hours"),
-            $currentDateTime->modify("+".$this->backHourRange->max." hours")
+            $currentDateTime->modify("+".$this->backHourRange->max." hours"),
+            $currentDateTime->modify("+".$this->backHourRange->min." hours")
         );
     }
 

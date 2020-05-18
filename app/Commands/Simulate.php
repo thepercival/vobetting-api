@@ -79,11 +79,11 @@ class Simulate extends Command
     protected const DEFAULT_MIN_CURRENCY_SIZE = 2;
     protected const DEFAULT_MAX_CURRENCY_SIZE = 10;
     // strategy
-    protected const DEFAULT_SELL_HOURS_IN_PAST_START = 0;
-    protected const DEFAULT_SELL_HOURS_IN_PAST_END = 24 * 14;
-    protected const DEFAULT_BUY_HOURS_IN_PAST_START = 2;
-    protected const DEFAULT_BUY_HOURS_IN_PAST_END = 24 * 14;
-    protected const DEFAULT_BASELINE_DELTA_PERCENTAGE = 0;
+    protected const DEFAULT_SELL_HOURS_IN_PAST_START = 24 * 14;
+    protected const DEFAULT_SELL_HOURS_IN_PAST_END = 0;
+    protected const DEFAULT_BUY_HOURS_IN_PAST_START = 24 * 7;
+    protected const DEFAULT_BUY_HOURS_IN_PAST_END = 24 * 3;
+    protected const DEFAULT_BASELINE_DELTA_PERCENTAGE = 2;
     protected const DEFAULT_PROFIT_PERCENTAGE = 1;
 
 /*
