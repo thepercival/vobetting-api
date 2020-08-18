@@ -10,13 +10,13 @@ namespace VOBetting\ExternalSource\TheOddsApi\Helper;
 
 use VOBetting\ExternalSource\TheOddsApi\Helper as TheOddsApiHelper;
 use VOBetting\ExternalSource\TheOddsApi\ApiHelper as TheOddsApiApiHelper;
-use Voetbal\ExternalSource\Association as ExternalSourceAssociation;
-use Voetbal\Association as AssociationBase;
+use Sports\ExternalSource\Association as ExternalSourceAssociation;
+use Sports\Association as AssociationBase;
 use VOBetting\ExternalSource\TheOddsApi;
 use Psr\Log\LoggerInterface;
 use stdClass;
-use Voetbal\ExternalSource\SofaScore;
-use Voetbal\Import\Service as ImportService;
+use Sports\ExternalSource\SofaScore;
+use Sports\Import\Service as ImportService;
 
 class Association extends TheOddsApiHelper implements ExternalSourceAssociation
 {

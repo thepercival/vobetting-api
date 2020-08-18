@@ -15,29 +15,29 @@ use VOBetting\BetLine\Repository as BetLineRepository;
 use VOBetting\ExternalSource\Matchbook;
 use VOBetting\ExternalSource\TheOddsApi;
 use VOBetting\LayBack\Repository as LayBackRepository;
-use Voetbal\Attacher\Game\Repository as GameAttacherRepository;
-use Voetbal\Attacher\Place\Repository as PlaceAttacherRepository;
-use Voetbal\Attacher\Poule\Repository as PouleAttacherRepository;
-use Voetbal\Attacher\Sport\Repository as SportAttacherRepository;
-use Voetbal\Attacher\Association\Repository as AssociationAttacherRepository;
-use Voetbal\Attacher\League\Repository as LeagueAttacherRepository;
-use Voetbal\Attacher\Season\Repository as SeasonAttacherRepository;
-use Voetbal\Attacher\Competition\Repository as CompetitionAttacherRepository;
-use Voetbal\Attacher\Competitor\Repository as CompetitorAttacherRepository;
+use SportsImport\Attacher\Game\Repository as GameAttacherRepository;
+use SportsImport\Attacher\Place\Repository as PlaceAttacherRepository;
+use SportsImport\Attacher\Poule\Repository as PouleAttacherRepository;
+use SportsImport\Attacher\Sport\Repository as SportAttacherRepository;
+use SportsImport\Attacher\Association\Repository as AssociationAttacherRepository;
+use SportsImport\Attacher\League\Repository as LeagueAttacherRepository;
+use SportsImport\Attacher\Season\Repository as SeasonAttacherRepository;
+use SportsImport\Attacher\Competition\Repository as CompetitionAttacherRepository;
+use SportsImport\Attacher\Competitor\Repository as CompetitorAttacherRepository;
 
 use VOBetting\ExternalSource\Factory as ExternalSourceFactory;
-use Voetbal\ExternalSource\SofaScore;
+use Sports\ExternalSource\SofaScore;
 use VOBetting\ExternalSource\Betfair;
-use Voetbal\Game\Repository as GameRepository;
-use Voetbal\Game\Score\Repository as GameScoreRepository;
+use Sports\Game\Repository as GameRepository;
+use Sports\Game\Score\Repository as GameScoreRepository;
 use VOBetting\Import\Service as ImportService;
-use Voetbal\Sport\Repository as SportRepository;
-use Voetbal\Association\Repository as AssociationRepository;
-use Voetbal\League\Repository as LeagueRepository;
-use Voetbal\Season\Repository as SeasonRepository;
-use Voetbal\Competition\Repository as CompetitionRepository;
-use Voetbal\Competitor\Repository as CompetitorRepository;
-use Voetbal\Structure\Repository as StructureRepository;
+use Sports\Sport\Repository as SportRepository;
+use Sports\Association\Repository as AssociationRepository;
+use Sports\League\Repository as LeagueRepository;
+use Sports\Season\Repository as SeasonRepository;
+use Sports\Competition\Repository as CompetitionRepository;
+use Sports\Competitor\Repository as CompetitorRepository;
+use Sports\Structure\Repository as StructureRepository;
 
 class Import extends Command
 {

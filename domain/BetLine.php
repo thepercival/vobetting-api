@@ -9,8 +9,8 @@
 namespace VOBetting;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Voetbal\Game;
-use Voetbal\Place;
+use Sports\Game;
+use Sports\Place;
 
 class BetLine
 {

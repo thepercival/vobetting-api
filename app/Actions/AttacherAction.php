@@ -13,22 +13,23 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
-use Voetbal\ExternalSource\Repository as ExternalSourceRepository;
-use Voetbal\Attacher\Repository as AttacherRepos;
+use SportsImport\ExternalSource\Repository as ExternalSourceRepository;
+use SportsImport\Attacher\Repository as AttacherRepos;
 use VOBetting\Attacher\Factory as AttacherFactory;
-use Voetbal\Repository as VoetbalRepository;
-use Voetbal\Sport\Repository as SportRepository;
-use Voetbal\Attacher\Sport\Repository as SportAttacherRepository;
-use Voetbal\Association\Repository as AssociationRepository;
-use Voetbal\Attacher\Association\Repository as AssociationAttacherRepository;
-use Voetbal\Season\Repository as SeasonRepository;
-use Voetbal\Attacher\Season\Repository as SeasonAttacherRepository;
-use Voetbal\League\Repository as LeagueRepository;
-use Voetbal\Attacher\League\Repository as LeagueAttacherRepository;
-use Voetbal\Competition\Repository as CompetitionRepository;
-use Voetbal\Attacher\Competition\Repository as CompetitionAttacherRepository;
-use Voetbal\Competitor\Repository as CompetitorRepository;
-use Voetbal\Attacher\Competitor\Repository as CompetitorAttacherRepository;
+use SportsImport\Attacher;
+use Sports\Repository as VoetbalRepository;
+use Sports\Sport\Repository as SportRepository;
+use SportsImport\Attacher\Sport\Repository as SportAttacherRepository;
+use Sports\Association\Repository as AssociationRepository;
+use SportsImport\Attacher\Association\Repository as AssociationAttacherRepository;
+use Sports\Season\Repository as SeasonRepository;
+use SportsImport\Attacher\Season\Repository as SeasonAttacherRepository;
+use Sports\League\Repository as LeagueRepository;
+use SportsImport\Attacher\League\Repository as LeagueAttacherRepository;
+use Sports\Competition\Repository as CompetitionRepository;
+use SportsImport\Attacher\Competition\Repository as CompetitionAttacherRepository;
+use Sports\Competitor\Team\Repository as TeamCompetitorRepository;
+use SportsImport\Attacher\Competitor\Team\Repository as TeamCompetitorAttacherRepository;
 use VOBetting\Bookmaker\Repository as BookmakerRepository;
 use VOBetting\Attacher\Bookmaker\Repository as BookmakerAttacherRepository;
 
@@ -83,11 +84,11 @@ final class AttacherAction extends Action
      */
     private $competitionRepos;
     /**
-     * @var CompetitorAttacherRepository
+     * @var TeamCompetitorRepository
      */
-    private $competitorAttacherRepos;
+    private $teamCompetitorAttacherRepos;
     /**
-     * @var CompetitorRepository
+     * @var TeamCompetitorRepository
      */
     private $competitorRepos;
     /**
@@ -113,8 +114,8 @@ final class AttacherAction extends Action
         LeagueRepository $leagueRepos,
         CompetitionAttacherRepository $competitionAttacherRepos,
         CompetitionRepository $competitionRepos,
-        CompetitorAttacherRepository $competitorAttacherRepos,
-        CompetitorRepository $competitorRepos,
+        TeamCompetitorAttacherRepository $teamCompetitorAttacherRepos,
+        TeamCompetitorRepository $teamCompetitorRepos,
         BookmakerAttacherRepository $bookmakerAttacherRepos,
         BookmakerRepository $bookmakerRepos
     ) {
@@ -131,8 +132,8 @@ final class AttacherAction extends Action
         $this->leagueRepos = $leagueRepos;
         $this->competitionAttacherRepos = $competitionAttacherRepos;
         $this->competitionRepos = $competitionRepos;
-        $this->competitorAttacherRepos = $competitorAttacherRepos;
-        $this->competitorRepos = $competitorRepos;
+        $this->teamCompetitorAttacherRepos = $teamCompetitorAttacherRepos;
+        $this->teamCompetitorRepos = $teamCompetitorRepos;
         $this->bookmakerAttacherRepos = $bookmakerAttacherRepos;
         $this->bookmakerRepos = $bookmakerRepos;
     }
@@ -279,8 +280,8 @@ final class AttacherAction extends Action
                 throw new \Exception("er is geen externe bron meegegeven", E_ERROR);
             }
 
-            /** @var \Voetbal\Attacher $attacherSer */
-            $attacherSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Attacher', 'json');
+            /** @var Attacher $attacherSer */
+            $attacherSer = $this->serializer->deserialize($this->getRawData(), 'SportsImport\Attacher', 'json');
 
             $importable = $importableRepos->find($attacherSer->getImportableIdForSer());
             if ($importable === null) {

@@ -9,6 +9,6 @@ VOBetting\BetLine:
     betType:
       type: integer
     place:
-      type: Voetbal\Place
+      type: Sports\Place
     layBacks:
       type: ArrayCollection<VOBetting\LayBack>

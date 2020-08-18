@@ -6,7 +6,7 @@
  * Time: 12:23
  */
 
-namespace App\Actions\Voetbal;
+namespace App\Actions\Sports;
 
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
@@ -16,10 +16,10 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
-use Voetbal\League;
-use Voetbal\League\Repository as LeagueRepository;
-use Voetbal\Association\Repository as AssociationRepository;
-use Voetbal\Association;
+use Sports\League;
+use Sports\League\Repository as LeagueRepository;
+use Sports\Association\Repository as AssociationRepository;
+use Sports\Association;
 
 final class LeagueAction extends Action
 {
@@ -87,8 +87,8 @@ final class LeagueAction extends Action
     public function add(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \Voetbal\League $leagueSer */
-            $leagueSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\League', 'json');
+            /** @var \Sports\League $leagueSer */
+            $leagueSer = $this->serializer->deserialize($this->getRawData(), 'Sports\League', 'json');
 
             $association = $this->associationRepos->findOneBy([ "name" => $leagueSer->getAssociation()->getName()]);
             if ($association === null) {
@@ -115,8 +115,8 @@ final class LeagueAction extends Action
     public function edit(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \Voetbal\League $leagueSer */
-            $leagueSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\League', 'json');
+            /** @var \Sports\League $leagueSer */
+            $leagueSer = $this->serializer->deserialize($this->getRawData(), 'Sports\League', 'json');
 
             $league = $this->leagueRepos->find($args['id']);
             if ($league === null) {

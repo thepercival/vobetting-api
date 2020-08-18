@@ -14,7 +14,8 @@ return [
     'serializer' => [
         'cache_dir' => __DIR__ . '/../cache/serializer',
         'yml_dir' => [
-            "Voetbal" => __DIR__ . '/../vendor/thepercival/voetbal/serialization/yml',
+            "Sports" => __DIR__ . '/../vendor/thepercival/php-sports/serialization/yml',
+            "SportsImport" => __DIR__ . '/../vendor/thepercival/php-sports-import/serialization/yml',
             "VOBetting" => __DIR__ . '/../serialization/yml'
         ],
     ],
@@ -30,7 +31,8 @@ return [
     'doctrine' => [
         'meta' => [
             'entity_path' => [
-                __DIR__ . '/../vendor/thepercival/voetbal/db/doctrine-mappings',
+                __DIR__ . '/../vendor/thepercival/php-sports/db/doctrine-mappings',
+                __DIR__ . '/../vendor/thepercival/php-sports-import/db/doctrine-mappings',
                 __DIR__ . '/../db/doctrine-mappings'
             ],
             'dev_mode' => (getenv('ENVIRONMENT') === "development"),

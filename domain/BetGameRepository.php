@@ -4,7 +4,7 @@ namespace VOBetting;
 
 use Doctrine\ORM\EntityManager;
 use stdClass;
-use Voetbal\Game;
+use Sports\Game;
 use \Doctrine\ORM\QueryBuilder;
 
 class BetGameRepository
@@ -24,7 +24,7 @@ class BetGameRepository
         $postFix = $homeAway ? "home" : "away";
         return $this->em->createQueryBuilder()
             ->select("cr".$postFix.".name")
-            ->from('Voetbal\Game\Place', "gpp" . $postFix)
+            ->from('Sports\Game\Place', "gpp" . $postFix)
             ->join("gpp".$postFix.".place", "pp" . $postFix )
             ->join("pp".$postFix.".competitor", "cr" . $postFix)
             ->where("gpp".$postFix.".game = g")

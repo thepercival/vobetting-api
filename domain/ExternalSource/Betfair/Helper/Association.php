@@ -10,13 +10,13 @@ namespace VOBetting\ExternalSource\Betfair\Helper;
 
 use VOBetting\ExternalSource\Betfair\Helper as BetfairHelper;
 use VOBetting\ExternalSource\Betfair\ApiHelper as BetfairApiHelper;
-use Voetbal\ExternalSource\Association as ExternalSourceAssociation;
-use Voetbal\Association as AssociationBase;
+use Sports\ExternalSource\Association as ExternalSourceAssociation;
+use Sports\Association as AssociationBase;
 use VOBetting\ExternalSource\Betfair;
 use Psr\Log\LoggerInterface;
 use stdClass;
-use Voetbal\ExternalSource\SofaScore;
-use Voetbal\Import\Service as ImportService;
+use Sports\ExternalSource\SofaScore;
+use Sports\Import\Service as ImportService;
 
 class Association extends BetfairHelper implements ExternalSourceAssociation
 {

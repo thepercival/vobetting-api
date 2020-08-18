@@ -10,13 +10,13 @@ namespace VOBetting\ExternalSource\Betfair;
 
 use VOBetting\ExternalSource\Betfair;
 use Psr\Log\LoggerInterface;
-use Voetbal\Competition;
-use Voetbal\Competitor;
-use Voetbal\Poule;
-use Voetbal\Range as VoetbalRange;
-use Voetbal\Structure as StructureBase;
-use Voetbal\Structure\Service as StructureService;
-use Voetbal\Structure\Options as StructureOptions;
+use Sports\Competition;
+use Sports\Competitor;
+use Sports\Poule;
+use SportsHelpers\Range as VoetbalRange;
+use Sports\Structure as StructureBase;
+use Sports\Structure\Service as StructureService;
+use Sports\Structure\Options as StructureOptions;
 
 class Helper
 {

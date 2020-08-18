@@ -6,7 +6,7 @@
  * Time: 12:23
  */
 
-namespace App\Actions\Voetbal;
+namespace App\Actions\Sports;
 
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
@@ -16,8 +16,8 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
-use Voetbal\Competition\Repository as CompetitionRepository;
-use Voetbal\Structure\Repository as StructureRepository;
+use Sports\Competition\Repository as CompetitionRepository;
+use Sports\Structure\Repository as StructureRepository;
 
 final class StructureAction extends Action
 {

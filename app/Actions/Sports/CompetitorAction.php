@@ -6,7 +6,7 @@
  * Time: 12:23
  */
 
-namespace App\Actions\Voetbal;
+namespace App\Actions\Sports;
 
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
@@ -16,11 +16,11 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
-use Voetbal\Competitor;
-use Voetbal\Competitor\Repository as CompetitorRepository;
-use Voetbal\Association\Repository as AssociationRepository;
-use Voetbal\Association;
-use Voetbal\League;
+use Sports\Competitor;
+use Sports\Competitor\Repository as CompetitorRepository;
+use Sports\Association\Repository as AssociationRepository;
+use Sports\Association;
+use Sports\League;
 
 final class CompetitorAction extends Action
 {
@@ -88,7 +88,7 @@ final class CompetitorAction extends Action
     {
         try {
             /** @var Competitor $competitorSer */
-            $competitorSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Competitor', 'json');
+            $competitorSer = $this->serializer->deserialize($this->getRawData(), 'Sports\Competitor', 'json');
 
             $association = null;
             $queryParams = $request->getQueryParams();
@@ -120,7 +120,7 @@ final class CompetitorAction extends Action
     {
         try {
             /** @var Competitor $competitorSer */
-            $competitorSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Competitor', 'json');
+            $competitorSer = $this->serializer->deserialize($this->getRawData(), 'Sports\Competitor', 'json');
 
             $competitor = $this->competitorRepos->find($args['id']);
             if ($competitor === null) {

@@ -10,9 +10,9 @@ namespace VOBetting;
 
 use DateTimeImmutable;
 use Exception;
-use Voetbal\Game;
-use Voetbal\Range;
-use Voetbal\State;
+use Sports\Game;
+use SportsHelpers\Range;
+use Sports\State;
 
 class Wallet
 {

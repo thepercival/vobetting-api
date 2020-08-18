@@ -15,17 +15,17 @@ use Psr\Log\LoggerInterface;
 
 use App\Mailer;
 use VOBetting\ExternalSource\Factory as ExternalSourceFactory;
-use Voetbal\Attacher\Association\Repository as AssociationAttacherRepository;
-use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
-use Voetbal\SerializationHandler\Round\NumberEvent as RoundNumberEventSubscriber;
-use Voetbal\SerializationHandler\Round\Number as RoundNumberSerializationHandler;
-use Voetbal\SerializationHandler\Structure as StructureSerializationHandler;
+use SportsImport\Attacher\Association\Repository as AssociationAttacherRepository;
+use Sports\CacheItemDb\Repository as CacheItemDbRepository;
+use Sports\SerializationHandler\Round\NumberEvent as RoundNumberEventSubscriber;
+use Sports\SerializationHandler\Round\Number as RoundNumberSerializationHandler;
+use Sports\SerializationHandler\Structure as StructureSerializationHandler;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
-use Voetbal\SerializationHandler\Round as RoundSerializationHandler;
+use Sports\SerializationHandler\Round as RoundSerializationHandler;
 use Selective\Config\Configuration;
 use Slim\App;
-use Voetbal\ExternalSource\Repository as ExternalSourceRepository;
+use Sports\ExternalSource\Repository as ExternalSourceRepository;
 use Slim\Factory\AppFactory;
 
 return [

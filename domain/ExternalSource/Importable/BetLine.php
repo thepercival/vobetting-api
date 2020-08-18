@@ -10,9 +10,9 @@ namespace VOBetting\ExternalSource\Importable;
 
 use VOBetting\BetLine\Repository as BetLineRepos;
 use VOBetting\External\System\Importer\BetLine as BetLineImporter;
-use Voetbal\Competition\Repository as CompetitionRepos;
-use Voetbal\Game\Repository as GameRepos;
-use Voetbal\External\Competitor\Repository as ExternalCompetitorRepos;
+use Sports\Competition\Repository as CompetitionRepos;
+use Sports\Game\Repository as GameRepos;
+use Sports\External\Competitor\Repository as ExternalCompetitorRepos;
 use VOBetting\LayBack\Repository as LayBackRepos;
 use VOBetting\Bookmaker\Repository as BookmakerRepos;
 use Monolog\Logger;

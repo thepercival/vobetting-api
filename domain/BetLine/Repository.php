@@ -15,7 +15,7 @@ use VOBetting\BetLine;
  * Class Repository
  * @package VOBetting\LayBack
  */
-class Repository extends \Voetbal\Repository
+class Repository extends \Sports\Repository
 {
     /**
      * @param Period $gamesPeriod

@@ -2,16 +2,16 @@
 
 namespace VOBetting\Attacher;
 
-use Voetbal\ExternalSource;
-use Voetbal\Import\Idable as Importable;
-use Voetbal\Attacher as AttacherBase;
-use Voetbal\Attacher\Factory as VoetbalAttacherFactory;
+use SportsImport\ExternalSource;
+use SportsHelpers\Identifiable;
+use SportsImport\Attacher as AttacherBase;
+use SportsImport\Attacher\Factory as AttacherFactory;
 use VOBetting\Attacher\Bookmaker as BookmakerAttacher;
 use VOBetting\Bookmaker;
 
-class Factory extends VoetbalAttacherFactory
+class Factory extends AttacherFactory
 {
-    public function createObject(Importable $importable, ExternalSource $externalSource, $externalId): ?AttacherBase
+    public function createObject(Identifiable $importable, ExternalSource $externalSource, $externalId): ?AttacherBase
     {
         if ($importable instanceof Bookmaker) {
             return new BookmakerAttacher(

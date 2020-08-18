@@ -19,13 +19,13 @@ use VOBetting\Bookmaker\Repository as BookmakerRepository;
 use VOBetting\Transaction;
 use VOBetting\Transaction\Output as TransactionOutput;
 use VOBetting\Wallet;
-use Voetbal\Game;
-use Voetbal\NameService;
-use Voetbal\Range;
+use Sports\Game;
+use Sports\NameService;
+use SportsHelpers\Range;
 use VOBetting\Output;
 use VOBetting\Strategy;
 use VOBetting\Strategy\PreMatchPriceGoingUp;
-use Voetbal\Sport\Repository as SportRepository;
+use Sports\Sport\Repository as SportRepository;
 
 /*
     moment to buy: exchange-lay 1% below bookmaker back and not yet bought and 2 days before start game, games should be before now

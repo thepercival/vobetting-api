@@ -5,8 +5,8 @@ namespace VOBetting\Transaction;
 use LucidFrame\Console\ConsoleTable;
 use stdClass;
 use VOBetting\Transaction;
-use Voetbal\NameService;
-use Voetbal\Game;
+use Sports\NameService;
+use Sports\Game;
 
 use VOBetting\Output as AbstractOutput;
 

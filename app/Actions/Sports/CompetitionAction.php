@@ -6,7 +6,7 @@
  * Time: 12:23
  */
 
-namespace App\Actions\Voetbal;
+namespace App\Actions\Sports;
 
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
@@ -16,15 +16,15 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
-use Voetbal\Competition;
-use Voetbal\Competition\Repository as CompetitionRepository;
-use Voetbal\League\Repository as LeagueRepository;
-use Voetbal\League;
-use Voetbal\Season\Repository as SeasonRepository;
-use Voetbal\Season;
-use Voetbal\Sport\Repository as SportRepository;
-use Voetbal\Sport;
-use Voetbal\Sport\Config\Service as SportConfigService;
+use Sports\Competition;
+use Sports\Competition\Repository as CompetitionRepository;
+use Sports\League\Repository as LeagueRepository;
+use Sports\League;
+use Sports\Season\Repository as SeasonRepository;
+use Sports\Season;
+use Sports\Sport\Repository as SportRepository;
+use Sports\Sport;
+use Sports\Sport\Config\Service as SportConfigService;
 
 final class CompetitionAction extends Action
 {
@@ -112,8 +112,8 @@ final class CompetitionAction extends Action
     public function add(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \Voetbal\Competition $competitionSer */
-            $competitionSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Competition', 'json');
+            /** @var \Sports\Competition $competitionSer */
+            $competitionSer = $this->serializer->deserialize($this->getRawData(), 'Sports\Competition', 'json');
 
             $queryParams = $request->getQueryParams();
             $sport = $this->sportRepos->findOneBy(["name" => $competitionSer->getFirstSportConfig()->getSport()->getName()]);
@@ -156,8 +156,8 @@ final class CompetitionAction extends Action
     public function edit(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \Voetbal\Competition $competitionSer */
-            $competitionSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Competition', 'json');
+            /** @var \Sports\Competition $competitionSer */
+            $competitionSer = $this->serializer->deserialize($this->getRawData(), 'Sports\Competition', 'json');
 
             $competition = $this->competitionRepos->find($args['id']);
             if ($competition === null) {

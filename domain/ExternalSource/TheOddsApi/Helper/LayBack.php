@@ -18,11 +18,11 @@ use VOBetting\Bookmaker;
 use VOBetting\ExternalSource\TheOddsApi;
 use Psr\Log\LoggerInterface;
 use stdClass;
-use Voetbal\Competition;
-use Voetbal\Competitor;
-use Voetbal\Game as GameBase;
-use Voetbal\Place;
-use Voetbal\Poule;
+use Sports\Competition;
+use Sports\Competitor;
+use Sports\Game as GameBase;
+use Sports\Place;
+use Sports\Poule;
 
 class LayBack extends TheOddsApiHelper implements ExternalSourceLayBack
 {

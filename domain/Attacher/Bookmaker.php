@@ -8,7 +8,7 @@
 
 namespace VOBetting\Attacher;
 
-use Voetbal\Attacher as AttacherBase;
+use SportsImport\Attacher as AttacherBase;
 
 class Bookmaker extends AttacherBase
 {

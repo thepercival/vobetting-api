@@ -5,8 +5,8 @@ namespace VOBetting\LayBack;
 use LucidFrame\Console\ConsoleTable;
 use stdClass;
 use VOBetting\LayBack;
-use Voetbal\NameService;
-use Voetbal\Game;
+use Sports\NameService;
+use Sports\Game;
 use VOBetting\Output as AbstractOutput;
 
 class Output extends AbstractOutput

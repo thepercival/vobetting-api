@@ -14,17 +14,17 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
 use VOBetting\ExternalSource\Betfair;
-use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
-use Voetbal\ExternalSource\Repository as ExternalSourceRepository;
-use Voetbal\ExternalSource;
+use Sports\CacheItemDb\Repository as CacheItemDbRepository;
+use Sports\ExternalSource\Repository as ExternalSourceRepository;
+use Sports\ExternalSource;
 use VOBetting\ExternalSource\Factory as ExternalSourceFactory;
 use VOBetting\ExternalSource\Bookmaker as ExternalSourceBookmaker;
-use Voetbal\ExternalSource\Sport as ExternalSourceSport;
-use Voetbal\ExternalSource\Association as ExternalSourceAssociation;
-use Voetbal\ExternalSource\Season as ExternalSourceSeason;
-use Voetbal\ExternalSource\League as ExternalSourceLeague;
-use Voetbal\ExternalSource\Competition as ExternalSourceCompetition;
-use Voetbal\ExternalSource\Competitor as ExternalSourceCompetitor;
+use Sports\ExternalSource\Sport as ExternalSourceSport;
+use Sports\ExternalSource\Association as ExternalSourceAssociation;
+use Sports\ExternalSource\Season as ExternalSourceSeason;
+use Sports\ExternalSource\League as ExternalSourceLeague;
+use Sports\ExternalSource\Competition as ExternalSourceCompetition;
+use Sports\ExternalSource\Competitor as ExternalSourceCompetitor;
 
 final class ExternalSourceAction extends Action
 {
@@ -262,7 +262,7 @@ final class ExternalSourceAction extends Action
     {
         try {
             /** @var ExternalSource $externalSourceSer */
-            $externalSourceSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\ExternalSource', 'json');
+            $externalSourceSer = $this->serializer->deserialize($this->getRawData(), 'Sports\ExternalSource', 'json');
 
             $systemWithSameName = $this->externalSourceRepos->findOneBy(array('name' => $externalSourceSer->getName() ));
             if ($systemWithSameName !== null) {
@@ -283,7 +283,7 @@ final class ExternalSourceAction extends Action
     {
         try {
             /** @var ExternalSource $externalSourceSer */
-            $externalSourceSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\ExternalSource', 'json');
+            $externalSourceSer = $this->serializer->deserialize($this->getRawData(), 'Sports\ExternalSource', 'json');
 
             $externalSource = $this->externalSourceRepos->find($args['id']);
             if ($externalSource === null) {

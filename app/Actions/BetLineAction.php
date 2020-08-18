@@ -17,7 +17,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
 use VOBetting\BetLine\Repository as BetLineRepository;
-use Voetbal\Game\Repository as GameRepository;
+use Sports\Game\Repository as GameRepository;
 
 final class BetLineAction extends Action
 {

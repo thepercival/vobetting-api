@@ -14,12 +14,12 @@ use PeterColes\Betfair\Betfair as BetfairClient;
 use stdClass;
 use VOBetting\BetLine;
 use VOBetting\ExternalSource\Betfair;
-use Voetbal\Association;
-use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
-use Voetbal\Competitor;
-use Voetbal\Game;
-use Voetbal\League;
-use Voetbal\ExternalSource;
+use Sports\Association;
+use Sports\CacheItemDb\Repository as CacheItemDbRepository;
+use Sports\Competitor;
+use Sports\Game;
+use Sports\League;
+use Sports\ExternalSource;
 
 class ApiHelper
 {

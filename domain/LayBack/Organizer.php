@@ -5,7 +5,7 @@ namespace VOBetting\LayBack;
 
 
 use VOBetting\LayBack;
-use Voetbal\Game;
+use Sports\Game;
 
 class Organizer
 {

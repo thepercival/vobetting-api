@@ -9,9 +9,9 @@
 namespace VOBetting;
 
 use DateTimeImmutable;
-use Voetbal\Game;
-use Voetbal\State;
-use Voetbal\Sport\ScoreConfig\Service as SportScoreConfigService;
+use Sports\Game;
+use Sports\State;
+use Sports\Sport\ScoreConfig\Service as SportScoreConfigService;
 
 class LayBack
 {

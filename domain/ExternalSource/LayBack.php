@@ -3,7 +3,7 @@
 namespace VOBetting\ExternalSource;
 
 use VOBetting\LayBack as LayBackBase;
-use Voetbal\Competition;
+use Sports\Competition;
 
 interface LayBack
 {

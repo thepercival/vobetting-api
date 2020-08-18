@@ -3,8 +3,8 @@
 namespace App\Commands;
 
 use VOBetting\LayBack\Output;
-use Voetbal\Game;
-use Voetbal\NameService;
+use Sports\Game;
+use Sports\NameService;
 use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
 use LucidFrame\Console\ConsoleTable;
@@ -20,8 +20,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use VOBetting\ExternalSource\Factory as ExternalSourceFactory;
 use VOBetting\ExternalSource\Bookmaker as ExternalSourceBookmaker;
 use VOBetting\ExternalSource\LayBack as ExternalSourceLayBack;
-use Voetbal\ExternalSource;
-use Voetbal\Competition;
+use Sports\ExternalSource;
+use Sports\Competition;
 use VOBetting\Import\Service as ImportService;
 
 class GetExternal extends Command

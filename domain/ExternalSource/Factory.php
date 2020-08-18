@@ -9,12 +9,13 @@
 namespace VOBetting\ExternalSource;
 
 use Psr\Log\LoggerInterface;
-use Voetbal\CacheItemDb\Repository as CacheItemDbRepository;
-use Voetbal\ExternalSource;
+use Sports\CacheItemDb\Repository as CacheItemDbRepository;
+use Sports\ExternalSource;
 use VOBetting\ExternalSource\Bookmaker as ExternalSourceBookmaker;
 use VOBetting\ExternalSource\LayBack as ExternalSourceLayBack;
-use Voetbal\ExternalSource\Factory as ExternalSourceFactory;
-use Voetbal\ExternalSource\Repository;
+use Sports\ExternalSource\Factory as ExternalSourceFactory;
+use Sports\ExternalSource\Repository;
+use SportsImport\ExternalSource\Implementation as ExternalSourceImplementation;
 
 class Factory extends ExternalSourceFactory
 {
@@ -29,7 +30,7 @@ class Factory extends ExternalSourceFactory
         parent::__construct($externalSourceRepos, $cacheItemDbRepos, $logger);
     }
 
-    protected function create(ExternalSource $externalSource)
+    protected function create(ExternalSource $externalSource): ExternalSourceImplementation
     {
         if ($externalSource->getName() === Betfair::NAME) {
             return new Betfair($externalSource, $this->cacheItemDbRepos, $this->logger);

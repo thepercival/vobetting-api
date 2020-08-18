@@ -14,12 +14,12 @@ use stdClass;
 use VOBetting\BetLine;
 use VOBetting\ExternalSource\TheOddsApi\Helper as TheOddsApiHelper;
 use VOBetting\ExternalSource\TheOddsApi\ApiHelper as TheOddsApiApiHelper;
-use Voetbal\Association;
-use Voetbal\Competitor as CompetitorBase;
+use Sports\Association;
+use Sports\Competitor as CompetitorBase;
 use Psr\Log\LoggerInterface;
 use VOBetting\ExternalSource\TheOddsApi;
-use Voetbal\Competition;
-use Voetbal\ExternalSource\Competitor as ExternalSourceCompetitor;
+use Sports\Competition;
+use Sports\ExternalSource\Competitor as ExternalSourceCompetitor;
 
 class Competitor extends TheOddsApiHelper implements ExternalSourceCompetitor
 {

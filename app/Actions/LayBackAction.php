@@ -18,7 +18,7 @@ use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
 use VOBetting\BetLine\Repository as BetLineRepository;
 use VOBetting\LayBack\Repository as LayBackRepository;
-use Voetbal\Game\Repository as GameRepository;
+use Sports\Game\Repository as GameRepository;
 
 final class LayBackAction extends Action
 {

@@ -12,12 +12,12 @@ use stdClass;
 use VOBetting\ExternalSource\Betfair;
 use VOBetting\ExternalSource\Betfair\Helper as BetfairHelper;
 use VOBetting\ExternalSource\Betfair\ApiHelper as BetfairApiHelper;
-use Voetbal\Competition as CompetitionBase;
-use Voetbal\ExternalSource;
+use Sports\Competition as CompetitionBase;
+use Sports\ExternalSource;
 use Psr\Log\LoggerInterface;
-use Voetbal\Sport\Config\Service as SportConfigService;
-use Voetbal\Sport;
-use Voetbal\ExternalSource\Competition as ExternalSourceCompetition;
+use Sports\Sport\Config\Service as SportConfigService;
+use Sports\Sport;
+use Sports\ExternalSource\Competition as ExternalSourceCompetition;
 
 class Competition extends BetfairHelper implements ExternalSourceCompetition
 {

@@ -10,8 +10,8 @@ namespace VOBetting\ExternalSource\TheOddsApi\Helper;
 
 use VOBetting\ExternalSource\TheOddsApi\Helper as TheOddsApiHelper;
 use VOBetting\ExternalSource\TheOddsApi\ApiHelper as TheOddsApiApiHelper;
-use Voetbal\ExternalSource\Sport as ExternalSourceSport;
-use Voetbal\Sport as SportBase;
+use Sports\ExternalSource\Sport as ExternalSourceSport;
+use Sports\Sport as SportBase;
 use VOBetting\ExternalSource\TheOddsApi;
 use Psr\Log\LoggerInterface;
 use stdClass;

@@ -18,12 +18,12 @@ use VOBetting\LayBack as LayBackBase;
 use VOBetting\ExternalSource\Matchbook;
 use Psr\Log\LoggerInterface;
 use stdClass;
-use Voetbal\Competition;
-use Voetbal\Competitor;
-use Voetbal\Competitor as CompetitorBase;
-use Voetbal\Game as GameBase;
-use Voetbal\Place;
-use Voetbal\Poule;
+use Sports\Competition;
+use Sports\Competitor;
+use Sports\Competitor as CompetitorBase;
+use Sports\Game as GameBase;
+use Sports\Place;
+use Sports\Poule;
 
 class LayBack extends MatchbookHelper implements ExternalSourceLayBack
 {

@@ -13,10 +13,10 @@ use VOBetting\ExternalSource\TheOddsApi\ApiHelper as TheOddsApiApiHelper;
 use VOBetting\ExternalSource\Bookmaker as ExternalSourceBookmaker;
 use VOBetting\Bookmaker as BookmakerBase;
 use VOBetting\ExternalSource\TheOddsApi;
-use Voetbal\Competition;
+use Sports\Competition;
 use Psr\Log\LoggerInterface;
 use stdClass;
-use Voetbal\Competitor as CompetitorBase;
+use Sports\Competitor as CompetitorBase;
 
 class Bookmaker extends TheOddsApiHelper implements ExternalSourceBookmaker
 {

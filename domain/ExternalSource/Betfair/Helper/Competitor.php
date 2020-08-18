@@ -14,12 +14,12 @@ use stdClass;
 use VOBetting\BetLine;
 use VOBetting\ExternalSource\Betfair\Helper as BetfairHelper;
 use VOBetting\ExternalSource\Betfair\ApiHelper as BetfairApiHelper;
-use Voetbal\Association;
-use Voetbal\Competitor as CompetitorBase;
+use Sports\Association;
+use Sports\Competitor as CompetitorBase;
 use Psr\Log\LoggerInterface;
 use VOBetting\ExternalSource\Betfair;
-use Voetbal\Competition;
-use Voetbal\ExternalSource\Competitor as ExternalSourceCompetitor;
+use Sports\Competition;
+use Sports\ExternalSource\Competitor as ExternalSourceCompetitor;
 
 class Competitor extends BetfairHelper implements ExternalSourceCompetitor
 {

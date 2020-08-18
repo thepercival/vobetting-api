@@ -8,9 +8,9 @@
 
 namespace VOBetting;
 
-use Voetbal\Import\Idable as Importable;
+use SportsHelpers\Identifiable;
 
-class Bookmaker implements Importable
+class Bookmaker implements Identifiable
 {
     /**
      * @var int|string

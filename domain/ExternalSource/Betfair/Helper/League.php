@@ -10,9 +10,9 @@ namespace VOBetting\ExternalSource\Betfair\Helper;
 
 use VOBetting\ExternalSource\Betfair\Helper as BetfairHelper;
 use VOBetting\ExternalSource\Betfair\ApiHelper as BetfairApiHelper;
-use Voetbal\Association as AssociationBase;
-use Voetbal\ExternalSource\League as ExternalSourceLeague;
-use Voetbal\League as LeagueBase;
+use Sports\Association as AssociationBase;
+use Sports\ExternalSource\League as ExternalSourceLeague;
+use Sports\League as LeagueBase;
 use VOBetting\ExternalSource\Betfair;
 use Psr\Log\LoggerInterface;
 use stdClass;

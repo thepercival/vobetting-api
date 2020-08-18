@@ -14,7 +14,9 @@
     }
   ],
   "require": {
-    "thepercival/voetbal": "dev-master",
+    "thepercival/php-sports": "^1.0",
+    "thepercival/php-sports-helpers": "^1.0",
+    "thepercival/php-sports-import": "^1.0",
     "php": "^7.4",
     "vlucas/phpdotenv": "^4.1",
     "slim/slim": "^4.3",

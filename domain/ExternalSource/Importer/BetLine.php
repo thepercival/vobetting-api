@@ -8,8 +8,8 @@
 
 namespace VOBetting\ExternalSource\Importer;
 
-use Voetbal\External\League as ExternalLeague;
-use Voetbal\League;
+use Sports\External\League as ExternalLeague;
+use Sports\League;
 
 interface BetLine
 {

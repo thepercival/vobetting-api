@@ -12,14 +12,14 @@ use stdClass;
 use VOBetting\ExternalSource\Matchbook;
 use VOBetting\ExternalSource\Matchbook\Helper as MatchbookHelper;
 use VOBetting\ExternalSource\Matchbook\ApiHelper as MatchbookApiHelper;
-use Voetbal\Competition as CompetitionBase;
-use Voetbal\League;
-use Voetbal\Season;
-use Voetbal\ExternalSource;
+use Sports\Competition as CompetitionBase;
+use Sports\League;
+use Sports\Season;
+use Sports\ExternalSource;
 use Psr\Log\LoggerInterface;
-use Voetbal\Sport\Config\Service as SportConfigService;
-use Voetbal\Sport;
-use Voetbal\ExternalSource\Competition as ExternalSourceCompetition;
+use Sports\Sport\Config\Service as SportConfigService;
+use Sports\Sport;
+use Sports\ExternalSource\Competition as ExternalSourceCompetition;
 
 class Competition extends MatchbookHelper implements ExternalSourceCompetition
 {

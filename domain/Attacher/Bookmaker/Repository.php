@@ -2,6 +2,6 @@
 
 namespace VOBetting\Attacher\Bookmaker;
 
-class Repository extends \Voetbal\Attacher\Repository
+class Repository extends \SportsImport\Attacher\Repository
 {
 }

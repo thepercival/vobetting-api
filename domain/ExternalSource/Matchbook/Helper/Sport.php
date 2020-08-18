@@ -10,8 +10,8 @@ namespace VOBetting\ExternalSource\Matchbook\Helper;
 
 use VOBetting\ExternalSource\Matchbook\Helper as MatchbookHelper;
 use VOBetting\ExternalSource\Matchbook\ApiHelper as MatchbookApiHelper;
-use Voetbal\ExternalSource\Sport as ExternalSourceSport;
-use Voetbal\Sport as SportBase;
+use Sports\ExternalSource\Sport as ExternalSourceSport;
+use Sports\Sport as SportBase;
 use VOBetting\ExternalSource\Matchbook;
 use Psr\Log\LoggerInterface;
 use stdClass;

@@ -6,7 +6,7 @@
  * Time: 12:23
  */
 
-namespace App\Actions\Voetbal;
+namespace App\Actions\Sports;
 
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
@@ -16,8 +16,8 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
-use Voetbal\Season\Repository as SeasonRepository;
-use Voetbal\Season;
+use Sports\Season\Repository as SeasonRepository;
+use Sports\Season;
 
 final class SeasonAction extends Action
 {
@@ -71,8 +71,8 @@ final class SeasonAction extends Action
     public function add(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \Voetbal\Season $seasonSer */
-            $seasonSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Season', 'json');
+            /** @var \Sports\Season $seasonSer */
+            $seasonSer = $this->serializer->deserialize($this->getRawData(), 'Sports\Season', 'json');
 
             $seasonWithSameName = $this->seasonRepos->findOneBy(array('name' => $seasonSer->getName() ));
             if ($seasonWithSameName !== null) {
@@ -93,8 +93,8 @@ final class SeasonAction extends Action
     public function edit(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \Voetbal\Season $seasonSer */
-            $seasonSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Season', 'json');
+            /** @var \Sports\Season $seasonSer */
+            $seasonSer = $this->serializer->deserialize($this->getRawData(), 'Sports\Season', 'json');
 
             $season = $this->seasonRepos->find($args['id']);
             if ($season === null) {

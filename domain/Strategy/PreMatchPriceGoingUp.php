@@ -11,8 +11,8 @@ use VOBetting\Bookmaker;
 use VOBetting\LayBack;
 use VOBetting\Strategy as StrategyBase;
 use VOBetting\Transaction;
-use Voetbal\Game;
-use Voetbal\Range;
+use Sports\Game;
+use SportsHelpers\Range;
 use Exception;
 
 /**

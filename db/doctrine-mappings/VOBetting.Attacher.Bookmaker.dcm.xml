@@ -5,7 +5,7 @@
       <generator strategy="AUTO"/>
     </id>
     <field name="externalId" column="externalId" type="string" length="100" nullable="false" unique="false"/>
-    <many-to-one field="externalSource" target-entity="Voetbal\ExternalSource">
+    <many-to-one field="externalSource" target-entity="SportsImport\ExternalSource">
       <join-columns>
         <join-column name="externalSystemid" referenced-column-name="id" nullable="false" on-delete="CASCADE"/>
       </join-columns>

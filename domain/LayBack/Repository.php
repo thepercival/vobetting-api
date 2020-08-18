@@ -11,14 +11,14 @@ namespace VOBetting\LayBack;
 use League\Period\Period;
 use VOBetting\BetLine;
 use VOBetting\LayBack;
-use Voetbal\Competitor;
-use Voetbal\Game as GameBase;
+use Sports\Competitor;
+use Sports\Game as GameBase;
 
 /**
  * Class Repository
  * @package VOBetting\LayBack
  */
-class Repository extends \Voetbal\Repository
+class Repository extends \Sports\Repository
 {
     /**
      * @param BetLine $betLine

@@ -10,13 +10,13 @@ namespace VOBetting\ExternalSource\Matchbook\Helper;
 
 use VOBetting\ExternalSource\Matchbook\Helper as MatchbookHelper;
 use VOBetting\ExternalSource\Matchbook\ApiHelper as MatchbookApiHelper;
-use Voetbal\ExternalSource\Association as ExternalSourceAssociation;
-use Voetbal\Association as AssociationBase;
+use Sports\ExternalSource\Association as ExternalSourceAssociation;
+use Sports\Association as AssociationBase;
 use VOBetting\ExternalSource\Matchbook;
 use Psr\Log\LoggerInterface;
 use stdClass;
-use Voetbal\ExternalSource\SofaScore;
-use Voetbal\Import\Service as ImportService;
+use Sports\ExternalSource\SofaScore;
+use Sports\Import\Service as ImportService;
 
 class Association extends MatchbookHelper implements ExternalSourceAssociation
 {
